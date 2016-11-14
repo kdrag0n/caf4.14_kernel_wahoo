@@ -444,11 +444,14 @@ static int skcipher_walk_first(struct skcipher_walk *walk)
 }
 
 static int skcipher_walk_skcipher(struct skcipher_walk *walk,
-				  struct skcipher_request *req)
+				  struct skcipher_request *req,
+				  struct scatterlist *src,
+				  struct scatterlist *dst,
+				  unsigned int len)
 {
 	struct crypto_skcipher *tfm = crypto_skcipher_reqtfm(req);
 
-	walk->total = req->cryptlen;
+	walk->total = len;
 	walk->nbytes = 0;
 	walk->iv = req->iv;
 	walk->oiv = req->iv;
@@ -456,8 +459,8 @@ static int skcipher_walk_skcipher(struct skcipher_walk *walk,
 	if (unlikely(!walk->total))
 		return 0;
 
-	scatterwalk_start(&walk->in, req->src);
-	scatterwalk_start(&walk->out, req->dst);
+	scatterwalk_start(&walk->in, src);
+	scatterwalk_start(&walk->out, dst);
 
 	walk->flags &= ~SKCIPHER_WALK_SLEEP;
 	walk->flags |= req->base.flags & CRYPTO_TFM_REQ_MAY_SLEEP ?
@@ -474,17 +477,27 @@ static int skcipher_walk_skcipher(struct skcipher_walk *walk,
 int skcipher_walk_virt(struct skcipher_walk *walk,
 		       struct skcipher_request *req, bool atomic)
 {
+	return skcipher_walk_virt_init(walk, req, atomic, req->src, req->dst,
+					req->cryptlen);
+}
+EXPORT_SYMBOL_GPL(skcipher_walk_virt);
+
+int skcipher_walk_virt_init(struct skcipher_walk *walk,
+			    struct skcipher_request *req, bool atomic,
+			    struct scatterlist *src, struct scatterlist *dst,
+			    unsigned int len)
+{
 	int err;
 
 	walk->flags &= ~SKCIPHER_WALK_PHYS;
 
-	err = skcipher_walk_skcipher(walk, req);
+	err = skcipher_walk_skcipher(walk, req, src, dst, len);
 
 	walk->flags &= atomic ? ~SKCIPHER_WALK_SLEEP : ~0;
 
 	return err;
 }
-EXPORT_SYMBOL_GPL(skcipher_walk_virt);
+EXPORT_SYMBOL_GPL(skcipher_walk_virt_init);
 
 void skcipher_walk_atomise(struct skcipher_walk *walk)
 {
@@ -499,7 +512,8 @@ int skcipher_walk_async(struct skcipher_walk *walk,
 
 	INIT_LIST_HEAD(&walk->buffers);
 
-	return skcipher_walk_skcipher(walk, req);
+	return skcipher_walk_skcipher(walk, req, req->src, req->dst,
+					 req->cryptlen);
 }
 EXPORT_SYMBOL_GPL(skcipher_walk_async);
 

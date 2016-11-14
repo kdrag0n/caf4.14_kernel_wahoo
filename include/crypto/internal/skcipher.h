@@ -144,6 +144,10 @@ int skcipher_walk_done(struct skcipher_walk *walk, int err);
 int skcipher_walk_virt(struct skcipher_walk *walk,
 		       struct skcipher_request *req,
 		       bool atomic);
+int skcipher_walk_virt_init(struct skcipher_walk *walk,
+			struct skcipher_request *req,
+			bool atomic, struct scatterlist *src,
+			struct scatterlist *dst, unsigned int len);
 void skcipher_walk_atomise(struct skcipher_walk *walk);
 int skcipher_walk_async(struct skcipher_walk *walk,
 			struct skcipher_request *req);
