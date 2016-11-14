@@ -3127,6 +3127,15 @@ static const struct alg_test_desc alg_test_descs[] = {
 			.hash = __VECS(ghash_tv_template)
 		}
 	}, {
+		.alg = "heh(aes)",
+		.test = alg_test_skcipher,
+		.suite = {
+			.cipher = {
+				.enc = __VECS(aes_heh_enc_tv_template),
+				.dec = __VECS(aes_heh_dec_tv_template)
+			}
+		}
+	}, {
 		.alg = "hmac(crc32)",
 		.test = alg_test_hash,
 		.suite = {
