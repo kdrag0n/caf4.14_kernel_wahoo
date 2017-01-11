@@ -162,6 +162,11 @@ static struct fscrypt_mode available_modes[] = {
 		.keysize = 32,
 		.ivsize = 32,
 	},
+	[FS_ENCRYPTION_MODE_AES_256_HEH] = {
+		.friendly_name = "AES-256-HEH",
+		.cipher_str = "heh(aes)",
+		.keysize = 32,
+	},
 	[FS_ENCRYPTION_MODE_PRIVATE] = {
 		.friendly_name = "ICE",
 		.cipher_str = "bugon",
