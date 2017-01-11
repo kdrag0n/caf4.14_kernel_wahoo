@@ -23,6 +23,9 @@ crct10dif-ce-y := crct10dif-ce-core.o crct10dif-ce-glue.o
 obj-$(CONFIG_CRYPTO_CRC32_ARM64_CE) += crc32-ce.o
 crc32-ce-y:= crc32-ce-core.o crc32-ce-glue.o
 
+obj-$(CONFIG_CRYPTO_POLY_HASH_ARM64_CE) += poly-hash-ce.o
+poly-hash-ce-y := poly-hash-ce-glue.o poly-hash-ce-core.o
+
 obj-$(CONFIG_CRYPTO_AES_ARM64_CE) += aes-ce-cipher.o
 aes-ce-cipher-y := aes-ce-core.o aes-ce-glue.o
 
