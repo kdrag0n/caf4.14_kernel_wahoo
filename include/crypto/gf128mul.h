@@ -102,21 +102,21 @@
  *
  * bbe on a little endian machine u32 x[4]:
  *
- *  MS            x[0]           LS  MS            x[1]		  LS
+ *  MS            x[0]           LS  MS            x[1]           LS
  *  ms   ls ms   ls ms   ls ms   ls  ms   ls ms   ls ms   ls ms   ls
  *  103..96 111.104 119.112 127.120  71...64 79...72 87...80 95...88
  *
- *  MS            x[2]           LS  MS            x[3]		  LS
+ *  MS            x[2]           LS  MS            x[3]           LS
  *  ms   ls ms   ls ms   ls ms   ls  ms   ls ms   ls ms   ls ms   ls
  *  39...32 47...40 55...48 63...56  07...00 15...08 23...16 31...24
  *
  * ble on a little endian machine
  *
- *  MS            x[0]           LS  MS            x[1]		  LS
+ *  MS            x[0]           LS  MS            x[1]           LS
  *  ms   ls ms   ls ms   ls ms   ls  ms   ls ms   ls ms   ls ms   ls
  *  31...24 23...16 15...08 07...00  63...56 55...48 47...40 39...32
  *
- *  MS            x[2]           LS  MS            x[3]		  LS
+ *  MS            x[2]           LS  MS            x[3]           LS
  *  ms   ls ms   ls ms   ls ms   ls  ms   ls ms   ls ms   ls ms   ls
  *  95...88 87...80 79...72 71...64  127.120 199.112 111.104 103..96
  *
@@ -138,31 +138,32 @@
     On little endian machines the bit indexes translate into the bit
     positions within four 32-bit words in the following way
 
-    MS            x[0]           LS  MS            x[1]		  LS
+    MS            x[0]           LS  MS            x[1]           LS
     ms   ls ms   ls ms   ls ms   ls  ms   ls ms   ls ms   ls ms   ls
     24...31 16...23 08...15 00...07  56...63 48...55 40...47 32...39
 
-    MS            x[2]           LS  MS            x[3]		  LS
+    MS            x[2]           LS  MS            x[3]           LS
     ms   ls ms   ls ms   ls ms   ls  ms   ls ms   ls ms   ls ms   ls
     88...95 80...87 72...79 64...71  120.127 112.119 104.111 96..103
 
     On big endian machines the bit indexes translate into the bit
     positions within four 32-bit words in the following way
 
-    MS            x[0]           LS  MS            x[1]		  LS
+    MS            x[0]           LS  MS            x[1]           LS
     ms   ls ms   ls ms   ls ms   ls  ms   ls ms   ls ms   ls ms   ls
     00...07 08...15 16...23 24...31  32...39 40...47 48...55 56...63
 
-    MS            x[2]           LS  MS            x[3]		  LS
+    MS            x[2]           LS  MS            x[3]           LS
     ms   ls ms   ls ms   ls ms   ls  ms   ls ms   ls ms   ls ms   ls
     64...71 72...79 80...87 88...95  96..103 104.111 112.119 120.127
 */
 
-/*	A slow generic version of gf_mul, implemented for lle and bbe
- * 	It multiplies a and b and puts the result in a */
+/*  A slow generic version of gf_mul, implemented for lle, bbe, and ble.
+ *  It multiplies a and b and puts the result in a
+ */
 void gf128mul_lle(be128 *a, const be128 *b);
-
 void gf128mul_bbe(be128 *a, const be128 *b);
+void gf128mul_ble(le128 *a, const le128 *b);
 
 /*
  * The following functions multiply a field element by x in
@@ -204,7 +205,7 @@ static inline void gf128mul_x_bbe(be128 *r, const be128 *x)
 	r->b = cpu_to_be64((b << 1) ^ _tt);
 }
 
-/* needed by XTS */
+/* needed by XTS and HEH */
 static inline void gf128mul_x_ble(le128 *r, const le128 *x)
 {
 	u64 a = le64_to_cpu(x->a);
@@ -218,15 +219,16 @@ static inline void gf128mul_x_ble(le128 *r, const le128 *x)
 }
 
 /* 4k table optimization */
-
 struct gf128mul_4k {
 	be128 t[256];
 };
 
 struct gf128mul_4k *gf128mul_init_4k_lle(const be128 *g);
 struct gf128mul_4k *gf128mul_init_4k_bbe(const be128 *g);
+struct gf128mul_4k *gf128mul_init_4k_ble(const le128 *g);
 void gf128mul_4k_lle(be128 *a, const struct gf128mul_4k *t);
 void gf128mul_4k_bbe(be128 *a, const struct gf128mul_4k *t);
+void gf128mul_4k_ble(le128 *a, const struct gf128mul_4k *t);
 
 static inline void gf128mul_free_4k(struct gf128mul_4k *t)
 {
@@ -234,7 +236,7 @@ static inline void gf128mul_free_4k(struct gf128mul_4k *t)
 }
 
 
-/* 64k table optimization, implemented for bbe */
+/* 64k table optimization, implemented for ble and bbe */
 
 struct gf128mul_64k {
 	struct gf128mul_4k *t[16];
