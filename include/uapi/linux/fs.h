@@ -279,6 +279,7 @@ struct fsxattr {
 #define FS_ENCRYPTION_MODE_SPECK128_256_XTS	7 /* Removed, do not use. */
 #define FS_ENCRYPTION_MODE_SPECK128_256_CTS	8 /* Removed, do not use. */
 #define FS_ENCRYPTION_MODE_ADIANTUM		9
+#define FS_ENCRYPTION_MODE_AES_256_HEH		126
 #define FS_ENCRYPTION_MODE_PRIVATE		127
 
 struct fscrypt_policy {
