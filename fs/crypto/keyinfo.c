@@ -33,9 +33,9 @@ static DEFINE_SPINLOCK(fscrypt_master_keys_lock);
  * The master key must be at least as long as the derived key.  If the master
  * key is longer, then only the first 'derived_keysize' bytes are used.
  */
-static int derive_key_aes(const u8 *master_key,
-			  const struct fscrypt_context *ctx,
-			  u8 *derived_key, unsigned int derived_keysize)
+static int derive_key_aes_v1(const u8 *master_key,
+			     const struct fscrypt_context *ctx,
+			     u8 *derived_key, unsigned int derived_keysize)
 {
 	int res = 0;
 	struct skcipher_request *req = NULL;
@@ -70,6 +70,82 @@ out:
 	skcipher_request_free(req);
 	crypto_free_skcipher(tfm);
 	return res;
+}
+
+/**
+ * derive_key_v2() - Derive a key non-reversibly
+ *
+ * This function computes the following:
+ *	 derived_key[0:127]   = AES-256-ENCRYPT(master_key[0:255], nonce)
+ *	 derived_key[128:255] = AES-256-ENCRYPT(master_key[0:255], nonce ^ 0x01)
+ *	 derived_key[256:383] = AES-256-ENCRYPT(master_key[256:511], nonce)
+ *	 derived_key[384:511] = AES-256-ENCRYPT(master_key[256:511], nonce ^ 0x01)
+ *
+ * 'nonce ^ 0x01' denotes flipping the low order bit of the last byte.
+ *
+ * Unlike the v1 algorithm, the v2 algorithm is "non-reversible", meaning that
+ * compromising a derived key does not also compromise the master key.
+ *
+ * Return: 0 on success, -errno on failure
+ */
+static int derive_key_aes_v2(const u8 *master_key,
+			     const struct fscrypt_context *ctx,
+			     u8 *derived_key, unsigned int derived_keysize)
+{
+	const int noncelen = sizeof(ctx->nonce);
+	struct crypto_cipher *tfm;
+	int err;
+	int i;
+
+	/*
+	 * Since we only use each transform for a small number of encryptions,
+	 * requesting just "aes" turns out to be significantly faster than
+	 * "ecb(aes)", by about a factor of two.
+	 */
+	tfm = crypto_alloc_cipher("aes", 0, 0);
+	if (IS_ERR(tfm))
+		return PTR_ERR(tfm);
+
+	for (i = 0; i < 2; i++) {
+		memcpy(derived_key, ctx->nonce, noncelen);
+		memcpy(derived_key + noncelen, ctx->nonce, noncelen);
+		derived_key[2 * noncelen - 1] ^= 0x01;
+		err = crypto_cipher_setkey(tfm, master_key,
+					   derived_keysize);
+		if (err)
+			break;
+		crypto_cipher_encrypt_one(tfm, derived_key, derived_key);
+		crypto_cipher_encrypt_one(tfm, derived_key + noncelen,
+					  derived_key + noncelen);
+		master_key += derived_keysize;
+		derived_key += 2 * noncelen;
+	}
+	crypto_free_cipher(tfm);
+	return err;
+}
+
+/**
+ * derive_key() - Derive a per-file key from a nonce and master key
+ *
+ * Return: 0 on success, -errno on failure
+ */
+static int derive_key_aes(const u8 *master_key,
+			  const struct fscrypt_context *ctx,
+			  u8 *derived_key, unsigned int derived_keysize)
+{
+	/*
+	 * Although the key derivation algorithm is logically independent of the
+	 * choice of encryption modes, in this kernel it is bundled with HEH
+	 * encryption of filenames, which is another crypto improvement that
+	 * requires an on-disk format change and requires userspace to specify
+	 * different encryption policies.
+	 */
+	if (ctx->filenames_encryption_mode == FS_ENCRYPTION_MODE_AES_256_HEH)
+		return derive_key_aes_v2(master_key, ctx, derived_key,
+				     derived_keysize);
+	else
+		return derive_key_aes_v1(master_key, ctx, derived_key,
+				     derived_keysize);
 }
 
 /*
