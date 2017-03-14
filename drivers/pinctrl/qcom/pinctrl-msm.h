@@ -172,6 +172,8 @@ struct msm_pinctrl_soc_data {
 	const struct msm_dir_conn *dir_conn;
 	unsigned int n_dir_conns;
 	unsigned int dir_conn_irq_base;
+	unsigned dir_connect_offset;
+	unsigned dir_connect_num_irqs;
 	struct msm_pdc_mux_output *pdc_mux_out;
 	unsigned int n_pdc_mux_out;
 	struct msm_gpio_mux_input *gpio_mux_in;
