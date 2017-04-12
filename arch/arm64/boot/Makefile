@@ -36,6 +36,7 @@ DTB_OBJS := $(shell find $(obj)/dts/ -name \*.dtb)
 ifdef RTIC_MPGEN
 DTB_OBJS += rtic_mp.dtb
 endif
+DTBO_OBJS := $(shell find -L $(obj)/dts/ -name \*.dtbo)
 
 rtic_mp.dtb: vmlinux FORCE
 	$(DTC) -O dtb -o rtic_mp.dtb -b 0 $(DTC_FLAGS) rtic_mp.dts
@@ -71,7 +72,7 @@ $(obj)/Image.gz-dtb: $(obj)/Image.gz $(DTB_OBJS) FORCE
 $(obj)/Image.lz4-dtb: $(obj)/Image.lz4 $(DTB_OBJS) FORCE
 	$(call if_changed,cat)
 
-$(obj)/dtbo.img: $(obj)/dts/dtboimg.cfg FORCE
+$(obj)/dtbo.img: $(obj)/dts/dtboimg.cfg $(DTBO_OBJS) FORCE
 	$(call if_changed,mkdtimg)
 
 install:
