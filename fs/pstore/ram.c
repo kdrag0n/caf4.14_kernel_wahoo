@@ -333,7 +333,7 @@ static ssize_t ramoops_pstore_read(struct pstore_record *record)
 	/* ECC correction notice */
 	record->ecc_notice_size = persistent_ram_ecc_string(prz, NULL, 0);
 
-	record->buf = kmalloc(size + record->ecc_notice_size + 1, GFP_KERNEL);
+	record->buf = vmalloc(size + record->ecc_notice_size + 1);
 	if (record->buf == NULL) {
 		size = -ENOMEM;
 		goto out;
