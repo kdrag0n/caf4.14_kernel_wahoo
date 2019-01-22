@@ -1390,6 +1390,13 @@ config BUILD_ARM64_DT_OVERLAY
 	depends on OF
 	help
 	  This option enables support for DT overlay compilation.
+
+config BUILD_ARM64_EMBEDDED_DTB
+	bool "Embed DTB into kernel image"
+	depends on OF
+	help
+	  Embed DTB directly into kernel image and ignore DTB from bootloader.
+
 endmenu
 
 menu "Userspace binary formats"
