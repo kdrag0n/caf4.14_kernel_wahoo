@@ -1794,9 +1794,10 @@ static int mdss_mdp_irq_clk_setup(struct mdss_data_type *mdata)
 
 	mdata->fs = devm_regulator_get(&mdata->pdev->dev, "vdd");
 	if (IS_ERR_OR_NULL(mdata->fs)) {
+		ret = PTR_ERR(mdata->fs);
 		mdata->fs = NULL;
 		pr_err("unable to get gdsc regulator\n");
-		return -EINVAL;
+		return ret;
 	}
 
 	mdata->venus = devm_regulator_get_optional(&mdata->pdev->dev,
