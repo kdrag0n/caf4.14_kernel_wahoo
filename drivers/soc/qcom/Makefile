@@ -60,6 +60,7 @@ obj-$(CONFIG_QCOM_BUS_SCALING) += msm_bus/
 obj-$(CONFIG_QCOM_COMMAND_DB) += cmd-db.o
 obj-$(CONFIG_QTI_RPMH_API) += rpmh.o
 obj-$(CONFIG_QTI_SYSTEM_PM) += system_pm.o
+obj-$(CONFIG_MSM_APM) += apm.o
 obj-$(MSM_REMOTEQDSS) += remoteqdss.o
 obj-$(CONFIG_MSM_JTAGV8) += jtagv8.o jtagv8-etm.o
 obj-$(CONFIG_MSM_CDSP_LOADER) += qdsp6v2/
