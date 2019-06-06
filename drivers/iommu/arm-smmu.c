@@ -264,6 +264,7 @@ struct arm_smmu_device {
 #define ARM_SMMU_OPT_MIN_IOVA_ALIGN	(1 << 8)
 #define ARM_SMMU_OPT_NO_DYNAMIC_ASID	(1 << 9)
 #define ARM_SMMU_OPT_NO_SMR_CHECK	(1 << 10)
+#define ARM_SMMU_OPT_NO_ACTLR_READ	(1 << 11)
 	u32				options;
 	enum arm_smmu_arch_version	version;
 	enum arm_smmu_implementation	model;
@@ -452,6 +453,7 @@ static struct arm_smmu_option_prop arm_smmu_options[] = {
 	{ ARM_SMMU_OPT_MIN_IOVA_ALIGN, "qcom,min-iova-align" },
 	{ ARM_SMMU_OPT_NO_DYNAMIC_ASID, "qcom,no-dynamic-asid" },
 	{ ARM_SMMU_OPT_NO_SMR_CHECK, "qcom,no-smr-check" },
+	{ ARM_SMMU_OPT_NO_ACTLR_READ, "qcom,no-actlr-read" },
 	{ 0, NULL},
 };
 
@@ -4754,11 +4756,20 @@ static int arm_smmu_device_cfg_probe(struct arm_smmu_device *smmu)
 				 sizeof(*smmu->cbs), GFP_KERNEL);
 	if (!smmu->cbs)
 		return -ENOMEM;
-	for (i = 0; i < smmu->num_context_banks; i++) {
-		void __iomem *cb_base;
 
-		cb_base = ARM_SMMU_CB(smmu, i);
-		smmu->cbs[i].actlr = readl_relaxed(cb_base + ARM_SMMU_CB_ACTLR);
+	/*
+	 * On some IOMMU implementations the hypervisor disallows
+	 * reading the implementation defined ACTLR registers and
+	 * trips a security fault which freezes the entire AP.
+	 */
+	if (!(smmu->options & ARM_SMMU_OPT_NO_ACTLR_READ)) {
+		for (i = 0; i < smmu->num_context_banks; i++) {
+			void __iomem *cb_base;
+
+			cb_base = ARM_SMMU_CB(smmu, i);
+			smmu->cbs[i].actlr = readl_relaxed(
+						cb_base + ARM_SMMU_CB_ACTLR);
+		}
 	}
 
 	/* ID2 */
