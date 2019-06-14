@@ -199,8 +199,8 @@
 	mnh-sm {
 		compatible = "intel,mnh-sm";
 
-		clocks = <&clock_rpmcc RPM_LN_BB_CLK2>,
-			 <&clock_rpmcc RPM_DIV_CLK3>;
+		clocks = <&clock_rpmcc RPM_SMD_LN_BB_CLK2>,
+			 <&clock_rpmcc RPM_SMD_DIV_CLK3>;
 		clock-names = "ref_clk", "sleep_clk";
 
 		pinctrl-names = "default";
