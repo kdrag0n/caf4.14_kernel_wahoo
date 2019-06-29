@@ -995,6 +995,7 @@ static enum power_supply_property smb2_batt_props[] = {
 	POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT_MAX,
 	POWER_SUPPLY_PROP_CHARGE_CONTROL_LIMIT,
 	POWER_SUPPLY_PROP_CHARGE_COUNTER,
+	POWER_SUPPLY_PROP_FCC_STEPPER_ENABLE,
 };
 
 static int smb2_batt_get_prop(struct power_supply *psy,
@@ -1109,6 +1110,9 @@ static int smb2_batt_get_prop(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_CHARGE_COUNTER:
 		rc = smblib_get_prop_batt_charge_counter(chg, val);
 		break;
+	case POWER_SUPPLY_PROP_FCC_STEPPER_ENABLE:
+		val->intval = 0;
+		break;
 	default:
 		pr_err("batt power supply prop %d not supported\n", psp);
 		return -EINVAL;
@@ -1203,6 +1207,8 @@ static int smb2_batt_set_prop(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_DIE_HEALTH:
 		chg->die_health = val->intval;
 		power_supply_changed(chg->batt_psy);
+		break;
+	case POWER_SUPPLY_PROP_FCC_STEPPER_ENABLE:
 		break;
 	default:
 		rc = -EINVAL;
