@@ -165,7 +165,7 @@ static const struct adreno_gpu_core adreno_gpulist[] = {
 		.major = 3,
 		.minor = 0,
 		.patchid = 1,
-		.features = ADRENO_GPMU | ADRENO_SPTP_PC | ADRENO_LM |
+		.features = ADRENO_SPTP_PC | ADRENO_LM |
 			ADRENO_PREEMPTION | ADRENO_64BIT |
 			ADRENO_CONTENT_PROTECTION |
 			ADRENO_MMU_GLOBAL_MEMSZ_8M,
@@ -191,7 +191,7 @@ static const struct adreno_gpu_core adreno_gpulist[] = {
 		.major = 3,
 		.minor = 0,
 		.patchid = ANY_ID,
-		.features = ADRENO_GPMU | ADRENO_SPTP_PC | ADRENO_LM |
+		.features = ADRENO_SPTP_PC | ADRENO_LM |
 			ADRENO_PREEMPTION | ADRENO_64BIT |
 			ADRENO_CONTENT_PROTECTION |
 			ADRENO_MMU_GLOBAL_MEMSZ_8M,
@@ -264,7 +264,7 @@ static const struct adreno_gpu_core adreno_gpulist[] = {
 		.patchid = 0,
 		.features = ADRENO_PREEMPTION | ADRENO_64BIT |
 			ADRENO_CONTENT_PROTECTION |
-			ADRENO_GPMU | ADRENO_SPTP_PC |
+			ADRENO_SPTP_PC |
 			ADRENO_MMU_GLOBAL_MEMSZ_8M,
 		.pm4fw_name = "a530_pm4.fw",
 		.pfpfw_name = "a530_pfp.fw",
@@ -287,7 +287,7 @@ static const struct adreno_gpu_core adreno_gpulist[] = {
 		.patchid = ANY_ID,
 		.features = ADRENO_PREEMPTION | ADRENO_64BIT |
 			ADRENO_CONTENT_PROTECTION |
-			ADRENO_GPMU | ADRENO_SPTP_PC |
+			ADRENO_SPTP_PC |
 			ADRENO_MMU_GLOBAL_MEMSZ_8M,
 		.pm4fw_name = "a530_pm4.fw",
 		.pfpfw_name = "a530_pfp.fw",
