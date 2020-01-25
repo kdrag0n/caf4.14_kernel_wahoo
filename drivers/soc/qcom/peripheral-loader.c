@@ -69,6 +69,14 @@
 	} while (0)
 
 
+/* Sony production phones have minidump disabled */
+#if defined(CONFIG_ARCH_SONY_LOIRE) || defined(CONFIG_ARCH_SONY_TONE) || \
+    defined(CONFIG_ARCH_SONY_YOSHINO) || defined(CONFIG_ARCH_SONY_NILE) || \
+    defined(CONFIG_ARCH_SONY_GANGES) || defined(CONFIG_ARCH_SONY_TAMA) || \
+    defined(CONFIG_ARCH_SONY_KUMANO)
+ #define TARGET_NO_MINIDUMP_SUPPORT
+#endif
+
 static void __iomem *pil_info_base;
 static struct md_global_toc *g_md_toc;
 
@@ -1689,6 +1697,7 @@ static int __init msm_pil_init(void)
 		writel_relaxed(0, pil_info_base + (i * sizeof(u32)));
 
 	/* Get Global minidump ToC*/
+#ifndef TARGET_NO_MINIDUMP_SUPPORT
 	g_md_toc = qcom_smem_get(QCOM_SMEM_HOST_ANY, SBL_MINIDUMP_SMEM_ID,
 				 &size);
 	pr_debug("Minidump: g_md_toc is %pa\n", &g_md_toc);
@@ -1696,6 +1705,7 @@ static int __init msm_pil_init(void)
 		pr_err("SMEM is not initialized.\n");
 		return -EPROBE_DEFER;
 	}
+#endif
 
 	pil_wq = alloc_workqueue("pil_workqueue", WQ_HIGHPRI | WQ_UNBOUND, 0);
 	if (!pil_wq)
