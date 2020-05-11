@@ -16,6 +16,9 @@
 #include <linux/syscalls.h>
 #include <linux/syscore_ops.h>
 #include <linux/uaccess.h>
+#include <linux/slab.h>
+#include <linux/delay.h>
+#include <linux/console.h>
 
 /*
  * this indicates whether you can reboot with ctrl-alt-del: the default is yes
@@ -555,3 +558,79 @@ static int __init reboot_setup(char *str)
 	return 1;
 }
 __setup("reboot=", reboot_setup);
+
+#define MAX_STACK_TRACE_DEPTH	64
+
+static int lock_trace(struct task_struct *task)
+{
+	int err = mutex_lock_killable(&task->signal->cred_guard_mutex);
+	if (err)
+		return err;
+	if (!ptrace_may_access(task, PTRACE_MODE_ATTACH_FSCREDS)) {
+		mutex_unlock(&task->signal->cred_guard_mutex);
+		return -EPERM;
+	}
+	return 0;
+}
+
+static void unlock_trace(struct task_struct *task)
+{
+	mutex_unlock(&task->signal->cred_guard_mutex);
+}
+
+static int debug_dump_stack(struct task_struct *task)
+{
+	struct stack_trace trace;
+	unsigned long *entries;
+	int err;
+	int i;
+
+	entries = kmalloc(MAX_STACK_TRACE_DEPTH * sizeof(*entries), GFP_KERNEL);
+	if (!entries)
+		return -ENOMEM;
+
+	trace.nr_entries	= 0;
+	trace.max_entries	= MAX_STACK_TRACE_DEPTH;
+	trace.entries		= entries;
+	trace.skip		= 0;
+
+	err = lock_trace(task);
+	if (!err) {
+		save_stack_trace_tsk(task, &trace);
+
+		for (i = 0; i < trace.nr_entries; i++) {
+			pr_emerg("[<%pK>] %pB\n",
+				   (void *)entries[i], (void *)entries[i]);
+		}
+		unlock_trace(task);
+	}
+	kfree(entries);
+
+	return err;
+}
+
+static void debug_reboot_work_func(struct work_struct *work)
+{
+	pr_emerg("debug reboot, dumping init stack\n");
+	debug_dump_stack(find_task_by_vpid(1));
+
+	// flush a lot and wait to make sure the output makes it into pstore
+	printk_safe_flush_on_panic();
+	printk_safe_flush_on_panic();
+	kmsg_dump(KMSG_DUMP_RESTART);
+	console_flush_on_panic();
+	console_flush_on_panic();
+	msleep(100);
+
+	emergency_sync();
+	kernel_restart("bootloader");
+}
+
+static DECLARE_DELAYED_WORK(debug_reboot_work, debug_reboot_work_func);
+
+static int __init debug_reboot_init(void)
+{
+	schedule_delayed_work(&debug_reboot_work, msecs_to_jiffies(10000));
+	return 0;
+}
+late_initcall(debug_reboot_init);
