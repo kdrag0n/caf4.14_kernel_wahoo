@@ -2980,7 +2980,16 @@ int gsi_stop_channel(unsigned long chan_hdl)
 		ctx->state != GSI_CHAN_STATE_STOP_IN_PROC) {
 		GSIERR("chan=%lu unexpected state=%u\n", chan_hdl, ctx->state);
 		res = -GSI_STATUS_BAD_STATE;
-		BUG();
+
+		if (of_machine_is_compatible("qcom,msm8998") &&
+		    ctx->state == GSI_CHAN_STATE_NOT_ALLOCATED) {
+			GSIERR("MSM8998 workaround for gsi firmware: avoiding "
+			       "kernel panic for already not allocated CH.\n");
+			res = GSI_STATUS_SUCCESS;
+		} else {
+			BUG();
+		}
+
 		goto free_lock;
 	}
 
@@ -3096,6 +3105,14 @@ int gsi_reset_channel(unsigned long chan_hdl)
 	if (ctx->state != GSI_CHAN_STATE_STOPPED &&
 		ctx->state != GSI_CHAN_STATE_ALLOCATED) {
 		GSIERR("bad state %d\n", ctx->state);
+
+		if (of_machine_is_compatible("qcom,msm8998") &&
+		    ctx->state == GSI_CHAN_STATE_NOT_ALLOCATED) {
+			GSIERR("MSM8998 workaround for gsi firmware: avoiding "
+			       "kernel panic for already not allocated CH.\n");
+			return GSI_STATUS_SUCCESS;
+		}
+
 		return -GSI_STATUS_UNSUPPORTED_OP;
 	}
 
@@ -3185,6 +3202,14 @@ int gsi_dealloc_channel(unsigned long chan_hdl)
 
 	if (ctx->state != GSI_CHAN_STATE_ALLOCATED) {
 		GSIERR("bad state %d\n", ctx->state);
+
+		if (of_machine_is_compatible("qcom,msm8998") &&
+		    ctx->state == GSI_CHAN_STATE_NOT_ALLOCATED) {
+			GSIERR("MSM8998 workaround for gsi firmware: avoiding "
+			       "kernel panic for already not allocated CH.\n");
+			return GSI_STATUS_SUCCESS;
+		}
+
 		return -GSI_STATUS_UNSUPPORTED_OP;
 	}
 
