@@ -1,0 +1,249 @@
+/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include <dt-bindings/clock/msm-clocks-8998.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include "msm8998-taimen-pinctrl.dtsi"
+#include "msm8998-taimen-misc.dtsi"
+#include "msm8998-taimen-pm.dtsi"
+#include "msm8998-taimen-panel.dtsi"
+#include "msm8998-taimen-sound.dtsi"
+#include "msm8998-taimen-connectivity.dtsi"
+#include "msm8998-taimen-nfc.dtsi"
+#include "msm8998-taimen-hdmi.dtsi"
+#include "msm8998-taimen-touch.dtsi"
+#include "msm8998-taimen-fingerprint.dtsi"
+#include "msm8998-taimen-camera.dtsi"
+#include "msm8998-taimen-easel.dtsi"
+#include "msm8998-taimen-led.dtsi"
+#include "msm8998-taimen-haptics.dtsi"
+#include "msm8998-mdss-panels.dtsi"
+#include "msm8998-taimen-usb.dtsi"
+
+&reserved_memory {
+	alt_ramoops_mem: alt_ramoops_region@b0e00000 {
+		compatible = "removed-dma-pool";
+		no-map;
+		reg = <0 0xb0e00000 0 0x200000>;
+	};
+
+	ramoops_mem: ramoops_region@b0000000 {
+		compatible = "removed-dma-pool";
+		no-map;
+		reg = <0 0xb0000000 0 0x200000>;
+	};
+
+	ramoops_meta_mem: ramoops_meta_region@affff000 {
+		compatible = "removed-dma-pool";
+		no-map;
+		reg = <0 0xaffff000 0 0x1000>;
+	};
+
+	crash_fb_mem@b0200000 {
+		linux,contiguous-region;
+		reg = <0 0xb0200000 0 0xc00000>;
+		label = "crash_fb_mem";
+	};
+
+	easel_mem: easel_mem@96000000 {
+		linux,contiguous-region;
+		reg = <0 0x96000000 0 0x4000000>;
+		label = "easel_mem";
+	};
+
+	cont_splash_mem: splash_region@9d600000 {
+		status = "disabled";
+	};
+
+	bootloader_log_mem: bootloader_log_region@affffc000 {
+		compatible = "removed-dma-pool";
+		no-map;
+		reg = <0 0xafffc000 0 0x3000>;
+	};
+};
+
+&pil_ipa_gpu_mem {
+	reg = <0 0x95a00000 0 0x100000>;
+};
+
+&pil_slpi_mem {
+	reg = <0 0x94b00000 0 0xf00000>;
+};
+
+&pil_mba_mem {
+	reg = <0 0x94900000 0 0x200000>;
+};
+
+&pil_video_mem {
+	reg = <0 0x94400000 0 0x500000>;
+};
+
+&modem_mem {
+	reg = <0 0x8cc00000 0 0x7800000>;
+};
+
+&soc {
+	qcom,wdt@17817000 {
+		qcom,bark-time = <16000>;
+	};
+
+	access_ramoops@0 {
+		compatible = "access_ramoops";
+		label = "metadata";
+		memory-region = <&ramoops_meta_mem>;
+	};
+
+	access_ramoops@1 {
+		compatible = "access_ramoops";
+		label = "ramoops";
+		memory-region = <&alt_ramoops_mem>;
+	};
+
+	ramoops {
+		compatible = "ramoops";
+		memory-region = <&ramoops_mem>;
+		alt-memory-region = <&alt_ramoops_mem>;
+		record-size = <0x0 0x20000>;
+		console-size = <0x0 0x100000>;
+		pmsg-size = <0x0 0x80000>;
+	};
+
+	crash_fb {
+		compatible = "crash_fb";
+		mem-addr = <0xb0200000>;
+		mem-size = <0xc00000>;
+	};
+
+	bootlog {
+		compatible = "bootlog";
+	};
+
+	qcom,ion {
+		qcom,ion-heap@30 {
+			reg = <30>;
+			memory-region = <&easel_mem>;
+			qcom,ion-heap-type = "CARVEOUT";
+		};
+	};
+
+	bootloader_log {
+		compatible = "htc,bldr_log";
+		/* tzbsp buffer(0x1e70) + header(12) + msg head(22) */
+		reg = <0xafffc000 0x1e92>;
+		reg-names = "bl_log";
+		memory-region = <&bootloader_log_mem>;
+	};
+};
+
+&blsp1_uart3_hs {
+	status = "ok";
+};
+
+&ufsphy1 {
+	vdda-phy-supply = <&pm8998_l1>;
+	vdda-pll-supply = <&pm8998_l2>;
+	vddp-ref-clk-supply = <&pm8998_l26>;
+	vdda-phy-max-microamp = <51400>;
+	vdda-pll-max-microamp = <14600>;
+	vddp-ref-clk-max-microamp = <100>;
+	vddp-ref-clk-always-on;
+	status = "ok";
+};
+
+&ufs1 {
+	vdd-hba-supply = <&gdsc_ufs>;
+	vdd-hba-fixed-regulator;
+	vcc-supply = <&pm8998_l20>;
+	vccq-supply = <&pm8998_l26>;
+	vccq2-supply = <&pm8998_s4>;
+	vcc-max-microamp = <750000>;
+	vccq-max-microamp = <560000>;
+	vccq2-max-microamp = <750000>;
+	status = "ok";
+};
+
+&ufs_ice {
+	status = "ok";
+};
+
+&uartblsp2dm1 {
+	status = "ok";
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart_console_active>;
+};
+
+&pm8998_gpios {
+	/* GPIO 6 for Vol+ Key */
+	gpio@c500 {
+		status = "okay";
+		qcom,mode = <0>;
+		qcom,pull = <0>;
+		qcom,vin-sel = <0>;
+		qcom,src-sel = <0>;
+		qcom,out-strength = <1>;
+	};
+
+	gpio@cc00 { /* GPIO 13 */
+		qcom,mode = <1>;
+		qcom,output-type = <0>;
+		qcom,pull = <5>;
+		qcom,vin-sel = <0>;
+		qcom,out-strength = <1>;
+		qcom,src-sel = <3>;
+		qcom,master-en = <1>;
+		status = "okay";
+	};
+
+	/* GPIO 18 SMB138X */
+	gpio@d100 {
+		qcom,mode = <0>;
+		qcom,pull = <0>;
+		qcom,vin-sel = <0>;
+		qcom,src-sel = <0>;
+		qcom,master-en = <1>;
+		status = "okay";
+	};
+};
+
+&mdss_dp_ctrl {
+	status = "disabled";
+};
+
+&wil6210 {
+	status = "disabled";
+};
+
+&firmware_android {
+	compatible = "android,firmware";
+	vbmeta {
+		compatible = "android,vbmeta";
+		parts = "vbmeta,boot,system,vendor,dtbo,laf";
+		by_name_prefix = "/dev/block/platform/soc/1da4000.ufshc/by-name";
+	};
+	fstab {
+		compatible = "android,fstab";
+		vendor {
+			compatible = "android,vendor";
+			dev = "/dev/block/platform/soc/1da4000.ufshc/by-name/vendor";
+			type = "ext4";
+			mnt_flags = "ro,barrier=1";
+			fsmgr_flags = "wait,slotselect,avb";
+		};
+		persist {
+			compatible = "android,persist";
+			dev = "/dev/block/platform/soc/1da4000.ufshc/by-name/persist";
+			type = "ext4";
+			mnt_flags = "nosuid,nodev,noatime,barrier=1";
+			fsmgr_flags = "wait";
+		};
+	};
+};
