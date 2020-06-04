@@ -1,0 +1,244 @@
+#include "msm8998-htc-common.dtsi"
+#include "msm8998-htc-regulator.dtsi"
+#include "msm8998-htc-pm.dtsi"
+#include "dsi-panel-muskie-s6e3ha3.dtsi"
+#include "dsi-panel-muskie-ea8064tg.dtsi"
+#include "dsi-panel-walleye-s6e3fa5.dtsi"
+#include "msm8998-htc-nfc.dtsi"
+#include "msm8998-camera-laser-muskie.dtsi"
+
+&wil6210 {
+	status = "disabled";
+};
+
+&mdss_dsi0 {
+	qcom,dsi-pref-prim-pan = <&dsi_s6e3ha3_dualdsi_wqhd_cmd>;
+	lab-supply = <>;
+	ibb-supply = <>;
+	wqhd-vddio-supply = <&pm8998_l14>;
+	vci-supply = <&pm8998_l22>;
+	pinctrl-names = "mdss_default", "mdss_sleep";
+	pinctrl-0 = <&mdss_dsi_active &mdss_te_active>;
+	pinctrl-1 = <&mdss_dsi_suspend &mdss_te_suspend>;
+	qcom,platform-reset-gpio = <&tlmm 94 0>;
+	qcom,platform-te-gpio = <&tlmm 10 0>;
+	qcom,platform-err_fg-gpio = <&pmi8998_gpios 14 0>;
+};
+
+&mdss_dsi1 {
+	qcom,dsi-pref-prim-pan = <&dsi_s6e3ha3_dualdsi_wqhd_cmd>;
+	lab-supply = <>;
+	ibb-supply = <>;
+	wqhd-vddio-supply = <&pm8998_l14>;
+	vci-supply = <&pm8998_l22>;
+	pinctrl-names = "mdss_default", "mdss_sleep";
+	pinctrl-0 = <&mdss_dsi_active &mdss_te_active>;
+	pinctrl-1 = <&mdss_dsi_suspend &mdss_te_suspend>;
+	qcom,platform-reset-gpio = <&tlmm 94 0>;
+	qcom,platform-te-gpio = <&tlmm 10 0>;
+	qcom,platform-err_fg-gpio = <&pmi8998_gpios 14 0>;
+};
+
+&pm8998_l14 {
+	regulator-min-microvolt = <1800000>;
+	regulator-max-microvolt = <1800000>;
+};
+
+&pm8998_l22 {
+	regulator-min-microvolt = <3000000>;
+	regulator-max-microvolt = <3000000>;
+};
+
+&tlmm {
+	pmx_mdss {
+		mdss_dsi_active {
+			mux {
+				pins = "gpio94";
+				function = "gpio";
+			};
+				config {
+				pins = "gpio94";
+				drive-strength = <2>; /* 2 mA */
+				bias-disable = <0>; /* no pull */
+			};
+		};
+		mdss_dsi_suspend {
+			mux {
+				pins = "gpio94";
+				function = "gpio";
+			};
+				config {
+				pins = "gpio94";
+				drive-strength = <2>; /* 2 mA */
+				bias-pull-down; /* pull down */
+			};
+		};
+	};
+
+	pmx_mdss_te {
+		mdss_te_active {
+			mux {
+				pins = "gpio10";
+				function = "mdp_vsync_a";
+			};
+			config {
+				pins = "gpio10";
+				drive-strength = <2>; /* 2 mA */
+				bias-pull-down; /* pull down*/
+			};
+		};
+
+		mdss_te_suspend {
+			mux {
+				pins = "gpio10";
+				function = "gpio";
+			};
+			config {
+				pins = "gpio10";
+				drive-strength = <2>; /* 2 mA */
+				bias-pull-down; /* pull down */
+				input-enable;
+			};
+		};
+	};
+
+	spkr_i2s_clk_pin {
+		spkr_i2s_clk_sleep {
+			config {
+				bias-disable;
+				input-enable;
+			};
+		};
+	};
+};
+
+&pmi8998_gpios {
+	gpio@cd00 { /* GPIO 14 - ERR_FG */
+		reg = <0xcd00 0x100>;
+		qcom,mode = <0>;        /* DIGITAL INPUT */
+		qcom,pull = <5>;        /* No Pull */
+		qcom,pin-num = <14>;
+		status = "okay";
+	};
+};
+&pmi8998_wled {
+	status = "disabled";
+};
+&labibb {
+	status = "disabled";
+};
+&mdss_fb2 {
+	status = "disabled";
+};
+&mdss_hdmi_tx {
+	status = "disabled";
+};
+&mdss_fb3 {
+	status = "disabled";
+};
+&mdss_dp_ctrl {
+	status = "disabled";
+};
+
+&pm8998_vadc {
+	chan@4e {
+		label = "fpc_therm";
+		reg = <0x4e>;
+		qcom,decimation = <2>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <2>;
+		qcom,hw-settle-time = <2>;
+		qcom,fast-avg-setup = <0>;
+	};
+
+	chan@4f {
+		label = "back_therm";
+		reg = <0x4f>;
+		qcom,decimation = <2>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <2>;
+		qcom,hw-settle-time = <2>;
+		qcom,fast-avg-setup = <0>;
+	};
+
+	chan@50 {
+		label = "pa_therm";
+		reg = <0x50>;
+		qcom,decimation = <2>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <2>;
+		qcom,hw-settle-time = <2>;
+		qcom,fast-avg-setup = <0>;
+	};
+};
+
+&pm8998_adc_tm {
+	chan@4e {
+		label = "fpc_therm";
+		reg = <0x4e>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <4>;
+		qcom,hw-settle-time = <2>;
+		qcom,btm-channel-number = <0x80>;
+		qcom,thermal-node;
+	};
+
+	chan@4f {
+		label = "back_therm";
+		reg = <0x4f>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <4>;
+		qcom,hw-settle-time = <2>;
+		qcom,btm-channel-number = <0x88>;
+		qcom,thermal-node;
+	};
+
+	chan@50 {
+		label = "pa_therm";
+		reg = <0x50>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <4>;
+		qcom,hw-settle-time = <2>;
+		qcom,btm-channel-number = <0x90>;
+		qcom,thermal-node;
+	};
+};
+
+&soc {
+	qcom,sensor-information {
+		sensor_information30: qcom,sensor-information-30 {
+			qcom,sensor-type = "adc";
+			qcom,sensor-name = "fpc_therm";
+		};
+		sensor_information31: qcom,sensor-information-31 {
+			qcom,sensor-type = "adc";
+			qcom,sensor-name = "back_therm";
+		};
+		sensor_information32: qcom,sensor-information-32 {
+			qcom,sensor-type = "adc";
+			qcom,sensor-name = "pa_therm";
+		};
+	};
+
+	htc,htc-battery {
+		htc_battery: htc,battery-node {
+			htc,v-elvdd-dis-en = <&pmi8998_gpios 11 0>;
+		};
+	};
+};
+
+&pmi8998_gpios {
+	gpio@ca00 {
+		reg = <0xca00 0x100>;
+		qcom,pin-num = <11>;
+		status = "okay";
+		qcom,mode = <1>;
+		qcom,pull = <4>;
+	};
+};

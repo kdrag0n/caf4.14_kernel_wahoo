@@ -1,0 +1,321 @@
+/* Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+#include <dt-bindings/interrupt-controller/irq.h>
+
+&aliases {
+	serial1 = "/soc/serial@0c16f000";
+};
+
+&pcie0 {
+	/* move and resize conf, io, and bars (mem) allocations */
+	reg = <0x1c00000 0x2000>,
+	      <0x1c06000 0x1000>,
+	      <0x1b000000 0xf1d>,
+	      <0x1b000f20 0xa8>,
+	      <0x1b010000 0x20000>,  /* 128KB conf space */
+	      <0x1b030000 0x20000>,  /* 128KB io space */
+	      <0x1b100000 0xf00000>; /* 15M bars space */
+	ranges = <0x01000000 0x0 0x1b030000 0x1b030000 0x0 0x20000>, /* io */
+		 <0x02000000 0x0 0x1b100000 0x1b100000 0x0 0xf00000>; /* bars */
+
+	qcom,phy-sequence = <0x804 0x01 0x00
+				0x034 0x14 0x00
+				0x138 0x30 0x00
+				0x048 0x0f 0x00
+				0x15c 0x06 0x00
+				0x090 0x01 0x00
+				0x088 0x20 0x00
+				0x0f0 0x00 0x00
+				0x0f8 0x01 0x00
+				0x0f4 0xc9 0x00
+				0x11c 0xff 0x00
+				0x120 0x3f 0x00
+				0x164 0x01 0x00
+				0x154 0x00 0x00
+				0x148 0x0a 0x00
+				0x05C 0x19 0x00
+				0x038 0x90 0x00
+				0x0b0 0x82 0x00
+				0x0c0 0x03 0x00
+				0x0bc 0x55 0x00
+				0x0b8 0x55 0x00
+				0x0a0 0x00 0x00
+				0x09c 0x0d 0x00
+				0x098 0x04 0x00
+				0x13c 0x00 0x00
+				0x060 0x08 0x00
+				0x068 0x16 0x00
+				0x070 0x34 0x00
+				0x15c 0x06 0x00
+				0x138 0x33 0x00
+				0x03c 0x02 0x00
+				0x040 0x07 0x00
+				0x080 0x04 0x00
+				0x0dc 0x00 0x00
+				0x0d8 0x3f 0x00
+				0x00c 0x09 0x00
+				0x010 0x01 0x00
+				0x01c 0x40 0x00
+				0x020 0x01 0x00
+				0x014 0x02 0x00
+				0x018 0x00 0x00
+				0x024 0x7e 0x00
+				0x028 0x15 0x00
+				0x244 0x02 0x00
+				0x2a4 0x12 0x00
+				0x260 0x10 0x00
+				0x28c 0x06 0x00
+				0x504 0x03 0x00
+				0x500 0x1c 0x00
+				0x50c 0x14 0x00
+				0x4d4 0x0a 0x00
+				0x4d8 0x04 0x00
+				0x4dc 0x1a 0x00
+				0x434 0x4b 0x00
+				0x414 0x04 0x00
+				0x40c 0x04 0x00
+				0x4f8 0x00 0x00
+				0x4fc 0x80 0x00
+				0x51c 0x40 0x00
+				0x444 0x71 0x00
+				0x43c 0x40 0x00
+				0x854 0x04 0x00
+				0x62c 0x52 0x00
+				0x9ac 0x00 0x00
+				0x8a0 0x01 0x00
+				0x9e0 0x00 0x00
+				0x9dc 0x01 0x00
+				0x9a8 0x00 0x00
+				0x8a4 0x01 0x00
+				0x8a8 0x73 0x00
+				0x9d8 0x99 0x00
+				0x9b0 0x03 0x00
+				0x804 0x03 0x00
+				0x800 0x00 0x00
+				0x808 0x03 0x00
+				0x21C 0x2D 0x00>;
+
+	/* QCOM's GICM implementation is not compatible with Easel */
+	qcom,msi-gicm-addr = <>;
+	qcom,msi-gicm-base = <>;
+
+	/* reduce endpoint reset latency */
+	qcom,ep-latency = <1>;
+
+	/* WAKE# optional sideband signal not connected */
+	wake-gpio = <>;
+	/* Remove pcie0_wake_default from pin muxing */
+	pinctrl-0 = <&pcie0_clkreq_default &pcie0_perst_default>;
+};
+
+&tlmm {
+	bcm15602_pins {
+		bcm15602_pon_default: bcm15602_pon_default {
+			mux {
+				pins = "gpio25";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio25";
+				drive-strength = <2>;
+				bias-disable;
+			};
+		};
+
+		bcm15602_intb_default: bcm15602_intb_default {
+			mux {
+				pins = "gpio26";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio26";
+				drive-strength = <2>;
+				bias-pull-up;
+			};
+		};
+
+		bcm15602_resetb_default: bcm15602_resetb_default {
+			mux {
+				pins = "gpio91";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio91";
+				drive-strength = <2>;
+				bias-pull-down;
+			};
+		};
+	};
+
+	easel_pins {
+		easel_ready_default: easel_ready_default {
+			mux {
+				pins = "gpio27";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio27";
+				drive-strength = <2>;
+				bias-pull-down;
+			};
+		};
+
+		easel_boot_mode_default: easel_boot_mode_default {
+			mux {
+				pins = "gpio28";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio28";
+				drive-strength = <2>;
+				bias-disable;
+			};
+		};
+
+		esl_console_active: esl_console_active {
+			mux {
+				pins = "gpio8", "gpio9";
+				function = "blsp_uart1_b";
+			};
+
+			config {
+				pins = "gpio8", "gpio9";
+				drive-strength = <2>;
+				bias-disable;
+			};
+		};
+
+		esl_console_sleep: esl_console_sleep {
+			mux {
+				pins = "gpio8", "gpio9";
+				function = "gpio";
+			};
+
+			config {
+				pins = "gpio8", "gpio9";
+				drive-strength = <2>;
+				bias-pull-down;
+			};
+		};
+	};
+};
+
+&i2c_9 {
+	bcm15602@8 {
+		compatible = "brcm,bcm15602";
+		reg = <0x8>;
+
+		interrupt-parent = <&tlmm>;
+		interrupts = <26 IRQ_TYPE_EDGE_FALLING>;
+		interrupt-names = "bcm15602_intb";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&bcm15602_pon_default &bcm15602_intb_default
+			&bcm15602_resetb_default>;
+
+		bcm,pon-gpio = <&tlmm 25 0x00>;
+		bcm,intb-gpio = <&tlmm 26 0x00>;
+		bcm,resetb-gpio = <&tlmm 91 0x00>;
+
+		bcm15602_gpio: gpio {
+			compatible = "brcm,bcm15602-gpio";
+			gpio-controller;
+			#gpio-cells = <2>;
+		};
+
+		bcm15602_thermal: sensor {
+			compatible = "brcm,bcm15602-thermal";
+			#thermal-sensor-cells = <0>;
+		};
+	};
+};
+
+&spi_10 {
+	status = "okay";
+	mnh-spi@0 {
+		compatible = "intel,mnh-spi";
+		reg = <0>;
+		spi-max-frequency = <25000000>;
+		spi-cpol;
+		spi-cpha;
+	};
+};
+
+&soc {
+	esl_console: serial@0c16f000 {
+		compatible = "qcom,msm-uartdm-v1.4", "qcom,msm-uartdm";
+		reg = <0xc16f000 0x1000>;
+
+		interrupts = <0 107 0>;
+
+		clocks = <&clock_gcc clk_gcc_blsp1_uart1_apps_clk>,
+			 <&clock_gcc clk_gcc_blsp1_ahb_clk>;
+		clock-names = "core", "iface";
+
+		pinctrl-names = "default", "sleep";
+		pinctrl-0 = <&esl_console_active>;
+		pinctrl-1 = <&esl_console_sleep>;
+	};
+
+	mnh-sm {
+		compatible = "intel,mnh-sm";
+
+		clocks = <&clock_gcc clk_ln_bb_clk2>,
+			 <&clock_gcc clk_div_clk3>;
+		clock-names = "ref_clk", "sleep_clk";
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&easel_ready_default &easel_boot_mode_default>;
+
+		soc-pwr-good-gpio = <&bcm15602_gpio 0 0x00>;
+		ddr-pad-iso-n-gpio = <&bcm15602_gpio 1 0x00>;
+		ready-gpio = <&tlmm 27 0x00>;
+		boot-mode-gpio = <&tlmm 28 0x00>;
+	};
+
+	mnh_thermal: mnh_thermal {
+		compatible = "intel,mnh_thermal";
+		#thermal-sensor-cells = <1>;
+	};
+
+	thermal-zones {
+		mnh_ipu1 {
+			polling-delay-passive = <1000>;/* milliseconds */
+			polling-delay = <0>;/* milliseconds */
+			thermal-sensors = <&mnh_thermal 0>;
+		};
+
+		mnh_ipu2 {
+			polling-delay-passive = <1000>;/* milliseconds */
+			polling-delay = <0>;/* milliseconds */
+			thermal-sensors = <&mnh_thermal 1>;
+		};
+
+		mnh_cpu {
+			polling-delay-passive = <1000>;/* milliseconds */
+			polling-delay = <0>;/* milliseconds */
+			thermal-sensors = <&mnh_thermal 2>;
+		};
+
+		mnh_lpddr {
+			polling-delay-passive = <1000>;/* milliseconds */
+			polling-delay = <0>;/* milliseconds */
+			thermal-sensors = <&mnh_thermal 3>;
+		};
+	};
+};
