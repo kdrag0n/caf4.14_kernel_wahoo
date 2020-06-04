@@ -1,0 +1,39 @@
+/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&pmi8998_haptics {
+	status = "disabled";
+};
+
+&i2c_6 {
+	status = "okay";
+	drv2624@5a {
+		compatible = "ti,drv2624";
+		reg = <0x5a>;
+		ti,reset-gpio = <&tlmm 95 0>;
+		ti,smart-loop = <0>; /* 0-closeloop, 1-openloop */
+		ti,actuator = <1>; /* 0-ERM, 1-LRA */
+		ti,rated-voltage = <77>; /* 1.8 Vrms */
+		ti,odclamp-voltage = <165>; /* 3.5 Vpeak */
+		ti,lra-frequency = <155>; /* f0 = 155Hz */
+		ti,ol-lra-frequency = <155>; /* off-f0 in OL */
+		ti,bemf-factor = <188>;
+		ti,bemf-gain = <1>;
+		ti,voltage-comp = <9>;
+		ti,blanking-time = <2>; /* 50 us */
+		ti,idiss-time = <2>; /* 50 us */
+		ti,zc-det-time = <0>; /* 100 us*/
+		ti,lra-wave-shape = <0>; /* Square wave */
+		ti,waveform-interval = <1>; /* 1 ms */
+		status = "ok";
+	};
+};

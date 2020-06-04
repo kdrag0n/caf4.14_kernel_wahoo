@@ -1,0 +1,461 @@
+/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+#include <dt-bindings/msm/power-on.h>
+
+&soc {
+	taimen_batterydata: qcom,battery-data {
+		qcom,batt-id-range-pct = <20>;
+		#include "lge_blt35_tocad_3620mah.dtsi"
+		#include "lge_blt35_lgc_3620mah.dtsi"
+	};
+};
+
+&soc {
+	qcom,bcl {
+		qcom,bcl-hotplug-list = <>;
+		qcom,bcl-soc-hotplug-list = <>;
+	};
+
+	qcom,sensor-information {
+		compatible = "qcom,sensor-information";
+
+		qcom,sensor-information-30 {
+			qcom,sensor-type = "adc";
+			qcom,sensor-name = "xo_therm";
+		};
+
+		qcom,sensor-information-31 {
+			qcom,sensor-type = "adc";
+			qcom,sensor-name = "bd_therm";
+		};
+
+		qcom,sensor-information-32 {
+			qcom,sensor-type = "adc";
+			qcom,sensor-name = "vts";
+			qcom,scaling-factor = <10>;
+		};
+
+		qcom,sensor-information-33 {
+			qcom,sensor-type = "adc";
+			qcom,sensor-name = "led_sensor";
+			qcom,scaling-factor = <10>;
+		};
+
+		qcom,sensor-information-34 {
+			qcom,sensor-type = "adc";
+			qcom,sensor-name = "battery";
+			qcom,scaling-factor = <1000>;
+		};
+	};
+};
+
+&pm8998_vadc {
+	chan@85 {
+		label = "vcoin";
+		reg = <0x85>;
+		qcom,decimation = <2>;
+		qcom,pre-div-channel-scaling = <1>;
+		qcom,calibration-type = "absolute";
+		qcom,scale-function = <0>;
+		qcom,hw-settle-time = <0>;
+		qcom,fast-avg-setup = <0>;
+	};
+
+	chan@4c {
+		label = "xo_therm";
+		reg = <0x4c>;
+		qcom,decimation = <2>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <4>;
+		qcom,hw-settle-time = <2>;
+		qcom,fast-avg-setup = <0>;
+	};
+
+	chan@4d {
+		label = "pcb_rev";
+		reg = <0x4d>;
+		qcom,decimation = <0>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <0>;
+		qcom,hw-settle-time = <1>;
+		qcom,fast-avg-setup = <0>;
+	};
+
+	chan@4f {
+		label = "pa_therm1";
+		reg = <0x4f>;
+		qcom,decimation = <2>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <2>;
+		qcom,hw-settle-time = <2>;
+		qcom,fast-avg-setup = <0>;
+	};
+
+	chan@50 {
+		label = "pa_therm2";
+		reg = <0x50>;
+		qcom,decimation = <2>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <2>;
+		qcom,hw-settle-time = <2>;
+		qcom,fast-avg-setup = <0>;
+	};
+
+	chan@51 {
+		label = "bd_therm";
+		reg = <0x51>;
+		qcom,decimation = <2>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <2>;
+		qcom,hw-settle-time = <2>;
+		qcom,fast-avg-setup = <0>;
+	};
+
+	chan@0e {
+		label = "usb_id_lv";
+		reg = <0x0e>;
+		qcom,decimation = <0>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <0>;
+		qcom,hw-settle-time = <5>;
+		qcom,fast-avg-setup = <0>;
+	};
+};
+
+&pm8998_adc_tm {
+	chan@83 {
+		label = "vph_pwr";
+		reg = <0x83>;
+		qcom,pre-div-channel-scaling = <1>;
+		qcom,calibration-type = "absolute";
+		qcom,scale-function = <0>;
+		qcom,hw-settle-time = <0>;
+		qcom,btm-channel-number = <0x60>;
+	};
+
+	chan@4f {
+		label = "pa_therm1";
+		reg = <0x4f>;
+		qcom,decimation = <2>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <2>;
+		qcom,hw-settle-time = <2>;
+		qcom,fast-avg-setup = <0>;
+		qcom,btm-channel-number = <0x68>;
+		qcom,thermal-node;
+	};
+
+	chan@50 {
+		label = "pa_therm2";
+		reg = <0x50>;
+		qcom,decimation = <2>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <2>;
+		qcom,hw-settle-time = <2>;
+		qcom,fast-avg-setup = <0>;
+		qcom,btm-channel-number = <0x70>;
+		qcom,thermal-node;
+	};
+
+	chan@4c {
+		label = "xo_therm";
+		reg = <0x4c>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <4>;
+		qcom,hw-settle-time = <2>;
+		qcom,btm-channel-number = <0x78>;
+		qcom,thermal-node;
+	};
+
+	chan@51 {
+		label = "bd_therm";
+		reg = <0x51>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <2>;
+		qcom,hw-settle-time = <2>;
+		qcom,btm-channel-number = <0x80>;
+		qcom,thermal-node;
+	};
+};
+
+&pmi8998_gpios {
+	gpio@c800 {
+		qcom,master-en = <1>;		/* Enable GPIO */
+		status = "okay";
+	};
+};
+
+&pmi8998_charger {
+	qcom,usb-icl-ua = <1500000>;
+	qcom,fcc-max-ua = <500000>;
+	qcom,hvdcp-disable;
+	qcom,auto-recharge-soc;
+	qcom,low-batt-threshold = <2>;
+};
+
+&pmi8998_fg {
+	qcom,battery-data = <&taimen_batterydata>;
+	qcom,fg-jeita-thresholds = <0 20 45 55>;
+	qcom,fg-jeita-hyst-temp = <2>;
+	qcom,fg-recharge-soc-thr = <97>;
+	qcom,fg-auto-recharge-soc;
+	qcom,hold-soc-while-full;
+	qcom,linearize-soc;
+	qcom,cl-max-decrement = <5>;
+	qcom,fg-esr-tight-lt-filter-micro-pct = <30000>;
+	qcom,fg-esr-broad-lt-filter-micro-pct = <30000>;
+	qcom,fg-batt-temp-compensation;
+	qcom,fg-temp-charging-factor = <0>;
+	qcom,fg-temp-info = <(-300)  (-200)  (-190)  (-180)
+			(-170)  (-160)  (-150)  (-100)
+			(-50)   0       50      100
+			150     200     250     300
+			350     400     450     500
+			550     600     700     800
+			900>;
+	qcom,fg-temp-comp-factor = <(-70)  (-10)  (-5)  0
+				5  10  10  20
+				30  30  10  10
+				0  (-10)  (-20)  (-30)
+				(-35)  (-40)  (-45)  (-50)
+				(-50)  (-40)  (-40)  (-30)
+				(-30)>;
+	qcom,fg-cutoff-voltage = <3400>;
+	qcom,fg-empty-voltage = <2650>;
+};
+
+&pmi8998_bcl {
+	qcom,vbat-too-low-threshold = <3>; /* 2.7V */
+};
+
+&pmi8998_pdphy {
+	vbus-supply = <&smb138x_vbus>;
+};
+
+&smb138x_parallel_slave {
+	qcom,parallel-mode = <2>;
+	qcom,otg-current-limit = <4>;
+
+	smb138x_vbus: qcom,smb138x-vbus {
+		status = "okay";
+	};
+};
+
+&spmi_bus {
+	qcom,pm8998@0 {
+		qcom,power-on@800 {
+			qcom,kpdpwr-sw-debounce;
+			qcom,s3-debounce = <16>;
+			qcom,s3-src = "kpdpwr";
+			qcom,hard-reset-poweroff-type =
+				<PON_POWER_OFF_WARM_RESET>;
+			qcom,pon_1 {  /* KPD_PWR_N */
+				qcom,support-reset = <1>;
+				qcom,s1-timer = <10256>;
+				qcom,s2-timer = <2000>;
+				qcom,s2-type = <8>;
+			};
+			qcom,pon_2 {  /* RESIN_N */
+				qcom,support-reset = <0>;
+			};
+			qcom,pon_3 {  /* KPD_PWR_N AND RESIN_N */
+				qcom,support-reset = <0>;
+			};
+		};
+	};
+};
+
+/* usb port temperature adc */
+&pm8998_gpios {
+	gpio@ca00 {
+		reg = <0xca00 0x100>;
+		qcom,pin-num = <11>;
+		status = "okay";
+		qcom,mode = <0>;
+		qcom,pull = <5>;
+		qcom,vin-sel = <0>;
+		qcom,src-sel = <0>;
+		qcom,master-en = <1>;
+	};
+};
+
+&pm8998_vadc {
+	chan@15 {
+		label = "usb_port_temp";
+		reg = <0x15>;
+		qcom,decimation = <0>;
+		qcom,pre-div-channel-scaling = <0>;
+		qcom,calibration-type = "ratiometric";
+		qcom,scale-function = <0>;
+		qcom,hw-settle-time = <1>;	/* 100us hardware settle time */
+		qcom,fast-avg-setup = <2>;	/* average 4 samples */
+		qcom,cal-val = <0>;
+		qcom,vadc-thermal-node;
+		goog,custom-map =
+				<(-200) 1668000
+				(-190) 1659000
+				(-180) 1651000
+				(-170) 1641000
+				(-160) 1632000
+				(-150) 1622000
+				(-140) 1611000
+				(-130) 1600000
+				(-120) 1589000
+				(-110) 1577000
+				(-100) 1565000
+				(-90) 1552000
+				(-80) 1539000
+				(-70) 1525000
+				(-60) 1511000
+				(-50) 1496000
+				(-40) 1481000
+				(-30) 1466000
+				(-20) 1449000
+				(-10) 1433000
+				0 1416000
+				10 1398000
+				20 1381000
+				30 1362000
+				40 1344000
+				50 1325000
+				60 1305000
+				70 1286000
+				80 1266000
+				90 1245000
+				100 1225000
+				110 1204000
+				120 1183000
+				130 1161000
+				140 1140000
+				150 1118000
+				160 1096000
+				170 1075000
+				180 1053000
+				190 1031000
+				200 1009000
+				210 987000
+				220 965000
+				230 943000
+				240 922000
+				250 900000
+				260 879000
+				270 857000
+				280 836000
+				290 815000
+				300 795000
+				310 774000
+				320 754000
+				330 734000
+				340 715000
+				350 695000
+				360 677000
+				370 658000
+				380 640000
+				390 622000
+				400 604000
+				410 587000
+				420 570000
+				430 554000
+				440 537000
+				450 522000
+				460 506000
+				470 491000
+				480 477000
+				490 462000
+				500 449000
+				510 435000
+				520 422000
+				530 409000
+				540 397000
+				550 385000
+				560 373000
+				570 361000
+				580 350000
+				590 339000
+				600 329000
+				610 319000
+				620 309000
+				630 300000
+				640 290000
+				650 281000
+				660 273000
+				670 264000
+				680 256000
+				690 248000
+				700 241000
+				710 233000
+				720 226000
+				730 219000
+				740 212000
+				750 206000
+				760 200000
+				770 193000
+				780 188000
+				790 182000
+				800 176000
+				810 171000
+				820 166000
+				830 161000
+				840 156000
+				850 151000
+				860 147000
+				870 142000
+				880 138000
+				890 134000
+				900 130000
+				910 126000
+				920 123000
+				930 119000
+				940 116000
+				950 112000
+				960 109000
+				970 106000
+				980 103000
+				990 100000
+				1000 97000
+				1010 94000
+				1020 91000
+				1030 89000
+				1040 86000
+				1050 84000
+				1060 82000
+				1070 79000
+				1080 77000
+				1090 75000
+				1100 73000
+				1110 71000
+				1120 69000
+				1130 67000
+				1140 65000
+				1150 64000
+				1160 62000
+				1170 60000
+				1180 59000
+				1190 57000
+				1200 56000
+				1210 54000
+				1220 53000
+				1230 51000
+				1240 50000
+				1250 49000>;
+	};
+};

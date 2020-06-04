@@ -1,0 +1,235 @@
+/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&spi_2 {
+	status = "ok";
+};
+
+&mdss_hdmi_tx {
+	status = "disabled";
+};
+
+&soc {
+	sound-9335 {
+		status = "disabled";
+	};
+
+	msm_cdc_pinctrl@59 {
+		status = "disabled";
+	};
+
+	msm_cdc_pinctrl@60 {
+		status = "disabled";
+	};
+
+	msm_cdc_pinctrl@75 {
+		status = "disabled";
+	};
+
+	sound-tavil {
+		qcom,model = "msm8998-tavil-taimen-snd-card";
+		qcom,audio-routing =
+			"RX_BIAS", "MCLK",
+			"MADINPUT", "MCLK",
+			"AMIC1", "MIC BIAS1",
+			"MIC BIAS1", "Handset Mic",
+			"AMIC2", "MIC BIAS2",
+			"MIC BIAS2", "Headset Mic",
+			"AMIC3", "MIC BIAS3",
+			"MIC BIAS3", "Handset 2nd Mic",
+			"AMIC4", "MIC BIAS4",
+			"MIC BIAS4", "Handset 3rd Mic",
+			"DMIC0", "MIC BIAS1",
+			"MIC BIAS1", "Digital Mic0",
+			"DMIC1", "MIC BIAS1",
+			"MIC BIAS1", "Digital Mic1",
+			"DMIC2", "MIC BIAS3",
+			"MIC BIAS3", "Digital Mic2",
+			"DMIC3", "MIC BIAS3",
+			"MIC BIAS3", "Digital Mic3",
+			"DMIC4", "MIC BIAS4",
+			"MIC BIAS4", "Digital Mic4",
+			"DMIC5", "MIC BIAS4",
+			"MIC BIAS4", "Digital Mic5",
+			"SpkrLeft IN", "SPK1 OUT",
+			"SpkrRight IN", "SPK2 OUT";
+
+		qcom,us-euro-gpios = <>;
+		qcom,hph-en0-gpio = <>;
+		qcom,hph-en1-gpio = <>;
+		qcom,wsa-max-devs = <0>;
+
+		wahoo,use-external-amp;
+		wahoo,external-amp-be-sname = "Quaternary MI2S Playback";
+
+		wahoo,external-amp-be-codec-phandle = <&ti_tas2557_4d>;
+
+		wahoo,external-amp-be-codec-dai-name = "tas2557 Stereo ASI1";
+	};
+
+	qcom,msm-dai-mi2s {
+		qcom,msm-dai-q6-mi2s-quat {
+			qcom,msm-mi2s-rx-lines = <2>; /* SD1 used as output */
+			qcom,msm-mi2s-tx-lines = <1>; /* SD0 used as input */
+			qcom,msm-mi2s-slave = <0>;
+			pinctrl-names = "default", "sleep";
+			pinctrl-0 = <&quat_mi2s_active
+				     &quat_mi2s_sd0_active
+				     &quat_mi2s_sd1_active>;
+			pinctrl-1 = <&quat_mi2s_sleep
+				     &quat_mi2s_sd0_sleep
+				     &quat_mi2s_sd1_sleep>;
+		};
+	};
+
+	audio_ext_clk_lnbb {
+		status = "disabled";
+	};
+
+	i2c@c1b5000 { /* i2c_7 & BLSP2 QUP1 */
+		tfa98xx@34 {
+			compatible = "nxp,tfa98xx";
+			status = "ok";
+			reg = <0x34>;
+		};
+
+		nxp_tfa98xx_amp@34 {
+				compatible = "nxp,tfa98xx";
+				reg = <0x34>;
+				reset-gpio = <&pm8998_gpios 6 0x1>;
+				upper-spk; /* left */
+				status = "disabled";
+		};
+
+		nxp_tfa98xx_amp@35 {
+				compatible = "nxp,tfa98xx";
+				reg = <0x35>;
+				reset-gpio = <&pm8998_gpios 7 0x1>;
+				status = "disabled";
+		};
+
+		ti_tas2557_4d: tas2557s@4d {
+				#sound-dai-cells = <1>;
+				compatible = "ti,tas2557s";
+				reg = <0x4d>;
+				ti,reset-gpio-left = <&pm8998_gpios 6 0>;
+				ti,reset-gpio-right = <&pm8998_gpios 6 0>;
+				ti,irq-gpio-left = <&pm8998_gpios 7 0>;
+				ti,irq-gpio-right = <&pm8998_gpios 8 0>;
+				ti,left-channel = <0x4c>;
+				ti,right-channel = <0x4d>;
+				ti,echo-ref = <0>;   /* 0, left channel; 1, right channel; 2, both */
+				ti,i2s-bits = <24>;   /* support 16, 24, 32 */
+				ti,cal-file-name = "tas2557_cal.bin";
+				ti,bypass-tmax = <0>;   /* 0, do not bypass; */
+				status = "ok";
+		};
+	};
+
+};
+
+&slim_aud {
+	tasha_codec {
+		status = "disabled";
+	};
+
+	swr_master {
+		status = "disabled";
+	};
+
+	tavil_codec {
+		clocks = <&clock_audio clk_audio_pmi_clk>;
+		wcd_spi {
+			qcom,master-bus-num = <2>;
+		};
+		swr_master {
+			status = "disabled";
+		};
+	};
+};
+
+
+&pm8998_gpios {
+        /* dac,power-gpio */
+	gpio@c900 {
+		qcom,master-en = <1>;   	/* ENABLE GPIO */
+		qcom,mode = <1>;		/* Digital output */
+		qcom,pull = <4>;		/* Pull down */
+		qcom,src-sel = <0>;		/* Constant */
+		qcom,invert = <0>;		/* Invert */
+		qcom,out-strength = <1>;	/* Low */
+		status = "okay";
+	};
+
+        /* dac,switch-gpio */
+	gpio@cb00 {
+		qcom,master-en = <1>;		/* Enable GPIO */
+		qcom,mode = <1>;		/* Digital output */
+		qcom,pull = <4>;		/* Pull down */
+		qcom,src-sel = <0>;		/* Constant */
+		qcom,invert = <0>;		/* Invert */
+		qcom,out-strength = <1>;	/* Low */
+		status = "okay";
+	};
+
+	/* tas2557, cdc-reset-gpio */
+	gpio@c500 { /* GPIO 6 */
+		qcom,mode = <1>;       		/* Output */
+		qcom,pull = <5>;		/* No Pull */
+		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
+		qcom,src-sel = <0>;		/* GPIO */
+		qcom,invert = <0>;		/* Invert */
+		qcom,master-en = <1>;		/* Enable GPIO */
+		qcom,out-strength = <1>;	/* Low */
+		status = "ok";
+	};
+
+	/* tas2557, irq-gpio-right */
+	gpio@c600 { /* GPIO 7 */
+		qcom,mode = <1>;       		/* Output */
+		qcom,pull = <4>;		/* Pull Down */
+		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
+		qcom,src-sel = <0>;		/* GPIO */
+		qcom,invert = <0>;		/* Invert */
+		qcom,master-en = <1>;		/* Enable GPIO */
+		qcom,out-strength = <1>;	/* Low */
+		status = "ok";
+	};
+
+	/* tas2557, irq-gpio-left */
+	gpio@c700 { /* GPIO 8 */
+		qcom,mode = <1>;                /* Output */
+		qcom,pull = <4>;                /* Pull Down */
+		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
+		qcom,src-sel = <0>;		/* GPIO */
+		qcom,invert = <0>;		/* Invert */
+		qcom,master-en = <1>;		/* Enable GPIO */
+		qcom,out-strength = <1>;	/* Low */
+		status = "ok";
+	};
+
+};
+
+&rpm_bus {
+	rpm-regulator-ldoa19 {
+		status = "okay";
+		regulator-l19 {
+			regulator-min-microvolt = <3008000>;
+			regulator-max-microvolt = <3008000>;
+			qcom,init-voltage = <3008000>;
+			qcom,vdd-voltage-level = <3008000 3008000>;
+			regulator-always-on;
+			status = "okay";
+		};
+	};
+};
+
