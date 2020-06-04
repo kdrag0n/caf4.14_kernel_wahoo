@@ -1,0 +1,35 @@
+/* Copyright (c) 2016, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/*
+ * msm8998-htc-pm.dtsi: common pm config of HTC projects
+ */
+
+#include <dt-bindings/msm/power-on.h>
+
+&spmi_bus {
+	qcom,pm8998@0 {
+		qcom,power-on@800 {
+			qcom,hard-reset-poweroff-type =
+				<PON_POWER_OFF_WARM_RESET>;
+			qcom,pon_1 {
+				status = "disabled";
+			};
+			qcom,pon_2 {
+				status = "disabled";
+			};
+			qcom,pon_3 {
+				status = "disabled";
+			};
+		};
+	};
+};
