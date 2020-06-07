@@ -144,7 +144,10 @@ static int mdss_pll_resource_parse(struct platform_device *pdev,
 		pll_res->pll_interface_type = MDSS_DP_PLL_14NM;
 	else if (!strcmp(compatible_stream, "qcom,mdss_hdmi_pll_28lpm"))
 		pll_res->pll_interface_type = MDSS_HDMI_PLL_28LPM;
-	else if (!strcmp(compatible_stream, "qcom,mdss_dsi_pll_sdm660")) {
+	else if (!strcmp(compatible_stream, "qcom,mdss_dsi_pll_8998")) {
+		pll_res->pll_interface_type = MDSS_DSI_PLL_10NM;
+		pll_res->target_id = MDSS_PLL_TARGET_8998;
+	} else if (!strcmp(compatible_stream, "qcom,mdss_dsi_pll_sdm660")) {
 		pll_res->pll_interface_type = MDSS_DSI_PLL_14NM;
 		pll_res->target_id = MDSS_PLL_TARGET_SDM660;
 		pll_res->revision = 2;

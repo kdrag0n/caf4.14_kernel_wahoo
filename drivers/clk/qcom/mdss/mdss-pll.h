@@ -57,6 +57,7 @@ enum {
 
 enum {
 	MDSS_PLL_TARGET_8996,
+	MDSS_PLL_TARGET_8998,
 	MDSS_PLL_TARGET_SDM660,
 };
 
@@ -218,7 +219,8 @@ static inline bool is_gdsc_disabled(struct mdss_pll_resources *pll_res)
 		WARN(1, "gdsc_base register is not defined\n");
 		return true;
 	}
-	if (pll_res->target_id == MDSS_PLL_TARGET_SDM660)
+	if (pll_res->target_id == MDSS_PLL_TARGET_8998 ||
+	    pll_res->target_id == MDSS_PLL_TARGET_SDM660)
 		ret = ((readl_relaxed(pll_res->gdsc_base + 0x4) & BIT(31)) &&
 		(!(readl_relaxed(pll_res->gdsc_base) & BIT(0)))) ? false : true;
 	else
