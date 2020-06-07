@@ -57,6 +57,7 @@ enum {
 
 enum {
 	MDSS_PLL_TARGET_8996,
+	MDSS_PLL_TARGET_8998,
 };
 
 #define DFPS_MAX_NUM_OF_FRAME_RATES 16
@@ -212,11 +213,17 @@ struct mdss_pll_vco_calc {
 
 static inline bool is_gdsc_disabled(struct mdss_pll_resources *pll_res)
 {
+	bool ret = false;
 	if (!pll_res->gdsc_base) {
 		WARN(1, "gdsc_base register is not defined\n");
 		return true;
 	}
-	return readl_relaxed(pll_res->gdsc_base) & BIT(31) ? false : true;
+	if (pll_res->target_id == MDSS_PLL_TARGET_8998)
+		ret = ((readl_relaxed(pll_res->gdsc_base + 0x4) & BIT(31)) &&
+		(!(readl_relaxed(pll_res->gdsc_base) & BIT(0)))) ? false : true;
+	else
+		ret = readl_relaxed(pll_res->gdsc_base) & BIT(31) ? false : true;
+	return ret;
 }
 
 static inline int mdss_pll_div_prepare(struct clk_hw *hw)
