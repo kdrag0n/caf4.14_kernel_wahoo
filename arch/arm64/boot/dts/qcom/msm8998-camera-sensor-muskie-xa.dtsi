@@ -315,8 +315,8 @@
 		qcom,sensor-mode = <0>;
 		qcom,cci-master = <0>;
 		status = "ok";
-		clocks = <&clock_mmss clk_mclk0_clk_src>,
-				<&clock_mmss clk_mmss_camss_mclk0_clk>;
+		clocks = <&clock_mmss MCLK0_CLK_SRC>,
+				<&clock_mmss MMSS_CAMSS_MCLK0_CLK>;
 		clock-names = "cam_src_clk", "cam_clk";
 		qcom,clock-rates = <24000000 0>;
 	};
@@ -346,8 +346,8 @@
 					"CAM_RESET1",
 					"CAM2_VDIG",
 					"CAM2_VANA";
-		clocks = <&clock_mmss clk_mclk1_clk_src>,
-				<&clock_mmss clk_mmss_camss_mclk1_clk>;
+		clocks = <&clock_mmss MCLK1_CLK_SRC>,
+				<&clock_mmss MMSS_CAMSS_MCLK1_CLK>;
 		clock-names = "cam_src_clk", "cam_clk";
 		qcom,clock-rates = <24000000 0>;
 	};
@@ -403,8 +403,8 @@
 		qcom,sensor-mode = <0>;
 		qcom,cci-master = <0>;
 		status = "ok";
-		clocks = <&clock_mmss clk_mclk0_clk_src>,
-				<&clock_mmss clk_mmss_camss_mclk0_clk>;
+		clocks = <&clock_mmss MCLK0_CLK_SRC>,
+				<&clock_mmss MMSS_CAMSS_MCLK0_CLK>;
 		clock-names = "cam_src_clk", "cam_clk";
 		qcom,clock-rates = <24000000 0>;
 	};
@@ -451,8 +451,8 @@
 		qcom,sensor-mode = <1>;
 		qcom,cci-master = <1>;
 		status = "ok";
-		clocks = <&clock_mmss clk_mclk1_clk_src>,
-				<&clock_mmss clk_mmss_camss_mclk1_clk>;
+		clocks = <&clock_mmss MCLK1_CLK_SRC>,
+				<&clock_mmss MMSS_CAMSS_MCLK1_CLK>;
 		clock-names = "cam_src_clk", "cam_clk";
 		qcom,clock-rates = <24000000 0>;
 	};
