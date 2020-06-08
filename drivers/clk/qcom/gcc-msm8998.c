@@ -229,12 +229,21 @@ static struct clk_alpha_pll gpll0_ao = {
 	},
 };
 
+static const struct clk_div_table post_div_table_fabia_even[] = {
+	{ 0x0, 1 },
+	{ 0x1, 2 },
+	{ 0x3, 4 },
+	{ 0x7, 8 },
+	{ 0xf, 16 },
+	{ }
+};
+
 static struct clk_alpha_pll_postdiv gpll0_out_main = {
 	.offset = 0x0,
 	.type = FABIA_PLL,
-	.post_div_table = clk_alpha_div_table,
+	.post_div_table = post_div_table_fabia_even,
 	.post_div_shift = 8,
-	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
+	.num_post_div = ARRAY_SIZE(post_div_table_fabia_even),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll0_out_main",
 		.parent_names = (const char *[]){ "gpll0" },
@@ -263,9 +272,9 @@ static struct clk_alpha_pll gpll1 = {
 static struct clk_alpha_pll_postdiv gpll1_out_main = {
 	.offset = 0x1000,
 	.type = FABIA_PLL,
-	.post_div_table = clk_alpha_div_table,
+	.post_div_table = post_div_table_fabia_even,
 	.post_div_shift = 8,
-	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
+	.num_post_div = ARRAY_SIZE(post_div_table_fabia_even),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll1_out_main",
 		.parent_names = (const char *[]){ "gpll1" },
@@ -294,9 +303,9 @@ static struct clk_alpha_pll gpll2 = {
 static struct clk_alpha_pll_postdiv gpll2_out_main = {
 	.offset = 0x2000,
 	.type = FABIA_PLL,
-	.post_div_table = clk_alpha_div_table,
+	.post_div_table = post_div_table_fabia_even,
 	.post_div_shift = 8,
-	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
+	.num_post_div = ARRAY_SIZE(post_div_table_fabia_even),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll2_out_main",
 		.parent_names = (const char *[]){ "gpll2" },
@@ -325,9 +334,9 @@ static struct clk_alpha_pll gpll3 = {
 static struct clk_alpha_pll_postdiv gpll3_out_main = {
 	.offset = 0x3000,
 	.type = FABIA_PLL,
-	.post_div_table = clk_alpha_div_table,
+	.post_div_table = post_div_table_fabia_even,
 	.post_div_shift = 8,
-	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
+	.num_post_div = ARRAY_SIZE(post_div_table_fabia_even),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll3_out_main",
 		.parent_names = (const char *[]){ "gpll3" },
@@ -358,9 +367,9 @@ static struct clk_alpha_pll gpll4 = {
 static struct clk_alpha_pll_postdiv gpll4_out_main = {
 	.offset = 0x77000,
 	.type = FABIA_PLL,
-	.post_div_table = clk_alpha_div_table,
+	.post_div_table = post_div_table_fabia_even,
 	.post_div_shift = 8,
-	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
+	.num_post_div = ARRAY_SIZE(post_div_table_fabia_even),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll4_out_main",
 		.parent_names = (const char *[]){ "gpll4" },
