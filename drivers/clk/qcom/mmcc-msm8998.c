@@ -324,7 +324,7 @@ static const struct alpha_pll_config mmpll0_config = {
 
 static struct clk_alpha_pll mmpll0 = {
 	.offset = 0xC000,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.clkr = {
 		.enable_reg = 0x1E0,
 		.enable_mask = BIT(0),
@@ -332,7 +332,7 @@ static struct clk_alpha_pll mmpll0 = {
 			.name = "mmpll0",
 			.parent_names = (const char *[]){ "cxo" },
 			.num_parents = 1,
-			.ops = &clk_alpha_pll_fabia_fixed_ops,
+			.ops = &clk_fabia_fixed_pll_ops,
 			VDD_MM_PLL_FMAX_MAP2(LOWER, 404000000, NOMINAL, 808000195),
 		},
 	},
@@ -348,7 +348,7 @@ static const struct alpha_pll_config mmpll1_config = {
 
 static struct clk_alpha_pll mmpll1 = {
 	.offset = 0xC050,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.clkr = {
 		.enable_reg = 0x1E0,
 		.enable_mask = BIT(1),
@@ -356,7 +356,7 @@ static struct clk_alpha_pll mmpll1 = {
 			.name = "mmpll1",
 			.parent_names = (const char *[]){ "cxo" },
 			.num_parents = 1,
-			.ops = &clk_alpha_pll_fabia_fixed_ops,
+			.ops = &clk_fabia_fixed_pll_ops,
 			VDD_MM_PLL_FMAX_MAP2(LOWER, 406000000, NOMINAL, 812000097),
 		},
 	},
@@ -371,12 +371,12 @@ static const struct alpha_pll_config mmpll3_config = {
 
 static struct clk_alpha_pll mmpll3 = {
 	.offset = 0x0,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "mmpll3",
 		.parent_names = (const char *[]){ "cxo" },
 		.num_parents = 1,
-		.ops = &clk_alpha_pll_fabia_fixed_ops,
+		.ops = &clk_fabia_fixed_pll_ops,
 		VDD_MM_PLL_FMAX_MAP2(LOWER, 465000000, LOW, 930000000),
 	},
 };
@@ -389,12 +389,12 @@ static const struct alpha_pll_config mmpll4_config = {
 
 static struct clk_alpha_pll mmpll4 = {
 	.offset = 0x50,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "mmpll4",
 		.parent_names = (const char *[]){ "cxo" },
 		.num_parents = 1,
-		.ops = &clk_alpha_pll_fabia_fixed_ops,
+		.ops = &clk_fabia_fixed_pll_ops,
 		VDD_MM_PLL_FMAX_MAP2(LOWER, 384000000, LOW, 768000000),
 	},
 };
@@ -408,12 +408,12 @@ static const struct alpha_pll_config mmpll5_config = {
 
 static struct clk_alpha_pll mmpll5 = {
 	.offset = 0xA0,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "mmpll5",
 		.parent_names = (const char *[]){ "cxo" },
 		.num_parents = 1,
-		.ops = &clk_alpha_pll_fabia_fixed_ops,
+		.ops = &clk_fabia_fixed_pll_ops,
 		VDD_MM_PLL_FMAX_MAP2(LOWER, 412500000, LOW, 825000000),
 	},
 };
@@ -427,12 +427,12 @@ static const struct alpha_pll_config mmpll6_config = {
 
 static struct clk_alpha_pll mmpll6 = {
 	.offset = 0xF0,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "mmpll6",
 		.parent_names = (const char *[]){ "cxo" },
 		.num_parents = 1,
-		.ops = &clk_alpha_pll_fabia_fixed_ops,
+		.ops = &clk_fabia_fixed_pll_ops,
 		VDD_MM_PLL_FMAX_MAP2(LOWER, 412500000, LOW, 825000000),
 	},
 };
@@ -445,12 +445,12 @@ static const struct alpha_pll_config mmpll7_config = {
 
 static struct clk_alpha_pll mmpll7 = {
 	.offset = 0x140,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "mmpll7",
 		.parent_names = (const char *[]){ "cxo" },
 		.num_parents = 1,
-		.ops = &clk_alpha_pll_fabia_fixed_ops,
+		.ops = &clk_fabia_fixed_pll_ops,
 		VDD_MM_PLL_FMAX_MAP1(LOW, 960000000),
 	},
 };
@@ -463,12 +463,12 @@ static const struct alpha_pll_config mmpll10_config = {
 
 static struct clk_alpha_pll mmpll10 = {
 	.offset = 0x190,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "mmpll10",
 		.parent_names = (const char *[]){ "cxo" },
 		.num_parents = 1,
-		.ops = &clk_alpha_pll_fabia_fixed_ops,
+		.ops = &clk_fabia_fixed_pll_ops,
 		VDD_MM_PLL_FMAX_MAP2(LOWER, 288000000, NOMINAL, 576000000),
 	},
 };

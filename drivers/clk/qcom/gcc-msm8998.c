@@ -182,7 +182,7 @@ static unsigned int soft_vote_gpll0;
 
 static struct clk_alpha_pll gpll0 = {
 	.offset = 0x0,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.vco_table = fabia_vco,
 	.num_vco = ARRAY_SIZE(fabia_vco),
 	.soft_vote = &soft_vote_gpll0,
@@ -195,7 +195,7 @@ static struct clk_alpha_pll gpll0 = {
 			.name = "gpll0",
 			.parent_names = (const char *[]){ "xo" },
 			.num_parents = 1,
-			.ops = &clk_alpha_pll_fabia_fixed_ops,
+			.ops = &clk_fabia_fixed_pll_ops,
 		}
 	},
 };
@@ -213,7 +213,7 @@ static struct clk_fixed_factor gpll0_early_div = {
 
 static struct clk_alpha_pll gpll0_ao = {
 	.offset = 0x00000,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.soft_vote = &soft_vote_gpll0,
 	.soft_vote_mask = PLL_SOFT_VOTE_CPU,
 	.flags = SUPPORTS_FSM_VOTE,
@@ -224,28 +224,28 @@ static struct clk_alpha_pll gpll0_ao = {
 			.name = "gpll0_ao",
 			.parent_names = (const char *[]){ "cxo_a" },
 			.num_parents = 1,
-			.ops = &clk_alpha_pll_fabia_fixed_ops,
+			.ops = &clk_fabia_fixed_pll_ops,
 		},
 	},
 };
 
 static struct clk_alpha_pll_postdiv gpll0_out_main = {
 	.offset = 0x0,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.post_div_table = clk_alpha_div_table,
-	.post_div_shift = ALPHA_POST_DIV_EVEN_SHIFT,
+	.post_div_shift = 8,
 	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll0_out_main",
 		.parent_names = (const char *[]){ "gpll0" },
 		.num_parents = 1,
-		.ops = &clk_alpha_fabia_pll_postdiv_ops,
+		.ops = &clk_generic_pll_postdiv_ops,
 	},
 };
 
 static struct clk_alpha_pll gpll1 = {
 	.offset = 0x1000,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.vco_table = fabia_vco,
 	.num_vco = ARRAY_SIZE(fabia_vco),
 	.clkr = {
@@ -255,28 +255,28 @@ static struct clk_alpha_pll gpll1 = {
 			.name = "gpll1",
 			.parent_names = (const char *[]){ "xo" },
 			.num_parents = 1,
-			.ops = &clk_alpha_pll_fabia_fixed_ops,
+			.ops = &clk_fabia_fixed_pll_ops,
 		}
 	},
 };
 
 static struct clk_alpha_pll_postdiv gpll1_out_main = {
 	.offset = 0x1000,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.post_div_table = clk_alpha_div_table,
-	.post_div_shift = ALPHA_POST_DIV_EVEN_SHIFT,
+	.post_div_shift = 8,
 	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll1_out_main",
 		.parent_names = (const char *[]){ "gpll1" },
 		.num_parents = 1,
-		.ops = &clk_alpha_fabia_pll_postdiv_ops,
+		.ops = &clk_generic_pll_postdiv_ops,
 	},
 };
 
 static struct clk_alpha_pll gpll2 = {
 	.offset = 0x2000,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.vco_table = fabia_vco,
 	.num_vco = ARRAY_SIZE(fabia_vco),
 	.clkr = {
@@ -286,28 +286,28 @@ static struct clk_alpha_pll gpll2 = {
 			.name = "gpll2",
 			.parent_names = (const char *[]){ "xo" },
 			.num_parents = 1,
-			.ops = &clk_alpha_pll_fabia_fixed_ops,
+			.ops = &clk_fabia_fixed_pll_ops,
 		}
 	},
 };
 
 static struct clk_alpha_pll_postdiv gpll2_out_main = {
 	.offset = 0x2000,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.post_div_table = clk_alpha_div_table,
-	.post_div_shift = ALPHA_POST_DIV_EVEN_SHIFT,
+	.post_div_shift = 8,
 	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll2_out_main",
 		.parent_names = (const char *[]){ "gpll2" },
 		.num_parents = 1,
-		.ops = &clk_alpha_fabia_pll_postdiv_ops,
+		.ops = &clk_generic_pll_postdiv_ops,
 	},
 };
 
 static struct clk_alpha_pll gpll3 = {
 	.offset = 0x3000,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.vco_table = fabia_vco,
 	.num_vco = ARRAY_SIZE(fabia_vco),
 	.clkr = {
@@ -317,28 +317,28 @@ static struct clk_alpha_pll gpll3 = {
 			.name = "gpll3",
 			.parent_names = (const char *[]){ "xo" },
 			.num_parents = 1,
-			.ops = &clk_alpha_pll_fabia_fixed_ops,
+			.ops = &clk_fabia_fixed_pll_ops,
 		}
 	},
 };
 
 static struct clk_alpha_pll_postdiv gpll3_out_main = {
 	.offset = 0x3000,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.post_div_table = clk_alpha_div_table,
-	.post_div_shift = ALPHA_POST_DIV_EVEN_SHIFT,
+	.post_div_shift = 8,
 	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll3_out_main",
 		.parent_names = (const char *[]){ "gpll3" },
 		.num_parents = 1,
-		.ops = &clk_alpha_fabia_pll_postdiv_ops,
+		.ops = &clk_generic_pll_postdiv_ops,
 	},
 };
 
 static struct clk_alpha_pll gpll4 = {
 	.offset = 0x77000,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.vco_table = fabia_vco,
 	.num_vco = ARRAY_SIZE(fabia_vco),
 	.clkr = {
@@ -348,7 +348,7 @@ static struct clk_alpha_pll gpll4 = {
 			.name = "gpll4",
 			.parent_names = (const char *[]){ "xo" },
 			.num_parents = 1,
-			.ops = &clk_alpha_pll_fabia_fixed_ops,
+			.ops = &clk_fabia_fixed_pll_ops,
 			VDD_DIG_FMAX_MAP3(LOWER, 400000000, LOW, 800000000,
 					NOMINAL, 1600000000),
 		}
@@ -357,15 +357,15 @@ static struct clk_alpha_pll gpll4 = {
 
 static struct clk_alpha_pll_postdiv gpll4_out_main = {
 	.offset = 0x77000,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.type = FABIA_PLL,
 	.post_div_table = clk_alpha_div_table,
-	.post_div_shift = ALPHA_POST_DIV_EVEN_SHIFT,
+	.post_div_shift = 8,
 	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll4_out_main",
 		.parent_names = (const char *[]){ "gpll4" },
 		.num_parents = 1,
-		.ops = &clk_alpha_fabia_pll_postdiv_ops,
+		.ops = &clk_generic_pll_postdiv_ops,
 	},
 };
 
@@ -3516,12 +3516,12 @@ static int msm_clock_debug_8998_probe(struct platform_device *pdev)
 	}
 
 	if (of_get_property(pdev->dev.of_node, "qcom,cpucc", NULL)) {
-		gcc_debug_mux.regmap[CPU] =
+		gcc_debug_mux.regmap[CPU_CC] =
 			syscon_regmap_lookup_by_phandle(pdev->dev.of_node,
 					"qcom,cpucc");
-		if (IS_ERR(gcc_debug_mux.regmap[CPU])) {
+		if (IS_ERR(gcc_debug_mux.regmap[CPU_CC])) {
 			pr_err("Failed to map qcom,cpucc\n");
-			return PTR_ERR(gcc_debug_mux.regmap[CPU]);
+			return PTR_ERR(gcc_debug_mux.regmap[CPU_CC]);
 		}
 	}
 
