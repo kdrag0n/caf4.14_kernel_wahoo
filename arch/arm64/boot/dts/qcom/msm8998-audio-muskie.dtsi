@@ -157,7 +157,7 @@
 	};
 
 	tavil_codec {
-		clocks = <&clock_audio clk_audio_pmi_clk>;
+		clocks = <&clock_audio AUDIO_PMI_CLK>;
 		qcom,cdc-dmic-clk-drv-strength = <4>; /* 4mA */
 		wcd_spi {
 			qcom,master-bus-num = <2>;
