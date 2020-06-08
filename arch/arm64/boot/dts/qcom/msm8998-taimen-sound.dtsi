@@ -19,10 +19,6 @@
 };
 
 &soc {
-	sound-9335 {
-		status = "disabled";
-	};
-
 	msm_cdc_pinctrl@59 {
 		status = "disabled";
 	};
@@ -135,6 +131,10 @@
 		};
 	};
 
+};
+
+&snd_9335 {
+	status = "disabled";
 };
 
 &slim_aud {
