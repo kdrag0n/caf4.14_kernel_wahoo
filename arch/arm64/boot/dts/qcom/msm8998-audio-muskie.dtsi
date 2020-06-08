@@ -3,18 +3,28 @@
 };
 
 &pm8998_gpios {
-
-		gpio@c500 { /* pm8998 gpio 6 */
-			qcom,mode = <1>; /* output mode */
-			qcom,master-en = <0x1>;
+		pm8998_gpio6 { /* pm8998 gpio 6 */
+			pm8998_gpio6_default: pm8998_gpio6_default {
+				pins = "gpio6";
+				function = "normal";
+				output-low; /* output mode */
+			};
 		};
 
-		gpio@c600 { /* pm8998 gpio 7 */
-			qcom,pull = <4>; /* PULL DOWN */
+		pm8998_gpio7 { /* pm8998 gpio 7 */
+			pm8998_gpio7_default: pm8998_gpio7_default {
+				pins = "gpio7";
+				function = "normal";
+				bias-pull-down; /* PULL DOWN */
+			};
 		};
 
-		gpio@c700 { /* pm8998 gpio 8 */
-			qcom,pull = <4>; /* PULL DOWN */
+		pm8998_gpio8 { /* pm8998 gpio 8 */
+			pm8998_gpio8_default: pm8998_gpio8_default {
+				pins = "gpio8";
+				function = "normal";
+				bias-pull-down; /* PULL DOWN */
+			};
 		};
 };
 

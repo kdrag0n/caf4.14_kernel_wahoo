@@ -198,9 +198,12 @@
 };
 
 &pmi8998_gpios {
-	gpio@c800 {
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "okay";
+	pmi8998_gpio9 {
+		pmi8998_gpio9_default: pmi8998_gpio9_default {
+			pins = "gpio9";
+			function = "normal";
+			output-low;
+		};
 	};
 };
 
@@ -286,15 +289,13 @@
 
 /* usb port temperature adc */
 &pm8998_gpios {
-	gpio@ca00 {
-		reg = <0xca00 0x100>;
-		qcom,pin-num = <11>;
-		status = "okay";
-		qcom,mode = <0>;
-		qcom,pull = <5>;
-		qcom,vin-sel = <0>;
-		qcom,src-sel = <0>;
-		qcom,master-en = <1>;
+	usb_temp_adc_gpio {
+		usb_temp_adc_gpio_default: usb_temp_adc_gpio_default {
+			pins = "gpio11";
+			function = "normal";
+			input-enable;
+			bias-disable;
+		};
 	};
 };
 

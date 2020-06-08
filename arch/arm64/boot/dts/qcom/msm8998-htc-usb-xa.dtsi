@@ -14,39 +14,24 @@
 #include <dt-bindings/usb/typec.h>
 
 &pm8998_gpios {
-	gpio@c400 { /* GPIO 5 - V_OTG_5V_EN_AP */
-		qcom,mode = <1>;
-		qcom,output-type = <0>;
-		qcom,invert = <0>;
-		qcom,vin-sel = <0>;
-		qcom,src-sel = <0>;
-		qcom,out-strength = <1>;
-		qcom,master-en = <1>;
-		status = "okay";
+	v_otg_5v_en_ap { /* GPIO 5 - V_OTG_5V_EN_AP */
+		v_otg_5v_en_ap_default: v_otg_5v_en_ap_default {
+			pins = "gpio5";
+			function = "normal";
+			output-low;
+			drive-push-pull;
+			qcom,drive-strength = <PMIC_GPIO_STRENGTH_LOW>;
+		};
 	};
 
-	gpio@d000 { /* GPIO 17 - V_OTG_VOUT_SET */
-		qcom,mode = <1>;
-		qcom,output-type = <0>;
-		qcom,invert = <1>;
-		qcom,vin-sel = <0>;
-		qcom,src-sel = <0>;
-		qcom,out-strength = <1>;
-		qcom,master-en = <1>;
-		status = "okay";
-	};
-};
-
-&pmi8998_gpios {
-	gpio@c800 { /* GPIO 9 - V_LED_3V3_EN - shared power for Re-drive */
-		qcom,mode = <1>;
-		qcom,output-type = <0>;
-		qcom,invert = <1>;
-		qcom,vin-sel = <0>;
-		qcom,src-sel = <0>;
-		qcom,out-strength = <1>;
-		qcom,master-en = <1>;
-		status = "okay";
+	v_otg_vout_set { /* GPIO 17 - V_OTG_VOUT_SET */
+		v_otg_vout_set_default: v_otg_vout_set_default {
+			pins = "gpio17";
+			function = "normal";
+			output-high;
+			drive-push-pull;
+			qcom,drive-strength = <PMIC_GPIO_STRENGTH_LOW>;
+		};
 	};
 };
 
@@ -241,15 +226,13 @@
 
 /* usb port temperature adc */
 &pm8998_gpios {
-	gpio@ca00 {
-		reg = <0xca00 0x100>;
-		qcom,pin-num = <11>;
-		status = "okay";
-		qcom,mode = <0>;
-		qcom,pull = <5>;
-		qcom,vin-sel = <0>;
-		qcom,src-sel = <0>;
-		qcom,master-en = <1>;
+	usb_temp_adc_gpio {
+		usb_temp_adc_gpio_default: usb_temp_adc_gpio_default {
+			pins = "gpio11";
+			function = "normal";
+			input-enable;
+			bias-disable;
+		};
 	};
 };
 
