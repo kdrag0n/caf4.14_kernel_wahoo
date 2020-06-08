@@ -111,12 +111,13 @@
 };
 
 &pmi8998_gpios {
-	gpio@cd00 { /* GPIO 14 - ERR_FG */
-		reg = <0xcd00 0x100>;
-		qcom,mode = <0>;        /* DIGITAL INPUT */
-		qcom,pull = <5>;        /* No Pull */
-		qcom,pin-num = <14>;
-		status = "okay";
+	err_fg_gpio { /* GPIO 14 - ERR_FG */
+		err_fg_gpio_default: err_fg_gpio_default {
+			pins = "gpio14";
+			function = "normal";
+			input-enable;        /* DIGITAL INPUT */
+			bias-disable;        /* No Pull */
+		};
 	};
 };
 &pmi8998_wled {
@@ -232,11 +233,12 @@
 };
 
 &pmi8998_gpios {
-	gpio@ca00 {
-		reg = <0xca00 0x100>;
-		qcom,pin-num = <11>;
-		status = "okay";
-		qcom,mode = <1>;
-		qcom,pull = <4>;
+	pmi8998_gpio11 {
+		pmi8998_gpio11_default: pmi8998_gpio11_default {
+			pins = "gpio11";
+			function = "normal";
+			output-low;
+			bias-pull-down;
+		};
 	};
 };

@@ -245,76 +245,69 @@
 };
 
 &pmi8998_gpios {
-	gpio@c200 { /* GPIO 3 - CAM1_AVDD_EN */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam1_avdd_en { /* GPIO 3 - CAM1_AVDD_EN */
+		cam1_avdd_en_default: cam1_avdd_en_default {
+			pins = "gpio3";
+			function = "normal";		/* GPIO */
+			output-low;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 
-	gpio@c500 { /* GPIO 6 - CAM1_DVDD_EN */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam1_dvdd_en { /* GPIO 6 - CAM1_DVDD_EN */
+		cam1_dvdd_en_default: cam1_dvdd_en_default {
+			pins = "gpio6";
+			function = "normal";		/* GPIO */
+			output-low;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 };
 
 &pm8998_gpios {
-	gpio@c800 { /* GPIO 9 - CAM0_DRV_AVDD_EN */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam0_drv_avdd_en { /* GPIO 9 - CAM0_DRV_AVDD_EN */
+		cam0_drv_avdd_en_default: cam0_drv_avdd_en_default {
+			pins = "gpio9";
+			function = "normal";		/* GPIO */
+			output-low;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 
-	gpio@c900 { /* GPIO 10 - CAM0_VCM_VDD_EN */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam0_vcm_vdd_en { /* GPIO 10 - CAM0_VCM_VDD_EN */
+		cam0_vcm_vdd_en_default: cam0_vcm_vdd_en_default {
+			pins = "gpio10";
+			function = "normal";		/* GPIO */
+			output-low;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 
-	gpio@ce00 { /* GPIO 15 - CAM0_2V8_AVDD_EN */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam0_2v8_avdd_en { /* GPIO 15 - CAM0_2V8_AVDD_EN */
+		cam0_2v8_avdd_en_default: cam0_2v8_avdd_en_default {
+			pins = "gpio15";
+			function = "normal";		/* GPIO */
+			output-low;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 
-	gpio@d200 { /* GPIO 19 - CAM0_1V8_AVDD_EN */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam0_1v8_avdd_en { /* GPIO 19 - CAM0_1V8_AVDD_EN */
+		cam0_1v8_avdd_en_default: cam0_1v8_avdd_en_default {
+			pins = "gpio19";
+			function = "normal";		/* GPIO */
+			output-low;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 
-	gpio@d300 { /* GPIO 20 - CAM0_DVDD_EN */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_MV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam0_dvdd_en { /* GPIO 20 - CAM0_DVDD_EN */
+		cam0_dvdd_en_default: cam0_dvdd_en_default {
+			pins = "gpio20";
+			function = "normal";		/* GPIO */
+			output-low;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 };
 

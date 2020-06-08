@@ -458,75 +458,69 @@
 	};
 };
 &pm8998_gpios {
-	gpio@c800 { /* GPIO 9 - CAMERA SENSOR 0 DRV */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam_sensor0_drv { /* GPIO 9 - CAMERA SENSOR 0 DRV */
+		cam_sensor0_drv_default: cam_sensor0_drv_default {
+			pins = "gpio9";
+			function = "normal";		/* GPIO */
+			output-low;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 
-	gpio@c900 { /* GPIO 10 - CAMERA SENSOR 0 VAF */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam_sensor0_vaf { /* GPIO 10 - CAMERA SENSOR 0 VAF */
+		cam_sensor0_vaf_default: cam_sensor0_vaf_default {
+			pins = "gpio10";
+			function = "normal";		/* GPIO */
+			output-low;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 
-	gpio@ce00 { /* GPIO 15 - CAMERA SENSOR 0 VANA */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <1>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam_sensor0_vana { /* GPIO 15 - CAMERA SENSOR 0 VANA */
+		cam_sensor0_vana_default: cam_sensor0_vana_default {
+			pins = "gpio15";
+			function = "normal";		/* GPIO */
+			output-high;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 
-	gpio@d200 { /* GPIO 19 - CAMERA SENSOR 0 VANA_A1V8 */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <1>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam_sensor0_vana_a1v8 { /* GPIO 19 - CAMERA SENSOR 0 VANA_A1V8 */
+		cam_sensor0_vana_a1v8_default: cam_sensor0_vana_a1v8_default {
+			pins = "gpio19";
+			function = "normal";		/* GPIO */
+			output-high;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 
-	gpio@d300 { /* GPIO 20 - CAMERA SENSOR 0 VDIG */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <1>;		/* VIN1 GPIO_MV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam_sensor0_vdig { /* GPIO 20 - CAMERA SENSOR 0 VDIG */
+		cam_sensor0_vdig_default: cam_sensor0_vdig_default {
+			pins = "gpio20";
+			function = "normal";		/* GPIO */
+			output-low;		/* Output */
+			bias-disable;		/* No Pull */
+			power-source = <1>;		/* VIN1 GPIO_MV */
+		};
 	};
 };
 
 &pmi8998_gpios {
-	gpio@c200 { /* GPIO 3 - CAMERA SENSOR 1 VANA */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <1>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam_sensor1_vana { /* GPIO 3 - CAMERA SENSOR 1 VANA */
+		cam_sensor1_vana_default: cam_sensor1_vana_default {
+			pins = "gpio3";
+			function = "normal";		/* GPIO */
+			output-high;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 
-	gpio@c500 { /* GPIO 6 - CAMERA SENSOR 1 VDIG */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <1>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	cam_sensor1_vdig { /* GPIO 6 - CAMERA SENSOR 1 VDIG */
+		cam_sensor1_vdig_default: cam_sensor1_vdig_default {
+			pins = "gpio6";
+			function = "normal";		/* GPIO */
+			output-high;		/* Output */
+			bias-disable;		/* No Pull */
+		};
 	};
 };
