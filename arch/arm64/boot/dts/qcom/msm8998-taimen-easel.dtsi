@@ -187,8 +187,8 @@
 
 		interrupts = <0 107 0>;
 
-		clocks = <&clock_gcc clk_gcc_blsp1_uart1_apps_clk>,
-			 <&clock_gcc clk_gcc_blsp1_ahb_clk>;
+		clocks = <&clock_gcc GCC_BLSP1_UART1_APPS_CLK>,
+			 <&clock_gcc GCC_BLSP1_AHB_CLK>;
 		clock-names = "core", "iface";
 
 		pinctrl-names = "default", "sleep";
@@ -199,8 +199,8 @@
 	mnh-sm {
 		compatible = "intel,mnh-sm";
 
-		clocks = <&clock_gcc clk_ln_bb_clk2>,
-			 <&clock_gcc clk_div_clk3>;
+		clocks = <&clock_rpmcc RPM_LN_BB_CLK2>,
+			 <&clock_rpmcc RPM_DIV_CLK3>;
 		clock-names = "ref_clk", "sleep_clk";
 
 		pinctrl-names = "default";
