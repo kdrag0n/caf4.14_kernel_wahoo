@@ -1115,6 +1115,16 @@ config REGULATOR_MEM_ACC
 	  applied for memory accesses.  This driver configures the power-mode
 	  (corner) for the memory accelerator.
 
+config REGULATOR_QPNP
+	tristate "Qualcomm Technologies, Inc. QPNP regulator support"
+	depends on SPMI
+	help
+	  This driver supports voltage regulators in Qualcomm Technologies, Inc.
+	  PMIC chips which comply with QPNP.  QPNP is a SPMI based PMIC
+	  implementation.  These chips provide several different varieties of
+	  LDO and switching regulators.  They also provide voltage switches and
+	  boost regulators.
+
 config REGULATOR_REFGEN
 	tristate "Qualcomm Technologies, Inc. REFGEN regulator driver"
 	depends on OF
