@@ -91,23 +91,24 @@
 };
 
 &pm8998_gpios {
-	gpio@c800 { /* GPIO 9 - CAMERA SENSOR 2 VDIG */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	/* GPIO 9 - CAMERA SENSOR 2 VDIG */
+	cam_sensor2_vdig {
+		cam_sensor2_vdig_default: cam_sensor2_vdig_default {
+			pins = "gpio9";
+			function = "normal";
+			output-low;
+			bias-disable;
+		};
 	};
 
-	gpio@d300 { /* GPIO 20 - CAMERA SENSOR 0 VDIG */
-		qcom,mode = <1>;		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <1>;		/* VIN1 GPIO_MV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		status = "ok";
+	/* GPIO 20 - CAMERA SENSOR 0 VDIG */
+	cam_sensor0_vdig {
+		cam_sensor0_vdig_default: cam_sensor0_vdig_default {
+			pins = "gpio20";
+			function = "normal";
+			output-low;
+			bias-disable;
+			power-source = <1>; /* VIN1 GPIO_MV */
+		};
 	};
 };

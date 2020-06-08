@@ -160,61 +160,58 @@
 
 &pm8998_gpios {
         /* dac,power-gpio */
-	gpio@c900 {
-		qcom,master-en = <1>;   	/* ENABLE GPIO */
-		qcom,mode = <1>;		/* Digital output */
-		qcom,pull = <4>;		/* Pull down */
-		qcom,src-sel = <0>;		/* Constant */
-		qcom,invert = <0>;		/* Invert */
-		qcom,out-strength = <1>;	/* Low */
-		status = "okay";
+	dac_power_gpio {
+		dac_power_gpio_default: dac_power_gpio_default {
+			pins = "gpio10";
+			function = "normal";		/* Constant */
+			output-low;		/* Digital output */
+			bias-pull-down;		/* Pull down */
+			qcom,drive-strength = <PMIC_GPIO_STRENGTH_LOW>;	/* Low */
+		};
 	};
 
         /* dac,switch-gpio */
-	gpio@cb00 {
-		qcom,master-en = <1>;		/* Enable GPIO */
-		qcom,mode = <1>;		/* Digital output */
-		qcom,pull = <4>;		/* Pull down */
-		qcom,src-sel = <0>;		/* Constant */
-		qcom,invert = <0>;		/* Invert */
-		qcom,out-strength = <1>;	/* Low */
-		status = "okay";
+	dac_switch_gpio {
+		dac_switch_gpio_default: dac_switch_gpio_default {
+			pins = "gpio12";
+			function = "normal";		/* Constant */
+			output-low;		/* Digital output */
+			bias-pull-down;		/* Pull down */
+			qcom,drive-strength = <PMIC_GPIO_STRENGTH_LOW>;	/* Low */
+		};
 	};
 
 	/* tas2557, cdc-reset-gpio */
-	gpio@c500 { /* GPIO 6 */
-		qcom,mode = <1>;       		/* Output */
-		qcom,pull = <5>;		/* No Pull */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		qcom,out-strength = <1>;	/* Low */
-		status = "ok";
+	tas2556_cdc_reset_gpio { /* GPIO 6 */
+		tas2556_cdc_reset_gpio_default: tas2556_cdc_reset_gpio_default {
+			pins = "gpio6";
+			function = "normal";		/* GPIO */
+			output-low;       		/* Output */
+			bias-disable;		/* No Pull */
+			qcom,drive-strength = <PMIC_GPIO_STRENGTH_LOW>;	/* Low */
+		};
 	};
 
 	/* tas2557, irq-gpio-right */
-	gpio@c600 { /* GPIO 7 */
-		qcom,mode = <1>;       		/* Output */
-		qcom,pull = <4>;		/* Pull Down */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		qcom,out-strength = <1>;	/* Low */
-		status = "ok";
+	tas2556_irq_gpio_right { /* GPIO 7 */
+		tas2556_irq_gpio_right_default: tas2556_irq_gpio_right_default {
+			pins = "gpio7";
+			function = "normal";		/* GPIO */
+			output-low;       		/* Output */
+			bias-pull-down;		/* Pull Down */
+			qcom,drive-strength = <PMIC_GPIO_STRENGTH_LOW>;	/* Low */
+		};
 	};
 
 	/* tas2557, irq-gpio-left */
-	gpio@c700 { /* GPIO 8 */
-		qcom,mode = <1>;                /* Output */
-		qcom,pull = <4>;                /* Pull Down */
-		qcom,vin-sel = <0>;		/* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;		/* GPIO */
-		qcom,invert = <0>;		/* Invert */
-		qcom,master-en = <1>;		/* Enable GPIO */
-		qcom,out-strength = <1>;	/* Low */
-		status = "ok";
+	tas2556_irq_gpio_left { /* GPIO 8 */
+		tas2556_irq_gpio_left_default: tas2556_irq_gpio_left_default {
+			pins = "gpio8";
+			function = "normal";		/* GPIO */
+			output-low;                /* Output */
+			bias-pull-down;                /* Pull Down */
+			qcom,drive-strength = <PMIC_GPIO_STRENGTH_LOW>;	/* Low */
+		};
 	};
 
 };

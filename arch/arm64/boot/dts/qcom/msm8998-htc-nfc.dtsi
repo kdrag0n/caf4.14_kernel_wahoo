@@ -41,26 +41,13 @@
 	};
 };
 
-&pm8998_gpios {
-	/* GPIO 21 (NFC_CLK_REQ) */
-	gpio@d400 {
-		qcom,mode = <0>; /* Input */
-		qcom,vin-sel = <1>;
-		qcom,src-sel = <0>;
-		qcom,master-en = <1>;
-		status = "okay";
-	};
-};
-
-
 &pmi8998_gpios {
-	gpio@c700 {  /*GPIO_8 NFC_WAKEUP Not configured in driver yet nq-nci.c*/
-		qcom,mode = <1>;                /* Output */
-		qcom,pull = <4>;                /* Pulldown 10uA */
-		qcom,vin-sel = <0>;             /* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;             /* GPIO */
-		qcom,invert = <0>;              /* Invert 0 INVERT_DISABLE */
-		qcom,master-en = <1>;           /* Enable GPIO */
-		status = "ok";
+	nfc_wakeup {  /*GPIO_8 NFC_WAKEUP Not configured in driver yet nq-nci.c*/
+		nfc_wakeup_default: nfc_wakeup_default {
+			pins = "gpio8";
+			function = "normal";             /* GPIO */
+			output-low;                /* Output */
+			bias-pull-down;                /* Pulldown 10uA */
+		};
 	};
 };

@@ -1,8 +1,12 @@
 #include "msm8998-touch-mw-common.dtsi"
 
 &pmi8998_gpios {
-	gpio@c100 {
-		status = "okay";
+	pmi8998_gpio2 {
+		pmi8998_gpio2_default: pmi8998_gpio2_default {
+			pins = "gpio2";
+			function = "normal";
+			output-low;
+		};
 	};
 };
 

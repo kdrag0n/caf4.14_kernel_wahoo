@@ -57,34 +57,37 @@
 
 &pm8998_gpios {
 	/* GPIO 21 (NFC_CLK_REQ) */
-	gpio@d400 {
-		qcom,mode = <0>; /* Input */
-		qcom,vin-sel = <1>;
-		qcom,src-sel = <0>;
-		qcom,master-en = <1>;
-		status = "okay";
+	nfc_clk_req {
+		nfc_clk_req_default: nfc_clk_req_default {
+			pins = "gpio21";
+			function = "normal";
+			input-enable; /* Input */
+			power-source = <1>;
+		};
 	};
 };
 
 
 &pmi8998_gpios {
-	gpio@c700 {  /*GPIO_8 NFC_WAKEUP Not configured in driver yet nq-nci.c*/
-		qcom,mode = <1>;                /* Output */
-		qcom,pull = <4>;                /* Pulldown 10uA */
-		qcom,vin-sel = <0>;             /* VIN1 GPIO_LV */
-		qcom,src-sel = <0>;             /* GPIO */
-		qcom,invert = <0>;              /* Invert 0 INVERT_DISABLE */
-		qcom,master-en = <1>;           /* Enable GPIO */
-		status = "ok";
+	nfc_wakeup {  /*GPIO_8 NFC_WAKEUP Not configured in driver yet nq-nci.c*/
+		nfc_wakeup_default: nfc_wakeup_default {
+			pins = "gpio8";
+			function = "normal";             /* GPIO */
+			output-low;                /* Output */
+			bias-pull-down;                /* Pulldown 10uA */
+		};
 	};
 };
 
 
 &pmi8998_gpios {
 	/* 1v8_nfc_vdd */
-	gpio@c100 {
-		qcom,master-en = <1>;           /* Enable GPIO */
-		qcom,out-strength = <3>;        /* High */
-		status = "okay";
+	1v8_nfc_vdd {
+		1v8_nfc_vdd_default: 1v8_nfc_vdd_default {
+			pins = "gpio2";
+			function = "normal";
+			output-low;
+			qcom,drive-strength = <PMIC_GPIO_STRENGTH_HIGH>;        /* High */
+		};
 	};
 };
