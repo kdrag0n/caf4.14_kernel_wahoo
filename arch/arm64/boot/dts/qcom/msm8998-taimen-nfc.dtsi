@@ -50,8 +50,8 @@
 	qcom,nq-postinit-cmd = /bits/ 8
 		<0x5 0x20 0x02 0x05 0x01 0xA0 0xF2 0x01 0x01>;
 	pinctrl-names = "nfc_active", "nfc_suspend";
-	pinctrl-0 = <&nfc_int_active &nfc_enable_active>;
-	pinctrl-1 = <&nfc_int_suspend &nfc_enable_suspend>;
+	pinctrl-0 = <&nfc_int_active &nfc_enable_active &nfc_clk_req_default>;
+	pinctrl-1 = <&nfc_int_suspend &nfc_enable_suspend &nfc_clk_req_default>;
 	};
 };
 
@@ -81,9 +81,9 @@
 
 
 &pmi8998_gpios {
-	/* 1v8_nfc_vdd */
-	1v8_nfc_vdd {
-		1v8_nfc_vdd_default: 1v8_nfc_vdd_default {
+	/* nfc_1v8_vdd */
+	nfc_1v8_vdd {
+		nfc_1v8_vdd_default: nfc_1v8_vdd_default {
 			pins = "gpio2";
 			function = "normal";
 			output-low;
