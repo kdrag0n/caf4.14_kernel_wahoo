@@ -151,6 +151,16 @@ config ARCH_MSM8998
 	  This enables support for the MSM8998 chipset. If you do not
 	  wish to build a kernel that runs on this chipset, say 'N' here.
 
+config BOARD_MUSKIE
+        bool "Enable Support for Muskie boards"
+	depends on ARCH_QCOM
+	select ARCH_MSMCOBALT
+
+config BOARD_TAIMEN
+        bool "Enable Support for Taimen boards"
+	depends on ARCH_QCOM
+	select ARCH_MSMCOBALT
+
 config ARCH_SM8150
 	bool "Enable Support for Qualcomm Technologies, Inc. SM8150"
 	depends on ARCH_QCOM
