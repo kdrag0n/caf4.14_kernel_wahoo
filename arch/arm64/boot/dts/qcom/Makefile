@@ -33,6 +33,14 @@ dtb-$(CONFIG_ARCH_QCS405) += qcs405-iot-sku1.dtb \
 		qcs405-iot-sku13.dtb \
 		qcs407-iot-sku13.dtb
 
+ifeq ($(CONFIG_ARCH_MSM8998),y)
+dtbo-$(CONFIG_BOARD_MUSKIE) += overlay-walleye-xd_xe_a.dtbo
+overlay-walleye-xd_xe_a.dtbo-base := msm8998-v2.1-soc.dtb
+
+dtbo-$(CONFIG_BOARD_TAIMEN) += overlay-taimen-rev-1_0.dtbo
+overlay-taimen-rev-1_0.dtbo-base := msm8998-v2.1-soc.dtb
+endif
+
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 	dtbo-$(CONFIG_ARCH_SM8150) += \
 		sm8150-cdp-overlay.dtbo \
