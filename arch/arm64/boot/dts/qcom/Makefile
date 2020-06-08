@@ -30,6 +30,11 @@ dtb-$(CONFIG_ARCH_QCS405) += qcs403-iot-sku1.dtb \
 			qcs403-iot-sku4.dtb
 endif
 
+ifeq ($(CONFIG_ARCH_MSM8998),y)
+dtb-$(CONFIG_BOARD_MUSKIE) += msm8998-htc-walleye.dtb
+dtb-$(CONFIG_BOARD_TAIMEN) += msm8998-taimen.dtb
+endif
+
 ifeq ($(CONFIG_BUILD_ARM64_DT_OVERLAY),y)
 	dtbo-$(CONFIG_ARCH_SM8150) += \
 		sm8150-cdp-overlay.dtbo \
