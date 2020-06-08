@@ -29,50 +29,6 @@
 };
 
 &soc {
-	sound-9335 {
-		status = "disabled";
-		qcom,audio-routing =
-			"AIF4 VI", "MCLK",
-			"RX_BIAS", "MCLK",
-			"MADINPUT", "MCLK",
-			"AMIC2", "MIC BIAS2",
-			"MIC BIAS2", "Headset Mic",
-			"AMIC3", "MIC BIAS2",
-			"MIC BIAS2", "ANCRight Headset Mic",
-			"AMIC4", "MIC BIAS2",
-			"MIC BIAS2", "ANCLeft Headset Mic",
-			"AMIC5", "MIC BIAS3",
-			"MIC BIAS3", "Handset Mic",
-			"AMIC6", "MIC BIAS4",
-			"MIC BIAS4", "Analog Mic6",
-			"DMIC0", "MIC BIAS1",
-			"MIC BIAS1", "Handset Mic",
-			"DMIC1", "MIC BIAS1",
-			"MIC BIAS1", "Handset Mic",
-			"DMIC2", "MIC BIAS3",
-			"MIC BIAS3", "Handset Mic",
-			"DMIC3", "MIC BIAS3",
-			"MIC BIAS3", "Handset Mic",
-			"DMIC4", "MIC BIAS4",
-			"MIC BIAS4", "Handset Mic",
-			"DMIC5", "MIC BIAS3",
-			"MIC BIAS3", "Handset Mic",
-			"SpkrLeft IN", "SPK1 OUT",
-			"SpkrRight IN", "SPK2 OUT";
-
-		qcom,msm-mbhc-hphl-swh = <1>; /* for NO Audio Jack */
-		qcom,msm-mbhc-gnd-swh = <1>; /* for NO Audio Jack */
-		qcom,wsa-max-devs = <0>; /* No wsa device */
-
-		wahoo,use-external-amp;
-		wahoo,external-amp-be-sname = "Quaternary MI2S Playback",
-					      "Tertiary MI2S Playback";
-		wahoo,external-amp-be-codec-phandle = <&nxp_tfa98xx_34>,
-						      <&nxp_tfa98xx_35>;
-		wahoo,external-amp-be-codec-dai-name = "tfa98xx-aif-7-34",
-						       "tfa98xx-aif-7-35";
-	};
-
 	sound-tavil {
 		qcom,audio-routing =
 			"RX_BIAS", "MCLK",
@@ -147,6 +103,50 @@
 		status = "disabled";
 	};
 };
+
+&snd_9335 {
+	status = "disabled";
+	qcom,audio-routing =
+		"AIF4 VI", "MCLK",
+		"RX_BIAS", "MCLK",
+		"MADINPUT", "MCLK",
+		"AMIC2", "MIC BIAS2",
+		"MIC BIAS2", "Headset Mic",
+		"AMIC3", "MIC BIAS2",
+		"MIC BIAS2", "ANCRight Headset Mic",
+		"AMIC4", "MIC BIAS2",
+		"MIC BIAS2", "ANCLeft Headset Mic",
+		"AMIC5", "MIC BIAS3",
+		"MIC BIAS3", "Handset Mic",
+		"AMIC6", "MIC BIAS4",
+		"MIC BIAS4", "Analog Mic6",
+		"DMIC0", "MIC BIAS1",
+		"MIC BIAS1", "Handset Mic",
+		"DMIC1", "MIC BIAS1",
+		"MIC BIAS1", "Handset Mic",
+		"DMIC2", "MIC BIAS3",
+		"MIC BIAS3", "Handset Mic",
+		"DMIC3", "MIC BIAS3",
+		"MIC BIAS3", "Handset Mic",
+		"DMIC4", "MIC BIAS4",
+		"MIC BIAS4", "Handset Mic",
+		"DMIC5", "MIC BIAS3",
+		"MIC BIAS3", "Handset Mic",
+		"SpkrLeft IN", "SPK1 OUT",
+		"SpkrRight IN", "SPK2 OUT";
+
+	qcom,msm-mbhc-hphl-swh = <1>; /* for NO Audio Jack */
+	qcom,msm-mbhc-gnd-swh = <1>; /* for NO Audio Jack */
+	qcom,wsa-max-devs = <0>; /* No wsa device */
+
+	wahoo,use-external-amp;
+	wahoo,external-amp-be-sname = "Quaternary MI2S Playback",
+					"Tertiary MI2S Playback";
+	wahoo,external-amp-be-codec-phandle = <&nxp_tfa98xx_34>,
+						<&nxp_tfa98xx_35>;
+	wahoo,external-amp-be-codec-dai-name = "tfa98xx-aif-7-34",
+						"tfa98xx-aif-7-35";
+	};
 
 /* msm_cdc_pinctrl@59 */
 &wcd_usbc_analog_en1_gpio {
