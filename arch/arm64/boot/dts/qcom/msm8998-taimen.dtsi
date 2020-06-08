@@ -37,9 +37,12 @@
 	};
 
 	ramoops_mem: ramoops_region@b0000000 {
-		compatible = "removed-dma-pool";
+		compatible = "removed-dma-pool", "ramoops";
 		no-map;
 		reg = <0 0xb0000000 0 0x200000>;
+		record-size = <0x20000>;
+		console-size = <0x100000>;
+		pmsg-size = <0x80000>;
 	};
 
 	ramoops_meta_mem: ramoops_meta_region@affff000 {
@@ -106,15 +109,6 @@
 		compatible = "access_ramoops";
 		label = "ramoops";
 		memory-region = <&alt_ramoops_mem>;
-	};
-
-	ramoops {
-		compatible = "ramoops";
-		memory-region = <&ramoops_mem>;
-		alt-memory-region = <&alt_ramoops_mem>;
-		record-size = <0x0 0x20000>;
-		console-size = <0x0 0x100000>;
-		pmsg-size = <0x0 0x80000>;
 	};
 
 	crash_fb {
