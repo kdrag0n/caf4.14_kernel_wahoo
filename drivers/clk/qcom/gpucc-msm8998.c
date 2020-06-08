@@ -140,13 +140,22 @@ static struct clk_alpha_pll gpu_pll0_pll = {
 	},
 };
 
+static const struct clk_div_table post_div_table_fabia_even[] = {
+	{ 0x0, 1 },
+	{ 0x1, 2 },
+	{ 0x3, 4 },
+	{ 0x7, 8 },
+	{ 0xf, 16 },
+	{ }
+};
+
 static struct clk_alpha_pll_postdiv gpu_pll0_out_even = {
 	.offset = 0x0,
 	.type = FABIA_PLL,
 	.width = 4,
-	.post_div_table = clk_alpha_div_table,
+	.post_div_table = post_div_table_fabia_even,
 	.post_div_shift = 8,
-	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
+	.num_post_div = ARRAY_SIZE(post_div_table_fabia_even),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpucc_pll0_out_even",
 		.parent_names = (const char *[]){ "gpu_cc_pll0" },
@@ -156,13 +165,21 @@ static struct clk_alpha_pll_postdiv gpu_pll0_out_even = {
 	},
 };
 
+static const struct clk_div_table post_div_table_fabia_odd[] = {
+	{ 0x0, 1 },
+	{ 0x3, 3 },
+	{ 0x5, 5 },
+	{ 0x7, 7 },
+	{ }
+};
+
 static struct clk_alpha_pll_postdiv gpu_pll0_out_odd = {
 	.offset = 0x0,
 	.type = FABIA_PLL,
 	.width = 4,
-	.post_div_table = clk_alpha_odd_div_table,
+	.post_div_table = post_div_table_fabia_odd,
 	.post_div_shift = 12,
-	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
+	.num_post_div = ARRAY_SIZE(post_div_table_fabia_odd),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpucc_pll0_out_odd",
 		.parent_names = (const char *[]){ "gpu_cc_pll0" },
