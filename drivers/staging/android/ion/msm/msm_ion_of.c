@@ -79,6 +79,10 @@ static struct ion_heap_desc ion_heap_meta[] = {
 	{
 		.id	= ION_SECURE_CARVEOUT_HEAP_ID,
 		.name	= ION_SECURE_CARVEOUT_HEAP_NAME,
+	},
+	{
+		.id	= ION_EASEL_HEAP_ID,
+		.name	= ION_EASEL_HEAP_NAME,
 	}
 };
 #endif

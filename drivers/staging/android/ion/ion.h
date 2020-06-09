@@ -44,6 +44,7 @@
 #define ION_SECURE_HEAP_NAME	"secure_heap"
 #define ION_SECURE_DISPLAY_HEAP_NAME "secure_display"
 #define ION_AUDIO_HEAP_NAME    "audio"
+#define ION_EASEL_HEAP_NAME	"easel_mem"
 
 #define ION_IS_CACHED(__flags)  ((__flags) & ION_FLAG_CACHED)
 
