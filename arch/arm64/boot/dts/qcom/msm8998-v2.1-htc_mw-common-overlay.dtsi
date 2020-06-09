@@ -10,8 +10,6 @@
  * GNU General Public License for more details.
  */
 
-#include <dt-bindings/clock/msm-clocks-8998.h>
-
 #include "base-msm8998-mtp.dtsi"
 #include "msm8998-htc_muskie.dtsi"
 #include "msm8998-htc-nfc.dtsi"
