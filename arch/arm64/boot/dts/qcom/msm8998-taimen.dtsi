@@ -187,17 +187,6 @@
 		};
 	};
 
-	pm8998_gpio13 { /* GPIO 13 */
-		pm8998_gpio13_default: pm8998_gpio13_default {
-			pins = "gpio13";
-			function = "func2";
-			output-low;
-			drive-push-pull;
-			bias-disable;
-			qcom,drive-strength = <PMIC_GPIO_STRENGTH_LOW>;
-		};
-	};
-
 	/* GPIO 18 SMB138X */
 	smb138x_gpio {
 		smb138x_gpio_default: smb138x_gpio_default {
