@@ -141,16 +141,6 @@
 		};
 	};
 
-	pm8998_gpio13 { /* GPIO 13 */
-		pm8998_gpio13_default: pm8998_gpio13_default {
-			pins = "gpio13";
-			function = "func2";
-			output-low;
-			drive-push-pull;
-			bias-disable;
-		};
-	};
-
 	/* GPIO 21 (NFC_CLK_REQ) */
 	nfc_clk_req {
 		nfc_clk_req_default: nfc_clk_req_default {

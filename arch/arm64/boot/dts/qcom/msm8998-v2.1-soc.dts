@@ -39,3 +39,18 @@
 &pcie0 {
 	/delete-property/ qcom,l1ss-supported;
 };
+
+&pm8998_gpios {
+	pm8998_gp13 {
+		pm8998_gpio_13: gp13 {
+			pins = "gpio13";
+			function = "func2";
+			output-enable;
+			output-low;
+			drive-push-pull;
+			bias-disable;
+			qcom,drive-strength = <1>;
+			power-source = <0>;
+		};
+	};
+};
