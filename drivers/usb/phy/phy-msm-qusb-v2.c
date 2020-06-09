@@ -727,7 +727,7 @@ static int qusb_phy_set_suspend_legacy(struct usb_phy *phy, int suspend)
 			wmb();
 
 			qusb_phy_enable_clocks(qphy, false);
-			qusb_phy_enable_power(qphy, false);
+			qusb_phy_disable_power(qphy);
 		}
 		qphy->suspended = true;
 	} else {
@@ -759,7 +759,7 @@ static int qusb_phy_set_suspend_legacy(struct usb_phy *phy, int suspend)
 			 */
 			wmb();
 
-			qusb_phy_enable_power(qphy, true);
+			qusb_phy_enable_power(qphy);
 			ret = reset_control_assert(qphy->phy_reset);
 			if (ret)
 				dev_err(phy->dev, "%s: phy_reset assert failed\n",
