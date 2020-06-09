@@ -1333,9 +1333,7 @@ static int csid_probe(struct platform_device *pdev)
 		&new_csid_dev->csid_clk, &new_csid_dev->num_clk);
 	if (rc < 0) {
 		pr_err("%s: msm_camera_get_clk_info failed", __func__);
-		if (rc != -EPROBE_DEFER)
-			rc = -EFAULT;
-
+		rc = -EFAULT;
 		goto csid_no_resource;
 	}
 
