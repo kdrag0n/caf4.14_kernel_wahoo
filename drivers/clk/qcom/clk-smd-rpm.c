@@ -786,14 +786,6 @@ static DEFINE_CLK_VOTER(sdc2_slv_msmbus_snoc_periph_clk, snoc_periph_clk,
 static DEFINE_CLK_VOTER(sdc2_slv_msmbus_snoc_periph_a_clk, snoc_periph_a_clk,
 								LONG_MAX);
 
-/* Branch Voter clocks */
-static DEFINE_CLK_BRANCH_VOTER(bi_tcxo_otg_clk, bi_tcxo);
-static DEFINE_CLK_BRANCH_VOTER(bi_tcxo_pil_pronto_clk, bi_tcxo);
-static DEFINE_CLK_BRANCH_VOTER(bi_tcxo_pil_mss_clk, bi_tcxo);
-static DEFINE_CLK_BRANCH_VOTER(bi_tcxo_wlan_clk, bi_tcxo);
-static DEFINE_CLK_BRANCH_VOTER(bi_tcxo_pil_lpass_clk, bi_tcxo);
-static DEFINE_CLK_BRANCH_VOTER(bi_tcxo_pil_cdsp_clk, bi_tcxo);
-
 static struct clk_hw *trinket_clks[] = {
 	[RPM_SMD_XO_CLK_SRC] = &trinket_bi_tcxo.hw,
 	[RPM_SMD_XO_A_CLK_SRC] = &trinket_bi_tcxo_ao.hw,
@@ -927,7 +919,16 @@ DEFINE_CLK_SMD_RPM_XO_BUFFER(msm8998, div_clk1, div_clk1_ao, 0xb);
 DEFINE_CLK_SMD_RPM_XO_BUFFER(msm8998, div_clk2, div_clk2_ao, 0xc);
 DEFINE_CLK_SMD_RPM_XO_BUFFER(msm8998, div_clk3, div_clk3_ao, 0xd);
 
+/* Voter clocks */
+static DEFINE_CLK_VOTER(mmssnoc_axi_clk, mmssnoc_axi_rpm_clk, 0);
+static DEFINE_CLK_VOTER(mmssnoc_axi_a_clk, mmssnoc_axi_rpm_a_clk, 0);
+static DEFINE_CLK_VOTER(cnoc_periph_keepalive_a_clk, cnoc_periph_a_clk,
+							LONG_MAX);
+
+/* Voter Branch clocks */
 static DEFINE_CLK_BRANCH_VOTER(bi_tcxo_pil_spss_clk, bi_tcxo);
+static DEFINE_CLK_BRANCH_VOTER(bi_tcxo_dwc3_clk, bi_tcxo);
+static DEFINE_CLK_BRANCH_VOTER(bi_tcxo_pil_ssc_clk, bi_tcxo);
 
 static struct clk_hw *msm8998_clks[] = {
 	[RPM_SMD_XO_CLK_SRC]	= &msm8998_bi_tcxo.hw,
