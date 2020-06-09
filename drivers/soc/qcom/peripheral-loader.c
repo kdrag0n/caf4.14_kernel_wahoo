@@ -59,11 +59,8 @@
 #define MAX_LEN 96
 #define NUM_OF_ENCRYPTED_KEY	3
 
-/* Sony production phones have minidump disabled */
-#if defined(CONFIG_ARCH_SONY_LOIRE) || defined(CONFIG_ARCH_SONY_TONE) || \
-    defined(CONFIG_ARCH_SONY_YOSHINO) || defined(CONFIG_ARCH_SONY_NILE) || \
-    defined(CONFIG_ARCH_SONY_GANGES) || defined(CONFIG_ARCH_SONY_TAMA) || \
-    defined(CONFIG_ARCH_SONY_KUMANO)
+/* Google production phones have minidump disabled */
+#if defined(CONFIG_BOARD_MUSKIE) || defined(CONFIG_BOARD_TAIMEN)
  #define TARGET_NO_MINIDUMP_SUPPORT
 #endif
 
