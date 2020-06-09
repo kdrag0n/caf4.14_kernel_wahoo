@@ -264,6 +264,7 @@ static int clk_smd_rpm_prepare(struct clk_hw *hw)
 
 	to_active_sleep(r, r->rate, &this_rate, &this_sleep_rate);
 
+	pr_info("hw clk %px\n", hw);
 	/* Don't send requests to the RPM if the rate has not been set. */
 	if (this_rate == 0)
 		goto out;
@@ -1074,6 +1075,7 @@ static int rpm_smd_clk_probe(struct platform_device *pdev)
 			continue;
 		}
 
+		pr_info("clock i = %d\n", i);
 		ret = clk_smd_rpm_handoff(hw_clks[i]);
 		if (ret)
 			goto err;
