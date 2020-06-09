@@ -497,16 +497,6 @@
 			bias-disable;		/* No Pull */
 		};
 	};
-
-	cam_sensor0_vdig { /* GPIO 20 - CAMERA SENSOR 0 VDIG */
-		cam_sensor0_vdig_default: cam_sensor0_vdig_default {
-			pins = "gpio20";
-			function = "normal";		/* GPIO */
-			output-low;		/* Output */
-			bias-disable;		/* No Pull */
-			power-source = <1>;		/* VIN1 GPIO_MV */
-		};
-	};
 };
 
 &pmi8998_gpios {
