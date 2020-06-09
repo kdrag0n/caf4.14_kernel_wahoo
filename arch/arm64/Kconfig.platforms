@@ -161,6 +161,10 @@ config BOARD_TAIMEN
 	depends on ARCH_QCOM
 	select ARCH_MSMCOBALT
 
+config BOARD_REFERENCE
+	def_bool !(BOARD_MUSKIE || BOARD_TAIMEN)
+	depends on ARCH_QCOM
+
 config ARCH_SM8150
 	bool "Enable Support for Qualcomm Technologies, Inc. SM8150"
 	depends on ARCH_QCOM
