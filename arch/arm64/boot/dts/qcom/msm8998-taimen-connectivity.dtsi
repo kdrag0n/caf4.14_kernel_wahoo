@@ -10,6 +10,8 @@
  * GNU General Public License for more details.
  */
 
+#include <dt-bindings/clock/qcom,rpmcc.h>
+
 &soc {
 	bluetooth: bt_wcn3990 {
 		compatible = "qca,wcn3990";

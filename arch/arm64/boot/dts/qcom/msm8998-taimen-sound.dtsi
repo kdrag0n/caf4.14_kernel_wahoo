@@ -10,6 +10,9 @@
  * GNU General Public License for more details.
  */
 
+#include <dt-bindings/pinctrl/qcom,pmic-gpio.h>
+#include <dt-bindings/clock/qcom,audio-ext-clk.h>
+
 &spi_2 {
 	status = "ok";
 };
