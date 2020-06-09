@@ -221,5 +221,7 @@
 #define CXO_SMD_DWC3_CLK			177
 #define CXO_SMD_PIL_SSC_CLK			178
 #define CXO_SMD_PIL_SPSS_CLK			179
+#define RPM_SMD_MMAXI_CLK			180
+#define RPM_SMD_MMAXI_A_CLK			181
 
 #endif
