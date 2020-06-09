@@ -12,7 +12,6 @@
 
 #include "base-msm8998-mtp.dtsi"
 #include "msm8998-htc_muskie.dtsi"
-#include "msm8998-htc-nfc.dtsi"
 #include "msm8998-htc-usb-xa.dtsi"
 #include "msm8998-htc-easel.dtsi"
 #include "msm8998-camera-sensor-muskie-xa.dtsi"
