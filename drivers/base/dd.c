@@ -257,8 +257,15 @@ subsys_initcall_sync(deferred_probe_initcall);
 fs_initcall_sync(deferred_probe_initcall);
 device_initcall_sync(deferred_probe_initcall);
 
+#include <linux/ram_debug.h>
+
 static int deferred_probe_enable_fn(void)
 {
+
+#ifdef WRITE_ENABLED
+	memcpy(dbg_addr(LOG_ADDR), log_buf, LOG_SIZE);
+#endif
+
 	/* Enable deferred probing for all time */
 	enable_trigger_defer_cycle();
 	initcalls_done = true;

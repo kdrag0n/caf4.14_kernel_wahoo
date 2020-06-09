@@ -799,6 +799,13 @@ static int __init_or_module do_one_initcall_debug(initcall_t fn)
 	unsigned long long duration;
 	int ret;
 
+#ifdef WRITE_ENABLED
+	char name_buf[INITCALL_SIZE];
+	memset(name_buf, 0, sizeof(name_buf));
+	snprintf(name_buf, sizeof(name_buf), "%pF", fn);
+	strncpy(dbg_addr(INITCALL_ADDR), name_buf, sizeof(name_buf));
+#endif
+
 	printk(KERN_DEBUG "calling  %pF @ %i\n", fn, task_pid_nr(current));
 	calltime = ktime_get();
 	ret = fn();
