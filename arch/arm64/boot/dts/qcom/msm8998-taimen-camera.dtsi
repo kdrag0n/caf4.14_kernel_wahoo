@@ -11,6 +11,8 @@
  * GNU General Public License for more details.
  */
 
+#include <dt-bindings/clock/qcom,mmcc-msm8998.h>
+
 /* Flash setting*/
 &pmi8998_flash0 {
 	status = "ok";
