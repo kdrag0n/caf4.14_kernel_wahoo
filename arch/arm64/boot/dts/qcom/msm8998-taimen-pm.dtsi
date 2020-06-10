@@ -246,15 +246,15 @@
 	qcom,fg-empty-voltage = <2650>;
 };
 
-&pmi8998_bcl {
-	qcom,vbat-too-low-threshold = <3>; /* 2.7V */
-};
+//&pmi8998_bcl {
+//	qcom,vbat-too-low-threshold = <3>; /* 2.7V */
+//};
 
 &pmi8998_pdphy {
 	vbus-supply = <&smb138x_vbus>;
 };
 
-&smb138x_parallel_slave {
+&smb1381_charger {
 	qcom,parallel-mode = <2>;
 	qcom,otg-current-limit = <4>;
 
