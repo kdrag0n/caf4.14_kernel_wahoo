@@ -622,11 +622,16 @@ static void print_wdog_data(struct msm_watchdog_data *wdog_dd)
 			wdog_dd->bark_irq, cpumask_pr_args(bark_affinity));
 }
 
+#include <linux/sysrq.h>
+
 static irqreturn_t wdog_bark_handler(int irq, void *dev_id)
 {
 	struct msm_watchdog_data *wdog_dd = (struct msm_watchdog_data *)dev_id;
 	unsigned long nanosec_rem;
 	unsigned long long t = sched_clock();
+
+	__handle_sysrq('l', false);
+	mdelay(200);
 
 	nanosec_rem = do_div(t, 1000000000);
 	dev_info(wdog_dd->dev, "Watchdog bark! Now = %lu.%06lu\n",
