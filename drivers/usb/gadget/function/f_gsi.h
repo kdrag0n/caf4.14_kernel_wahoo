@@ -30,8 +30,6 @@
 
 #include "u_ether.h"
 
-#include "configfs.h"
-
 #define GSI_RMNET_CTRL_NAME "rmnet_ctrl"
 #define GSI_MBIM_CTRL_NAME "android_mbim"
 #define GSI_DPL_CTRL_NAME "dpl_ctrl"
@@ -40,7 +38,7 @@
 #define GSI_GPS_CTRL_NAME "gps"
 
 #define GSI_CTRL_NAME_LEN (sizeof(GSI_MBIM_CTRL_NAME)+2)
-#define GSI_MAX_CTRL_PKT_SIZE 8192
+#define GSI_MAX_CTRL_PKT_SIZE 4096
 #define GSI_CTRL_DTR (1 << 0)
 
 #define GSI_NUM_IN_RNDIS_BUFFERS 50
@@ -53,9 +51,8 @@
 #define GSI_OUT_AGGR_SIZE 24576
 
 #define GSI_IN_RNDIS_AGGR_SIZE 16384
-#define GSI_IN_MBIM_AGGR_SIZE 31744
+#define GSI_IN_MBIM_AGGR_SIZE 16384
 #define GSI_IN_RMNET_AGGR_SIZE 16384
-#define GSI_OUT_MBIM_AGGR_SIZE 16384
 #define GSI_ECM_AGGR_SIZE 2048
 
 #define GSI_OUT_MBIM_BUF_LEN 16384
@@ -223,10 +220,6 @@ struct gsi_ctrl_port {
 	unsigned int modem_to_host;
 	unsigned int cpkt_drop_cnt;
 	unsigned int get_encap_cnt;
-
-	struct device *dev;
-	struct work_struct uevent_work;
-	struct workqueue_struct *uevent_wq;
 };
 
 struct gsi_data_port {
@@ -315,11 +308,6 @@ static inline struct f_gsi *c_port_to_gsi(struct gsi_ctrl_port *d)
 struct gsi_opts {
 	struct usb_function_instance func_inst;
 	struct f_gsi *gsi;
-
-	/* os desc support */
-	struct config_group *interf_group;
-	char ext_compat_id[16];
-	struct usb_os_desc os_desc;
 };
 
 static inline struct gsi_opts *to_gsi_opts(struct config_item *item)
@@ -473,7 +461,7 @@ static struct usb_ss_ep_comp_descriptor rmnet_gsi_ss_in_comp_desc = {
 	.bDescriptorType =	USB_DT_SS_ENDPOINT_COMP,
 
 	/* the following 2 values can be tweaked if necessary */
-	.bMaxBurst =		6,
+	.bMaxBurst =		2,
 	/* .bmAttributes =	0, */
 };
 
@@ -490,7 +478,7 @@ static struct usb_ss_ep_comp_descriptor rmnet_gsi_ss_out_comp_desc = {
 	.bDescriptorType =	USB_DT_SS_ENDPOINT_COMP,
 
 	/* the following 2 values can be tweaked if necessary */
-	.bMaxBurst =		2,
+	.bMaxBurst =		6,
 	/* .bmAttributes =	0, */
 };
 
@@ -772,8 +760,7 @@ static struct usb_gadget_strings *rndis_gsi_strings[] = {
 };
 
 /* mbim device descriptors */
-#define MBIM_NTB_DEFAULT_IN_SIZE	GSI_IN_MBIM_AGGR_SIZE
-#define MBIM_NTB_DEFAULT_OUT_SIZE	GSI_OUT_MBIM_AGGR_SIZE
+#define MBIM_NTB_DEFAULT_IN_SIZE	(0x4000)
 
 static struct usb_cdc_ncm_ntb_parameters mbim_gsi_ntb_parameters = {
 	.wLength = sizeof(mbim_gsi_ntb_parameters),
@@ -783,7 +770,7 @@ static struct usb_cdc_ncm_ntb_parameters mbim_gsi_ntb_parameters = {
 	.wNdpInPayloadRemainder = cpu_to_le16(0),
 	.wNdpInAlignment = cpu_to_le16(4),
 
-	.dwNtbOutMaxSize = cpu_to_le32(MBIM_NTB_DEFAULT_OUT_SIZE),
+	.dwNtbOutMaxSize = cpu_to_le32(0x4000),
 	.wNdpOutDivisor = cpu_to_le16(4),
 	.wNdpOutPayloadRemainder = cpu_to_le16(0),
 	.wNdpOutAlignment = cpu_to_le16(4),
@@ -1072,6 +1059,50 @@ static struct usb_gadget_strings *mbim_gsi_strings[] = {
 	NULL,
 };
 
+/* Microsoft OS Descriptors */
+
+/*
+ * We specify our own bMS_VendorCode byte which Windows will use
+ * as the bRequest value in subsequent device get requests.
+ */
+#define MBIM_VENDOR_CODE	0xA5
+
+/* Microsoft Extended Configuration Descriptor Header Section */
+struct mbim_gsi_ext_config_desc_header {
+	__le32	dwLength;
+	__u16	bcdVersion;
+	__le16	wIndex;
+	__u8	bCount;
+	__u8	reserved[7];
+};
+
+/* Microsoft Extended Configuration Descriptor Function Section */
+struct mbim_gsi_ext_config_desc_function {
+	__u8	bFirstInterfaceNumber;
+	__u8	bInterfaceCount;
+	__u8	compatibleID[8];
+	__u8	subCompatibleID[8];
+	__u8	reserved[6];
+};
+
+/* Microsoft Extended Configuration Descriptor */
+static struct {
+	struct mbim_gsi_ext_config_desc_header	header;
+	struct mbim_gsi_ext_config_desc_function    function;
+} mbim_gsi_ext_config_desc = {
+	.header = {
+		.dwLength = cpu_to_le32(sizeof(mbim_gsi_ext_config_desc)),
+		.bcdVersion = cpu_to_le16(0x0100),
+		.wIndex = cpu_to_le16(4),
+		.bCount = 1,
+	},
+	.function = {
+		.bFirstInterfaceNumber = 0,
+		.bInterfaceCount = 1,
+		.compatibleID = { 'A', 'L', 'T', 'R', 'C', 'F', 'G' },
+		/* .subCompatibleID = DYNAMIC */
+	},
+};
 /* ecm device descriptors */
 #define ECM_QC_LOG2_STATUS_INTERVAL_MSEC	5
 #define ECM_QC_STATUS_BYTECOUNT			16 /* 8 byte header + data */

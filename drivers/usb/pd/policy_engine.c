@@ -240,7 +240,6 @@ static void *usbpd_ipc_log;
 #define VDM_BUSY_TIME		50
 #define VCONN_ON_TIME		100
 #define SINK_TX_TIME		16
-#define DR_SWAP_RESPONSE_TIME	20
 
 /* tPSHardReset + tSafe0V */
 #define SNK_HARD_RESET_VBUS_OFF_TIME	(35 + 650)
@@ -354,13 +353,30 @@ static void *usbpd_ipc_log;
 #define ID_HDR_PRODUCT_AMA	5
 #define ID_HDR_PRODUCT_VPD	6
 
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+#define USB_VBUS_WAIT_VOLT	900	/* mV */
+#define USB_VBUS_WAIT_ITVL	5	/* mS */
+#define USB_VBUS_WAIT_TMOUT	200     /* mS */
+#undef ID_HDR_VID
+#undef PROD_VDO_PID
+#define ID_HDR_VID		0x0FCE /* Sony Mobile Communications */
+#define PROD_VDO_PID		0x01F9
+#define ACCEPTABLE_SRC_VOLTAGE_9V 9000
+#endif
+
 static bool check_vsafe0v = true;
 module_param(check_vsafe0v, bool, 0600);
 
 static int min_sink_current = 900;
 module_param(min_sink_current, int, 0600);
 
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+static const u32 somc_default_src_caps[] = { 0x3601905A }; /* 5V @ 0.9A */
+static const u32 somc_minimum_src_caps[] = { 0x3601900A }; /* 5V @ 0.1A */
+static u32 default_src_caps[] = { 0x3601905A };	/* VSafe5V @ 0.9A */
+#else
 static const u32 default_src_caps[] = { 0x36019096 };	/* VSafe5V @ 1.5A */
+#endif
 static const u32 default_snk_caps[] = { 0x2601912C };	/* VSafe5V @ 3A */
 
 struct vdm_tx {
@@ -396,14 +412,15 @@ struct usbpd {
 	enum usbpd_state	current_state;
 	bool			hard_reset_recvd;
 	ktime_t			hard_reset_recvd_time;
-	ktime_t			dr_swap_recvd_time;
-
 	struct list_head	rx_q;
 	spinlock_t		rx_lock;
 	struct rx_msg		*rx_ext_msg;
 
 	u32			received_pdos[PD_MAX_DATA_OBJ];
 	u16			src_cap_id;
+#ifdef CONFIG_USBPD_SMBFG_NEWGEN_EXTENSION
+	u32			org_received_pdos[7];
+#endif
 	u8			selected_pdo;
 	u8			requested_pdo;
 	u32			rdo;	/* can be either source or sink */
@@ -451,6 +468,7 @@ struct usbpd {
 	struct regulator	*vconn;
 	bool			vbus_enabled;
 	bool			vconn_enabled;
+	bool			vconn_is_external;
 
 	u8			tx_msgid[SOPII_MSG + 1];
 	u8			rx_msgid[SOPII_MSG + 1];
@@ -493,10 +511,40 @@ static const unsigned int usbpd_extcon_cable[] = {
 	EXTCON_USB,
 	EXTCON_USB_HOST,
 	EXTCON_DISP_DP,
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+	EXTCON_VBUS_DROP,
+#endif
 	EXTCON_NONE,
 };
 
 static void handle_vdm_tx(struct usbpd *pd, enum pd_sop_type sop_type);
+
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+/**
+ * usbpd_ocp_notification - ocp notification callback from regulator.
+ * @ctxt: Pointer to the dwc3_msm context
+ *
+ * NOTE: This can be called in interrupt context.
+ */
+static void usbpd_ocp_notification(void *ctxt)
+{
+	struct usbpd *pd = (struct usbpd *)ctxt;
+
+	extcon_set_state_sync(pd->extcon, EXTCON_VBUS_DROP, 1);
+	extcon_set_state_sync(pd->extcon, EXTCON_VBUS_DROP, 0);
+	pr_info("%s: receive ocp notification\n", __func__);
+}
+
+static int usbpd_register_ocp(struct usbpd *pd)
+{
+	struct regulator_ocp_notification ocp_ntf;
+
+	ocp_ntf.notify = usbpd_ocp_notification;
+	ocp_ntf.ctxt = pd;
+
+	return regulator_register_ocp_notification(pd->vbus, &ocp_ntf);
+}
+#endif
 
 enum plug_orientation usbpd_get_plug_orientation(struct usbpd *pd)
 {
@@ -832,6 +880,11 @@ static int pd_select_pdo(struct usbpd *pd, int pdo_pos, int uv, int ua)
 		return -ENOTSUPP;
 	}
 
+	/* Can't sink more than 5V if VCONN is sourced from the VBUS input */
+	if (pd->vconn_enabled && !pd->vconn_is_external &&
+			pd->requested_voltage > 5000000)
+		return -ENOTSUPP;
+
 	pd->requested_current = curr;
 	pd->requested_pdo = pdo_pos;
 
@@ -844,6 +897,28 @@ static int pd_eval_src_caps(struct usbpd *pd)
 	union power_supply_propval val;
 	bool pps_found = false;
 	u32 first_pdo = pd->received_pdos[0];
+#ifdef CONFIG_USBPD_SMBFG_NEWGEN_EXTENSION
+	u32 *pdo = pd->received_pdos;
+	u32 *org_pdo = pd->org_received_pdos;
+
+	for (i = 0; i < ARRAY_SIZE(pd->received_pdos); i++)
+		org_pdo[i] = pdo[i];
+
+	for (i = 1; i < ARRAY_SIZE(pd->received_pdos); i++) {
+		if (PD_SRC_PDO_TYPE(pdo[i]) == PD_SRC_PDO_TYPE_FIXED &&
+				PD_SRC_PDO_FIXED_VOLTAGE(pdo[i]) * 50 <=
+						ACCEPTABLE_SRC_VOLTAGE_9V)
+			/* This PDO is acceptable */
+			;
+		else
+			break;
+	}
+
+	usbpd_dbg(&pd->dev, "Clear PDOs from %d to %d\n",
+				i + 1, (int)ARRAY_SIZE(pd->received_pdos));
+	for (; i < ARRAY_SIZE(pd->received_pdos); i++)
+		pdo[i] = 0;
+#endif
 
 	if (PD_SRC_PDO_TYPE(first_pdo) != PD_SRC_PDO_TYPE_FIXED) {
 		usbpd_err(&pd->dev, "First src_cap invalid! %08x\n", first_pdo);
@@ -1158,9 +1233,6 @@ static void phy_msg_received(struct usbpd *pd, enum pd_sop_type sop,
 		return;
 	}
 
-	if (IS_CTRL(rx_msg, MSG_DR_SWAP))
-		pd->dr_swap_recvd_time = ktime_get();
-
 	spin_lock_irqsave(&pd->rx_lock, flags);
 	list_add_tail(&rx_msg->entry, &pd->rx_q);
 	spin_unlock_irqrestore(&pd->rx_lock, flags);
@@ -1170,6 +1242,31 @@ static void phy_msg_received(struct usbpd *pd, enum pd_sop_type sop,
 	else
 		usbpd_dbg(&pd->dev, "usbpd_sm already running\n");
 }
+
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+static void phy_wait_vbus_settled_down(struct usbpd *pd, int mv,
+							int itvl, int tmout)
+{
+	int rc;
+	int cnt = 0;
+	int usbin = mv;
+
+	do {
+		union power_supply_propval pval;
+
+		msleep(itvl);
+		rc = power_supply_get_property(pd->usb_psy,
+				POWER_SUPPLY_PROP_VOLTAGE_NOW, &pval);
+		if (IS_ERR_VALUE((long)rc))
+			goto waitremain;
+		usbin = pval.intval / 1000;
+		cnt++;
+	} while (usbin >= mv && tmout > (cnt * itvl));
+waitremain:
+	if (usbin >= mv && tmout > (cnt * itvl))
+		msleep(tmout - (cnt * itvl));
+}
+#endif /* CONFIG_EXTCON_SOMC_EXTENSION */
 
 static void phy_shutdown(struct usbpd *pd)
 {
@@ -1183,6 +1280,11 @@ static void phy_shutdown(struct usbpd *pd)
 	if (pd->vbus_enabled) {
 		regulator_disable(pd->vbus);
 		pd->vbus_enabled = false;
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+		phy_wait_vbus_settled_down(pd,
+				USB_VBUS_WAIT_VOLT, USB_VBUS_WAIT_ITVL,
+				USB_VBUS_WAIT_TMOUT);
+#endif
 	}
 }
 
@@ -1361,6 +1463,10 @@ static void usbpd_set_state(struct usbpd *pd, enum usbpd_state next_state)
 		dual_role_instance_changed(pd->dual_role);
 
 		val.intval = 1; /* Rp-1.5A; SinkTxNG for PD 3.0 */
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+		if (!pd->in_explicit_contract)
+			val.intval = 0; /* Rp-Default; */
+#endif
 		power_supply_set_property(pd->usb_psy,
 				POWER_SUPPLY_PROP_TYPEC_SRC_RP, &val);
 
@@ -2190,6 +2296,34 @@ static void handle_vdm_tx(struct usbpd *pd, enum pd_sop_type sop_type)
 	pd->vdm_tx = NULL;
 }
 
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+/*
+ * Set minimum src capability.
+ */
+void usbpd_set_min_src_caps(struct usbpd *pd, const bool set)
+{
+	bool change = false;
+
+	if (set && memcmp(default_src_caps, somc_minimum_src_caps,
+			sizeof(default_src_caps))) {
+		memcpy(default_src_caps, somc_minimum_src_caps,
+			sizeof(default_src_caps));
+		change = true;
+	} else if (!set && memcmp(default_src_caps, somc_default_src_caps,
+			sizeof(default_src_caps))) {
+		memcpy(default_src_caps, somc_default_src_caps,
+			sizeof(default_src_caps));
+		change = true;
+	}
+
+	if (change && pd && pd->current_pr == PR_SRC) {
+		usbpd_dbg(&pd->dev, "set ERROR_RECOVERY\n");
+		usbpd_set_state(pd, PE_ERROR_RECOVERY);
+	}
+}
+EXPORT_SYMBOL(usbpd_set_min_src_caps);
+#endif
+
 static void handle_get_src_cap_extended(struct usbpd *pd)
 {
 	int ret;
@@ -2347,7 +2481,9 @@ static void dr_swap(struct usbpd *pd)
 				SVDM_CMD_TYPE_INITIATOR, 0, NULL, 0);
 	}
 
+#ifndef CONFIG_EXTCON_SOMC_EXTENSION
 	dual_role_instance_changed(pd->dual_role);
+#endif
 }
 
 
@@ -2425,10 +2561,14 @@ enable_reg:
 	if (!pd->vbus) {
 		pd->vbus = devm_regulator_get(pd->dev.parent, "vbus");
 		if (IS_ERR(pd->vbus)) {
-			pd->vbus = NULL;
 			usbpd_err(&pd->dev, "Unable to get vbus\n");
 			return -EAGAIN;
 		}
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+		ret = usbpd_register_ocp(pd);
+		if (ret)
+			usbpd_err(&pd->dev, "Cannot register OCP!!\n");
+#endif
 	}
 	ret = regulator_enable(pd->vbus);
 	if (ret)
@@ -2472,7 +2612,6 @@ static void usbpd_sm(struct work_struct *w)
 	int ret, ms;
 	struct rx_msg *rx_msg = NULL;
 	unsigned long flags;
-	s64 dr_swap_delta;
 
 	usbpd_dbg(&pd->dev, "handle state %s\n",
 			usbpd_state_strings[pd->current_state]);
@@ -2516,6 +2655,10 @@ static void usbpd_sm(struct work_struct *w)
 		pd->selected_pdo = pd->requested_pdo = 0;
 		pd->peer_usb_comm = pd->peer_pr_swap = pd->peer_dr_swap = false;
 		memset(&pd->received_pdos, 0, sizeof(pd->received_pdos));
+#ifdef CONFIG_USBPD_SMBFG_NEWGEN_EXTENSION
+		memset(&pd->org_received_pdos, 0,
+					sizeof(pd->org_received_pdos));
+#endif
 		rx_msg_cleanup(pd);
 
 		power_supply_set_property(pd->usb_psy,
@@ -2750,14 +2893,6 @@ static void usbpd_sm(struct work_struct *w)
 		} else if (IS_CTRL(rx_msg, MSG_DR_SWAP)) {
 			if (pd->vdm_state == MODE_ENTERED) {
 				usbpd_set_state(pd, PE_SRC_HARD_RESET);
-				break;
-			}
-
-			dr_swap_delta = ktime_ms_delta(ktime_get(),
-						pd->dr_swap_recvd_time);
-			if (dr_swap_delta > DR_SWAP_RESPONSE_TIME) {
-				usbpd_err(&pd->dev, "DR swap timedout(%lld), do not send ACCEPT\n",
-								dr_swap_delta);
 				break;
 			}
 
@@ -3043,14 +3178,6 @@ static void usbpd_sm(struct work_struct *w)
 				break;
 			}
 
-			dr_swap_delta = ktime_ms_delta(ktime_get(),
-						pd->dr_swap_recvd_time);
-			if (dr_swap_delta > DR_SWAP_RESPONSE_TIME) {
-				usbpd_err(&pd->dev, "DR swap timedout(%lld), do not send ACCEPT\n",
-								dr_swap_delta);
-				break;
-			}
-
 			ret = pd_send_msg(pd, MSG_ACCEPT, NULL, 0, SOP_MSG);
 			if (ret) {
 				usbpd_set_state(pd, PE_SEND_SOFT_RESET);
@@ -3070,6 +3197,20 @@ static void usbpd_sm(struct work_struct *w)
 			usbpd_set_state(pd, PE_PRS_SNK_SRC_TRANSITION_TO_OFF);
 			break;
 		} else if (IS_CTRL(rx_msg, MSG_VCONN_SWAP)) {
+			/*
+			 * if VCONN is connected to VBUS, make sure we are
+			 * not in high voltage contract, otherwise reject.
+			 */
+			if (!pd->vconn_is_external &&
+					(pd->requested_voltage > 5000000)) {
+				ret = pd_send_msg(pd, MSG_REJECT, NULL, 0,
+						SOP_MSG);
+				if (ret)
+					usbpd_set_state(pd, PE_SEND_SOFT_RESET);
+
+				break;
+			}
+
 			ret = pd_send_msg(pd, MSG_ACCEPT, NULL, 0, SOP_MSG);
 			if (ret) {
 				usbpd_set_state(pd, PE_SEND_SOFT_RESET);
@@ -3485,6 +3626,12 @@ static int psy_changed(struct notifier_block *nb, unsigned long evt, void *ptr)
 
 	pd->vbus_present = val.intval;
 
+#ifdef CONFIG_USB_PD_WATER_DETECTION
+	if (typec_mode == POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER) {
+		wdet_polling_reset(pd->wdet);
+	}
+#endif
+
 	/*
 	 * For sink hard reset, state machine needs to know when VBUS changes
 	 *   - when in PE_SNK_TRANSITION_TO_DEFAULT, notify when VBUS falls
@@ -3507,6 +3654,31 @@ static int psy_changed(struct notifier_block *nb, unsigned long evt, void *ptr)
 
 	if (pd->typec_mode == typec_mode)
 		return 0;
+
+#if defined(CONFIG_EXTCON_SOMC_EXTENSION) && \
+    (defined(CONFIG_ARCH_MSM8998) || defined(CONFIG_ARCH_SDM630))
+	switch (typec_mode) {
+	/* Sink states */
+	case POWER_SUPPLY_TYPEC_SOURCE_DEFAULT:
+	case POWER_SUPPLY_TYPEC_SOURCE_MEDIUM:
+	case POWER_SUPPLY_TYPEC_SOURCE_HIGH:
+		ret = power_supply_get_property(pd->usb_psy,
+				POWER_SUPPLY_PROP_REAL_TYPE, &val);
+		if (ret) {
+			usbpd_err(&pd->dev, "Unable to read USB TYPE: %d\n",
+					ret);
+			return ret;
+		}
+
+		if (val.intval == POWER_SUPPLY_TYPE_UNKNOWN) {
+			usbpd_dbg(&pd->dev, "SNK states but APSD is not done yet.\n");
+			return 0;
+		}
+		break;
+	default:
+		break;
+	}
+#endif /* CONFIG_EXTCON_SOMC_EXTENSION */
 
 	pd->typec_mode = typec_mode;
 
@@ -3577,6 +3749,9 @@ static int psy_changed(struct notifier_block *nb, unsigned long evt, void *ptr)
 		break;
 	case POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER:
 		usbpd_info(&pd->dev, "Type-C Analog Audio Adapter connected\n");
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+		kobject_uevent(&pd->dev.kobj, KOBJ_CHANGE);
+#endif
 		break;
 	default:
 		usbpd_warn(&pd->dev, "Unsupported typec mode:%d\n",
@@ -3856,6 +4031,10 @@ static int usbpd_uevent(struct device *dev, struct kobj_uevent_env *env)
 					default_src_caps[i]);
 	}
 
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+	if (pd->typec_mode == POWER_SUPPLY_TYPEC_SINK_AUDIO_ADAPTER)
+		add_uevent_var(env, "TYPEC_MODE=AAA");
+#endif
 	add_uevent_var(env, "RDO=%08x", pd->rdo);
 	add_uevent_var(env, "CONTRACT=%s", pd->in_explicit_contract ?
 				"explicit" : "implicit");
@@ -4576,6 +4755,9 @@ struct usbpd *usbpd_create(struct device *parent)
 	extcon_set_property_capability(pd->extcon, EXTCON_USB_HOST,
 			EXTCON_PROP_USB_SS);
 
+	pd->vconn_is_external = device_property_present(parent,
+					"qcom,vconn-uses-external-source");
+
 	pd->num_sink_caps = device_property_read_u32_array(parent,
 			"qcom,default-sink-caps", NULL, 0);
 	if (pd->num_sink_caps > 0) {
@@ -4663,6 +4845,12 @@ struct usbpd *usbpd_create(struct device *parent)
 	/* force read initial power_supply values */
 	psy_changed(&pd->psy_nb, PSY_EVENT_PROP_CHANGED, pd->usb_psy);
 
+#ifdef CONFIG_USB_PD_WATER_DETECTION
+	pd->wdet = wdet_create(parent);
+	if (IS_ERR_OR_NULL(pd->wdet))
+		goto del_inst;
+#endif
+
 	return pd;
 
 del_inst:
@@ -4688,6 +4876,10 @@ void usbpd_destroy(struct usbpd *pd)
 {
 	if (!pd)
 		return;
+
+#ifdef CONFIG_USB_PD_WATER_DETECTION
+	wdet_destroy(pd->wdet);
+#endif
 
 	list_del(&pd->instance);
 	power_supply_unreg_notifier(&pd->psy_nb);
