@@ -1,4 +1,4 @@
-/* Copyright (c) 2012-2020, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2012-2019, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -226,6 +226,9 @@ struct extcon_nb {
 	struct notifier_block	vbus_nb;
 	struct notifier_block	id_nb;
 	struct notifier_block	blocking_sync_nb;
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+	struct notifier_block	vbus_drop_nb;
+#endif
 };
 
 /* Input bits to state machine (mdwc->inputs) */
@@ -234,6 +237,9 @@ struct extcon_nb {
 #define B_SESS_VLD		1
 #define B_SUSPEND		2
 #define WAIT_FOR_LPM		3
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+#define A_VBUS_DROP_DET		4
+#endif
 
 #define PM_QOS_SAMPLE_SEC	2
 #define PM_QOS_THRESHOLD	400
@@ -281,7 +287,6 @@ struct dwc3_msm {
 	unsigned int		max_power;
 	bool			charging_disabled;
 	enum dwc3_drd_state	drd_state;
-	enum bus_vote		default_bus_vote;
 	enum bus_vote		override_bus_vote;
 	u32			bus_perf_client;
 	struct msm_bus_scale_pdata	*bus_scale_table;
@@ -314,6 +319,14 @@ struct dwc3_msm {
 	u32			num_gsi_event_buffers;
 	struct dwc3_event_buffer **gsi_ev_buff;
 	int pm_qos_latency;
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+	bool			send_vbus_drop_ue;
+#endif
+
+#if defined(CONFIG_EXTCON_SOMC_EXTENSION) || \
+    defined(CONFIG_USB_DWC3_MSM_ID_POLL)
+	bool			otg_present;
+#endif
 	struct pm_qos_request pm_qos_req_dma;
 	struct delayed_work perf_vote_work;
 	struct delayed_work sdp_check;
@@ -1047,17 +1060,13 @@ static void gsi_ring_db(struct usb_ep *ep, struct usb_gsi_request *request)
 
 	gsi_dbl_address_lsb = devm_ioremap_nocache(mdwc->dev,
 				request->db_reg_phs_addr_lsb, sizeof(u32));
-	if (!gsi_dbl_address_lsb) {
-		dev_err(mdwc->dev, "Failed to get GSI DBL address LSB\n");
-		return;
-	}
+	if (!gsi_dbl_address_lsb)
+		dev_dbg(mdwc->dev, "Failed to get GSI DBL address LSB\n");
 
 	gsi_dbl_address_msb = devm_ioremap_nocache(mdwc->dev,
 			request->db_reg_phs_addr_msb, sizeof(u32));
-	if (!gsi_dbl_address_msb) {
-		dev_err(mdwc->dev, "Failed to get GSI DBL address MSB\n");
-		return;
-	}
+	if (!gsi_dbl_address_msb)
+		dev_dbg(mdwc->dev, "Failed to get GSI DBL address MSB\n");
 
 	offset = dwc3_trb_dma_offset(dep, &dep->trb_pool[num_trbs-1]);
 	dev_dbg(mdwc->dev, "Writing link TRB addr: %pa to %pK (%x) for ep:%s\n",
@@ -1520,11 +1529,6 @@ static int dwc3_msm_gsi_ep_op(struct usb_ep *ep,
 
 	switch (op) {
 	case GSI_EP_OP_PREPARE_TRBS:
-		if (!dwc->pullups_connected) {
-			dbg_log_string("No Pullup\n");
-			return -ESHUTDOWN;
-		}
-
 		request = (struct usb_gsi_request *)op_data;
 		ret = gsi_prepare_trbs(ep, request);
 		break;
@@ -1533,22 +1537,12 @@ static int dwc3_msm_gsi_ep_op(struct usb_ep *ep,
 		gsi_free_trbs(ep, request);
 		break;
 	case GSI_EP_OP_CONFIG:
-		if (!dwc->pullups_connected) {
-			dbg_log_string("No Pullup\n");
-			return -ESHUTDOWN;
-		}
-
 		request = (struct usb_gsi_request *)op_data;
 		spin_lock_irqsave(&dwc->lock, flags);
 		gsi_configure_ep(ep, request);
 		spin_unlock_irqrestore(&dwc->lock, flags);
 		break;
 	case GSI_EP_OP_STARTXFER:
-		if (!dwc->pullups_connected) {
-			dbg_log_string("No Pullup\n");
-			return -ESHUTDOWN;
-		}
-
 		spin_lock_irqsave(&dwc->lock, flags);
 		ret = gsi_startxfer_for_ep(ep);
 		spin_unlock_irqrestore(&dwc->lock, flags);
@@ -1561,11 +1555,6 @@ static int dwc3_msm_gsi_ep_op(struct usb_ep *ep,
 		gsi_store_ringbase_dbl_info(ep, request);
 		break;
 	case GSI_EP_OP_ENABLE_GSI:
-		if (!dwc->pullups_connected) {
-			dbg_log_string("No Pullup\n");
-			return -ESHUTDOWN;
-		}
-
 		gsi_enable(ep);
 		break;
 	case GSI_EP_OP_GET_CH_INFO:
@@ -1573,11 +1562,6 @@ static int dwc3_msm_gsi_ep_op(struct usb_ep *ep,
 		gsi_get_channel_info(ep, ch_info);
 		break;
 	case GSI_EP_OP_RING_DB:
-		if (!dwc->pullups_connected) {
-			dbg_log_string("No Pullup\n");
-			return -ESHUTDOWN;
-		}
-
 		request = (struct usb_gsi_request *)op_data;
 		gsi_ring_db(ep, request);
 		break;
@@ -2452,7 +2436,7 @@ static int dwc3_msm_update_bus_bw(struct dwc3_msm *mdwc, enum bus_vote bv)
 	 * from userspace.
 	 */
 	if (bv >= mdwc->bus_scale_table->num_usecases)
-		bv_index = mdwc->default_bus_vote;
+		bv_index = BUS_VOTE_NOMINAL;
 	else if (bv == BUS_VOTE_NONE)
 		bv_index = BUS_VOTE_NONE;
 
@@ -2638,11 +2622,11 @@ static int dwc3_msm_suspend(struct dwc3_msm *mdwc, bool force_power_collapse)
 	atomic_set(&dwc->in_lpm, 1);
 
 	/*
-	 * with the core in power collapse, we dont require wakeup
+	 * with DCP or during cable disconnect, we dont require wakeup
 	 * using HS_PHY_IRQ or SS_PHY_IRQ. Hence enable wakeup only in
 	 * case of host bus suspend and device bus suspend.
 	 */
-	if (!(mdwc->lpm_flags & MDWC3_POWER_COLLAPSE)) {
+	if (mdwc->in_device_mode || mdwc->in_host_mode) {
 		if (mdwc->use_pdc_interrupts) {
 			enable_usb_pdc_interrupt(mdwc, true);
 		} else {
@@ -2694,7 +2678,7 @@ static int dwc3_msm_resume(struct dwc3_msm *mdwc)
 	if (mdwc->in_host_mode && mdwc->max_rh_port_speed == USB_SPEED_HIGH)
 		dwc3_msm_update_bus_bw(mdwc, BUS_VOTE_SVS);
 	else
-		dwc3_msm_update_bus_bw(mdwc, mdwc->default_bus_vote);
+		dwc3_msm_update_bus_bw(mdwc, BUS_VOTE_NOMINAL);
 
 	/* Vote for TCXO while waking up USB HSPHY */
 	ret = clk_prepare_enable(mdwc->xo_clk);
@@ -3072,7 +3056,6 @@ static irqreturn_t msm_dwc3_pwr_irq(int irq, void *data)
 }
 
 static void dwc3_otg_sm_work(struct work_struct *w);
-static int get_psy_type(struct dwc3_msm *mdwc);
 
 static int dwc3_msm_get_clk_gdsc(struct dwc3_msm *mdwc)
 {
@@ -3239,7 +3222,26 @@ static void check_for_sdp_connection(struct work_struct *w)
 	}
 }
 
-#define DP_PULSE_WIDTH_MSEC 200
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+static int dwc3_msm_vbus_drop_notifier(struct notifier_block *nb,
+	unsigned long event, void *ptr)
+{
+	struct extcon_dev *edev = ptr;
+	struct extcon_nb *enb = container_of(nb, struct extcon_nb, vbus_nb);
+	struct dwc3_msm *mdwc = enb->mdwc;
+
+	if (!edev) {
+		dev_err(mdwc->dev, "edev null for USB-DropT\n");
+		return NOTIFY_DONE;
+	}
+
+	set_bit(A_VBUS_DROP_DET, &mdwc->inputs);
+	dev_info(mdwc->dev, "received USB-DropT ocp notification\n");
+	schedule_delayed_work(&mdwc->sm_work, 0);
+
+	return NOTIFY_DONE;
+}
+#endif
 
 static int dwc3_msm_vbus_notifier(struct notifier_block *nb,
 	unsigned long event, void *ptr)
@@ -3264,13 +3266,6 @@ static int dwc3_msm_vbus_notifier(struct notifier_block *nb,
 	dev_dbg(mdwc->dev, "vbus:%ld event received\n", event);
 
 	mdwc->vbus_active = event;
-
-	if (get_psy_type(mdwc) == POWER_SUPPLY_TYPE_USB_CDP &&
-			mdwc->vbus_active) {
-		dev_dbg(mdwc->dev, "Connected to CDP, pull DP up\n");
-		usb_phy_drive_dp_pulse(mdwc->hs_phy, DP_PULSE_WIDTH_MSEC);
-	}
-
 	if ((dwc->dr_mode == USB_DR_MODE_OTG) && !mdwc->in_restart)
 		queue_work(mdwc->dwc3_wq, &mdwc->resume_work);
 
@@ -3283,6 +3278,9 @@ static int dwc3_msm_extcon_register(struct dwc3_msm *mdwc)
 	struct extcon_dev *edev;
 	int idx, extcon_cnt, ret = 0;
 	bool check_vbus_state, check_id_state, phandle_found = false;
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+	bool dropt_registered = false;
+#endif /* CONFIG_EXTCON_SOMC_EXTENSION */
 
 	extcon_cnt = of_count_phandle_with_args(node, "extcon", NULL);
 	if (extcon_cnt < 0) {
@@ -3336,12 +3334,43 @@ static int dwc3_msm_extcon_register(struct dwc3_msm *mdwc)
 				extcon_get_state(edev, EXTCON_USB_HOST))
 			dwc3_msm_id_notifier(&mdwc->extcon[idx].id_nb,
 						true, edev);
+
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+		/*
+		 * This can be only registered with the PDPHY and there is
+		 * no way to actually get the name of the current extcon_dev
+		 * since the struct definition is private and not exposed,
+		 * so, try to register DropT at every iteration.
+		 * It will succeed only once.
+		 */
+		if (!dropt_registered) {
+			mdwc->extcon[idx].vbus_drop_nb.notifier_call =
+						dwc3_msm_vbus_drop_notifier;
+			ret = extcon_register_notifier(edev, EXTCON_VBUS_DROP,
+					&mdwc->extcon[idx].vbus_drop_nb);
+			dropt_registered = true;
+		}
+#endif /* CONFIG_EXTCON_SOMC_EXTENSION */
 	}
 
 	if (!phandle_found) {
 		dev_err(mdwc->dev, "no extcon device found\n");
 		return -ENODEV;
 	}
+
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+	/*
+	 * If we couldn't register it then fail USB probing: we don't want
+	 * to run our device without overcurrent protection in place.
+	 * This may panic the kernel later... a way to force anyone to
+	 * fix this, in case anything goes wrong.
+	 */
+	if (!dropt_registered) {
+		dev_err(mdwc->dev, "failed to register notifier "
+				   "for USB-DropT\n");
+		return -EINVAL;
+	}
+#endif /* CONFIG_EXTCON_SOMC_EXTENSION */
 
 	return 0;
 }
@@ -3564,7 +3593,7 @@ static ssize_t bus_vote_store(struct device *dev,
 			&& (mdwc->max_rh_port_speed == USB_SPEED_HIGH))
 			bv = BUS_VOTE_SVS;
 		else
-			bv = mdwc->default_bus_vote;
+			bv = BUS_VOTE_NOMINAL;
 
 		dwc3_msm_update_bus_bw(mdwc, bv);
 	}
@@ -3634,7 +3663,8 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 	 * in avoiding race conditions between xhci_plat_resume and
 	 * xhci_runtime_resume and also between hcd disconnect and xhci_resume.
 	 */
-	mdwc->sm_usb_wq = alloc_ordered_workqueue("k_sm_usb", WQ_FREEZABLE);
+	mdwc->sm_usb_wq = alloc_ordered_workqueue("k_sm_usb",
+						WQ_FREEZABLE | WQ_MEM_RECLAIM);
 	if (!mdwc->sm_usb_wq) {
 		destroy_workqueue(mdwc->dwc3_wq);
 		return -ENOMEM;
@@ -3648,6 +3678,9 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 	}
 
 	mdwc->id_state = DWC3_ID_FLOAT;
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+	mdwc->otg_present = true;
+#endif
 	set_bit(ID, &mdwc->inputs);
 
 	mdwc->charging_disabled = of_property_read_bool(node,
@@ -3850,20 +3883,10 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 		goto put_dwc3;
 	}
 
-	/* use default as nominal bus voting */
-	mdwc->default_bus_vote = BUS_VOTE_NOMINAL;
-	ret = of_property_read_u32(node, "qcom,default-bus-vote",
-			&mdwc->default_bus_vote);
-
 	mdwc->bus_scale_table = msm_bus_cl_get_pdata(pdev);
 	if (mdwc->bus_scale_table) {
 		mdwc->bus_perf_client =
 			msm_bus_scale_register_client(mdwc->bus_scale_table);
-
-		/* default_bus_vote is out of range, use nominal bus voting */
-		if (mdwc->default_bus_vote >=
-				mdwc->bus_scale_table->num_usecases)
-			mdwc->default_bus_vote = BUS_VOTE_NOMINAL;
 	}
 
 	dwc = platform_get_drvdata(mdwc->dwc3);
@@ -3916,7 +3939,7 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 	if (of_property_read_bool(node, "extcon")) {
 		ret = dwc3_msm_extcon_register(mdwc);
 		if (ret)
-			goto err_get_extcon;
+			goto put_dwc3;
 
 		/*
 		 * dpdm regulator will be turned on to perform apsd
@@ -3926,8 +3949,7 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 		 * if dpdm is not present controller can be reset
 		 * as this controller may not be used for charger detection.
 		 */
-		mdwc->dpdm_reg = devm_regulator_get_optional(&pdev->dev,
-				"dpdm");
+		mdwc->dpdm_reg = devm_regulator_get(&pdev->dev, "dpdm");
 		if (IS_ERR(mdwc->dpdm_reg)) {
 			dev_dbg(mdwc->dev, "assume cable is not connected\n");
 			mdwc->dpdm_reg = NULL;
@@ -3942,31 +3964,16 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 			queue_delayed_work(mdwc->sm_usb_wq, &mdwc->sm_work, 0);
 		}
 	} else {
-		switch (dwc->dr_mode) {
-		case USB_DR_MODE_OTG:
-			if (of_property_read_bool(node,
-						"qcom,default-mode-host")) {
-				dev_dbg(mdwc->dev, "%s: start host mode\n",
+		if ((dwc->dr_mode == USB_DR_MODE_OTG &&
+		     !of_property_read_bool(node, "qcom,default-mode-host")) ||
+		     dwc->dr_mode == USB_DR_MODE_PERIPHERAL) {
+			dev_dbg(mdwc->dev, "%s: no extcon, start peripheral mode\n",
 								__func__);
-				mdwc->id_state = DWC3_ID_GROUND;
-			} else if (of_property_read_bool(node,
-						"qcom,default-mode-none")) {
-				dev_dbg(mdwc->dev, "%s: stay in none mode\n",
-								__func__);
-			} else {
-				dev_dbg(mdwc->dev, "%s: start peripheral mode\n",
-								__func__);
-				mdwc->vbus_active = true;
-			}
-			break;
-		case USB_DR_MODE_HOST:
-			mdwc->id_state = DWC3_ID_GROUND;
-			break;
-		case USB_DR_MODE_PERIPHERAL:
-			/* fall through */
-		default:
 			mdwc->vbus_active = true;
-			break;
+		} else {
+			dev_dbg(mdwc->dev, "%s: no extcon, start host mode\n",
+								__func__);
+			mdwc->id_state = DWC3_ID_GROUND;
 		}
 
 		dwc3_ext_event_notify(mdwc);
@@ -3979,21 +3986,17 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 
 	return 0;
 
-err_get_extcon:
-	if (mdwc->iommu_map)
-		arm_iommu_attach_device(mdwc->dev, mdwc->iommu_map);
-
 put_dwc3:
 	platform_device_put(mdwc->dwc3);
 	if (mdwc->bus_perf_client)
 		msm_bus_scale_unregister_client(mdwc->bus_perf_client);
 
 uninit_iommu:
-	of_platform_depopulate(&pdev->dev);
 	if (mdwc->iommu_map) {
 		arm_iommu_detach_device(mdwc->dev);
 		arm_iommu_release_mapping(mdwc->iommu_map);
 	}
+	of_platform_depopulate(&pdev->dev);
 err:
 	destroy_workqueue(mdwc->sm_usb_wq);
 	destroy_workqueue(mdwc->dwc3_wq);
@@ -4041,10 +4044,10 @@ static int dwc3_msm_remove(struct platform_device *pdev)
 
 	if (mdwc->hs_phy)
 		mdwc->hs_phy->flags &= ~PHY_HOST_MODE;
-	dbg_event(0xFF, "Remov put", 0);
 	platform_device_put(mdwc->dwc3);
 	of_platform_depopulate(&pdev->dev);
 
+	dbg_event(0xFF, "Remov put", 0);
 	pm_runtime_disable(mdwc->dev);
 	pm_runtime_barrier(mdwc->dev);
 	pm_runtime_put_sync(mdwc->dev);
@@ -4139,7 +4142,7 @@ static int dwc3_msm_host_notifier(struct notifier_block *nb,
 			dev_dbg(mdwc->dev, "set core clk rate %ld\n",
 				mdwc->core_clk_rate);
 			mdwc->max_rh_port_speed = USB_SPEED_UNKNOWN;
-			dwc3_msm_update_bus_bw(mdwc, mdwc->default_bus_vote);
+			dwc3_msm_update_bus_bw(mdwc, BUS_VOTE_NOMINAL);
 		}
 	}
 
@@ -4639,6 +4642,9 @@ static void dwc3_otg_sm_work(struct work_struct *w)
 			work = 1;
 		} else {
 			dwc3_msm_gadget_vbus_draw(mdwc, 0);
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+			mdwc->send_vbus_drop_ue = false;
+#endif
 			dev_dbg(mdwc->dev, "Cable disconnected\n");
 		}
 		break;
@@ -4736,6 +4742,13 @@ static void dwc3_otg_sm_work(struct work_struct *w)
 			mdwc->vbus_retry_count = 0;
 			mdwc->hc_died = false;
 			work = 1;
+#ifdef CONFIG_EXTCON_SOMC_EXTENSION
+		} else if (test_bit(A_VBUS_DROP_DET, &mdwc->inputs)) {
+			dev_dbg(mdwc->dev, "vbus_drop_det\n");
+			dwc3_otg_start_host(mdwc, 0);
+			mdwc->drd_state = DRD_STATE_HOST_IDLE;
+			mdwc->vbus_retry_count = 0;
+#endif
 		} else {
 			dev_dbg(mdwc->dev, "still in a_host state. Resuming root hub.\n");
 			dbg_event(0xFF, "XHCIResume", 0);
