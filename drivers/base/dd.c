@@ -72,14 +72,14 @@ static void deferred_probe_debug(struct device *dev)
 	ktime_t calltime, delta, rettime;
 	unsigned long long duration;
 
-	printk(KERN_DEBUG "deferred probe %s @ %i\n", dev_name(dev),
+	printk(KERN_INFO "deferred probe %s @ %i\n", dev_name(dev),
 	       task_pid_nr(current));
 	calltime = ktime_get();
 	bus_probe_device(dev);
 	rettime = ktime_get();
 	delta = ktime_sub(rettime, calltime);
 	duration = (unsigned long long) ktime_to_ns(delta) >> 10;
-	printk(KERN_DEBUG "deferred probe %s returned after %lld usecs\n",
+	printk(KERN_INFO "deferred probe %s returned after %lld usecs\n",
 	       dev_name(dev), duration);
 }
 
@@ -488,7 +488,7 @@ pinctrl_bind_failed:
 	switch (ret) {
 	case -EPROBE_DEFER:
 		/* Driver requested deferred probing */
-		dev_dbg(dev, "Driver %s requests probe deferral\n", drv->name);
+		dev_info(dev, "Driver %s requests probe deferral\n", drv->name);
 		driver_deferred_probe_add(dev);
 		/* Did a trigger occur while probing? Need to re-trigger if yes */
 		if (local_trigger_count != atomic_read(&deferred_trigger_count))

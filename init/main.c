@@ -806,13 +806,13 @@ static int __init_or_module do_one_initcall_debug(initcall_t fn)
 	strncpy(dbg_addr(INITCALL_ADDR), name_buf, sizeof(name_buf));
 #endif
 
-	printk(KERN_DEBUG "calling  %pF @ %i\n", fn, task_pid_nr(current));
+	printk(KERN_INFO "calling  %pF @ %i\n", fn, task_pid_nr(current));
 	calltime = ktime_get();
 	ret = fn();
 	rettime = ktime_get();
 	delta = ktime_sub(rettime, calltime);
 	duration = (unsigned long long) ktime_to_ns(delta) >> 10;
-	printk(KERN_DEBUG "initcall %pF returned %d after %lld usecs\n",
+	printk(KERN_INFO "initcall %pF returned %d after %lld usecs\n",
 		 fn, ret, duration);
 
 	return ret;
