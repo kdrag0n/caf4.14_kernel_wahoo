@@ -28,7 +28,7 @@ config AB8500_USB
 	  in host mode, low speed.
 
 config FSL_USB2_OTG
-	bool "Freescale USB OTG Transceiver Driver"
+	tristate "Freescale USB OTG Transceiver Driver"
 	depends on USB_EHCI_FSL && USB_FSL_USB2 && USB_OTG_FSM=y && PM
 	depends on USB_GADGET || !USB_GADGET # if USB_GADGET=m, this can't be 'y'
 	select USB_PHY
@@ -251,6 +251,14 @@ config MSM_HSUSB_PHY
 	  the high-speed PHY which is usually paired with either the ChipIdea or
 	  Synopsys DWC3 USB IPs on MSM SOCs. This driver expects to configure the
 	  PHY with a dedicated register I/O memory region.
+
+config MSM_USB_PHY_SOMC_EXT
+	bool "MSM SSUSB and QUSB2 PHY advanced SoMC configuration"
+	depends on MSM_QUSB_PHY && USB_MSM_SSPHY_QMP
+	help
+	  This is extensional code from SoMC needed to configure
+	  the USB PHY on SoMC boards that require additional
+	  non-standard configuration.
 
 config USB_MV_OTG
 	tristate "Marvell USB OTG support"
