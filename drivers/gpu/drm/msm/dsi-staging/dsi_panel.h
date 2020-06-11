@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -37,6 +37,14 @@
 
 #define DSI_MODE_MAX 5
 
+#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
+#define SDE_PINCTRL_STATE_TOUCH_ACTIVE "sde_touch_active"
+#define SDE_PINCTRL_STATE_TOUCH_SUSPEND  "sde_touch_suspend"
+#define DISPLAY_BL_MIN 4
+#define DISPLAY_BL_OFF 0
+#define DISPLAY_BL_ON 1
+#endif /* CONFIG_DRM_SDE_SPECIFIC_PANEL */
+
 enum dsi_panel_rotation {
 	DSI_PANEL_ROTATE_NONE = 0,
 	DSI_PANEL_ROTATE_HV_FLIP,
@@ -71,12 +79,6 @@ enum dsi_dms_mode {
 	DSI_DMS_MODE_RES_SWITCH_IMMEDIATE,
 };
 
-enum dsi_panel_physical_type {
-	DSI_DISPLAY_PANEL_TYPE_LCD = 0,
-	DSI_DISPLAY_PANEL_TYPE_OLED,
-	DSI_DISPLAY_PANEL_TYPE_MAX,
-};
-
 struct dsi_dfps_capabilities {
 	enum dsi_dfps_type type;
 	u32 min_refresh_rate;
@@ -90,15 +92,16 @@ struct dsi_dyn_clk_caps {
 	bool dyn_clk_support;
 	u32 *bit_clk_list;
 	u32 bit_clk_list_len;
-	bool skip_phy_timing_update;
-	enum dsi_dyn_clk_feature_type type;
-	bool maintain_const_fps;
 };
 
 struct dsi_pinctrl_info {
 	struct pinctrl *pinctrl;
 	struct pinctrl_state *active;
 	struct pinctrl_state *suspend;
+#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
+	struct pinctrl_state *touch_state_active;
+	struct pinctrl_state *touch_state_suspend;
+#endif /* CONFIG_DRM_SDE_SPECIFIC_PANEL */
 };
 
 struct dsi_panel_phy_props {
@@ -114,16 +117,16 @@ struct dsi_backlight_config {
 	u32 bl_min_level;
 	u32 bl_max_level;
 	u32 brightness_max_level;
-	u32 brightness_default_level;
 	u32 bl_level;
 	u32 bl_scale;
 	u32 bl_scale_ad;
 
 	int en_gpio;
 	/* PWM params */
-	struct pwm_device *pwm_bl;
-	bool pwm_enabled;
+	bool pwm_pmi_control;
+	u32 pwm_pmic_bank;
 	u32 pwm_period_usecs;
+	int pwm_gpio;
 
 	/* WLED params */
 	struct led_trigger *wled;
@@ -182,7 +185,6 @@ struct dsi_panel {
 	struct dsi_video_engine_cfg video_config;
 	struct dsi_cmd_engine_cfg cmd_config;
 	enum dsi_op_mode panel_mode;
-	bool panel_mode_switch_enabled;
 
 	struct dsi_dfps_capabilities dfps_caps;
 	struct dsi_dyn_clk_caps dyn_clk_caps;
@@ -190,7 +192,6 @@ struct dsi_panel {
 
 	struct dsi_display_mode *cur_mode;
 	u32 num_timing_nodes;
-	u32 num_display_modes;
 
 	struct dsi_regulator_info power_info;
 	struct dsi_backlight_config bl_config;
@@ -216,7 +217,12 @@ struct dsi_panel {
 
 	bool sync_broadcast_en;
 	int power_mode;
-	enum dsi_panel_physical_type panel_type;
+
+#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
+	struct panel_specific_pdata *spec_pdata;
+	struct delayed_work hbm_protect_work;
+	int touch_type;
+#endif /* CONFIG_DRM_SDE_SPECIFIC_PANEL */
 };
 
 static inline bool dsi_panel_ulps_feature_enabled(struct dsi_panel *panel)
@@ -237,11 +243,6 @@ static inline void dsi_panel_acquire_panel_lock(struct dsi_panel *panel)
 static inline void dsi_panel_release_panel_lock(struct dsi_panel *panel)
 {
 	mutex_unlock(&panel->panel_lock);
-}
-
-static inline bool dsi_panel_is_type_oled(struct dsi_panel *panel)
-{
-	return (panel->panel_type == DSI_DISPLAY_PANEL_TYPE_OLED);
 }
 
 struct dsi_panel *dsi_panel_get(struct device *parent,
@@ -287,6 +288,18 @@ int dsi_panel_set_lp2(struct dsi_panel *panel);
 
 int dsi_panel_set_nolp(struct dsi_panel *panel);
 
+#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
+int dsi_panel_set_aod_on(struct dsi_panel *panel);
+
+int dsi_panel_set_aod_off(struct dsi_panel *panel);
+
+int dsi_panel_set_vr_on(struct dsi_panel *panel);
+
+int dsi_panel_set_vr_off(struct dsi_panel *panel);
+
+int dsi_panel_set_hbm_mode(struct dsi_panel *panel, int mode);
+#endif /* CONFIG_DRM_SDE_SPECIFIC_PANEL */
+
 int dsi_panel_prepare(struct dsi_panel *panel);
 
 int dsi_panel_enable(struct dsi_panel *panel);
@@ -312,14 +325,6 @@ int dsi_panel_send_qsync_off_dcs(struct dsi_panel *panel,
 
 int dsi_panel_send_roi_dcs(struct dsi_panel *panel, int ctrl_idx,
 		struct dsi_rect *roi);
-
-int dsi_panel_pre_mode_switch_to_video(struct dsi_panel *panel);
-
-int dsi_panel_pre_mode_switch_to_cmd(struct dsi_panel *panel);
-
-int dsi_panel_mode_switch_to_cmd(struct dsi_panel *panel);
-
-int dsi_panel_mode_switch_to_vid(struct dsi_panel *panel);
 
 int dsi_panel_switch(struct dsi_panel *panel);
 

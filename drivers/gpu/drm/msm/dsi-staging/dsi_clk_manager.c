@@ -48,6 +48,7 @@ struct dsi_clk_mngr {
 	pre_clockon_cb pre_clkon_cb;
 
 	bool is_cont_splash_enabled;
+	bool link_hsclk_full_reconf;
 	void *priv_data;
 };
 
@@ -139,7 +140,7 @@ int dsi_clk_set_pixel_clk_rate(void *client, u64 pixel_clk, u32 index)
  * dsi_clk_set_byte_clk_rate() - set frequency for byte clock
  * @client:	DSI clock client pointer.
  * @byte_clk:	Byte clock rate in Hz.
- * @byte_intf_clk: Byte interface clock rate in Hz.
+ * @byte_intf_clk:	Byte interface clock rate in Hz.
  * @index:	Index of the DSI controller.
  * return: error code in case of failure or 0 for success.
  */
@@ -159,13 +160,13 @@ int dsi_clk_set_byte_clk_rate(void *client, u64 byte_clk,
 
 	if (mngr->link_clks[index].hs_clks.byte_intf_clk) {
 		rc = clk_set_rate(mngr->link_clks[index].hs_clks.byte_intf_clk,
-							byte_intf_clk);
+				  byte_intf_clk);
 		if (rc)
 			pr_err("failed to set clk rate for byte intf clk=%d\n",
 			       rc);
 		else
-			mngr->link_clks[index].freq.byte_intf_clk_rate
-							= byte_intf_clk;
+			mngr->link_clks[index].freq.byte_intf_clk_rate =
+				byte_intf_clk;
 	}
 
 	return rc;
@@ -357,6 +358,17 @@ static int dsi_link_hs_clk_set_rate(struct dsi_link_hs_clk_info *link_hs_clks,
 	 */
 	if (mngr->is_cont_splash_enabled)
 		return 0;
+
+	/*
+	 * MSM8998 on common clk framework requires the MDSS-PLL clocks
+	 * to get fully reconfigured after suspend due to an unknown bug.
+	 */
+	if (mngr->link_hsclk_full_reconf) {
+		rc = clk_set_rate(link_hs_clks->byte_clk,
+			l_clks->freq.byte_clk_rate / 2);
+		rc = clk_set_rate(link_hs_clks->pixel_clk,
+			l_clks->freq.pix_clk_rate / 2);
+	}
 
 	rc = clk_set_rate(link_hs_clks->byte_clk,
 		l_clks->freq.byte_clk_rate);
@@ -1380,6 +1392,19 @@ void dsi_display_clk_mngr_update_splash_status(void *clk_mgr, bool status)
 
 	mngr = (struct dsi_clk_mngr *)clk_mgr;
 	mngr->is_cont_splash_enabled = status;
+}
+
+void dsi_display_clk_mngr_set_clk_full_reconf(void *clk_mgr, bool status)
+{
+	struct dsi_clk_mngr *mngr;
+
+	if (!clk_mgr) {
+		pr_err("Invalid params\n");
+		return;
+	}
+
+	mngr = (struct dsi_clk_mngr *)clk_mgr;
+	mngr->link_hsclk_full_reconf = status;
 }
 
 void *dsi_display_clk_mngr_register(struct dsi_clk_info *info)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2014-2019, The Linux Foundation. All rights reserved.
  * Copyright (C) 2013 Red Hat
  * Author: Rob Clark <robdclark@gmail.com>
  *
@@ -49,6 +49,10 @@
 
 #include <soc/qcom/scm.h>
 #include "soc/qcom/secure_buffer.h"
+
+#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
+#include "../dsi-staging/somc_panel/somc_panel_exts.h"
+#endif /* CONFIG_DRM_SDE_SPECIFIC_PANEL */
 
 #define CREATE_TRACE_POINTS
 #include "sde_trace.h"
@@ -887,7 +891,7 @@ static int _sde_kms_splash_mem_get(struct sde_kms *sde_kms,
 	}
 
 	splash->ref_cnt++;
-	SDE_DEBUG("one2one mapping done for base:%lx size:%x ref_cnt:%d\n",
+	SDE_DEBUG("one2one mapping done for base:%x size:%x ref_cnt:%d\n",
 				splash->splash_buf_base,
 				splash->splash_buf_size,
 				splash->ref_cnt);
@@ -938,7 +942,7 @@ static int _sde_kms_splash_mem_put(struct sde_kms *sde_kms,
 
 	splash->ref_cnt--;
 
-	SDE_DEBUG("splash base:%lx refcnt:%d\n",
+	SDE_DEBUG("splash base:%x refcnt:%d\n",
 			splash->splash_buf_base, splash->ref_cnt);
 
 	if (!splash->ref_cnt) {
@@ -1055,7 +1059,7 @@ static void sde_kms_commit(struct msm_kms *kms,
 	SDE_ATRACE_END("sde_kms_commit");
 }
 
-void sde_kms_release_splash_resource(struct sde_kms *sde_kms,
+static void _sde_kms_release_splash_resource(struct sde_kms *sde_kms,
 		struct drm_crtc *crtc)
 {
 	struct msm_drm_private *priv;
@@ -1172,7 +1176,7 @@ static void sde_kms_complete_commit(struct msm_kms *kms,
 	sde_power_resource_enable(&priv->phandle, sde_kms->core_client, false);
 
 	for_each_crtc_in_state(old_state, crtc, old_crtc_state, i)
-		sde_kms_release_splash_resource(sde_kms, crtc);
+		_sde_kms_release_splash_resource(sde_kms, crtc);
 
 	SDE_EVT32_VERBOSE(SDE_EVTLOG_FUNC_EXIT);
 	SDE_ATRACE_END("sde_kms_complete_commit");
@@ -1363,6 +1367,42 @@ static void _sde_kms_release_displays(struct sde_kms *sde_kms)
 	sde_kms->dsi_display_count = 0;
 }
 
+#ifdef CONFIG_DRM_MSM_EMU_HEADLESS
+int kms_emu_headless_disp_check_status(void *display, bool te_check_override)
+{
+	struct dsi_display *dsi_display = display;
+	struct dsi_panel *panel;
+	struct dsi_display_ctrl *ctrl;
+	int i, rc = 0x1;
+	u32 mask;
+
+	if (!dsi_display || !dsi_display->panel)
+		return -EINVAL;
+
+	panel = dsi_display->panel;
+
+	dsi_panel_acquire_panel_lock(panel);
+
+	if (!panel->panel_initialized) {
+		pr_debug("Panel not initialized\n");
+		dsi_panel_release_panel_lock(panel);
+		return rc;
+	}
+
+	/* Prevent another ESD check,when ESD recovery is underway */
+	if (atomic_read(&panel->esd_recovery_pending)) {
+		dsi_panel_release_panel_lock(panel);
+		return rc;
+	}
+
+	panel->esd_config.esd_enabled = false;
+
+	dsi_panel_release_panel_lock(panel);
+
+	return rc;
+}
+#endif
+
 /**
  * _sde_kms_setup_displays - create encoders, bridges and connectors
  *                           for underlying displays
@@ -1386,11 +1426,19 @@ static int _sde_kms_setup_displays(struct drm_device *dev,
 		.soft_reset   = dsi_display_soft_reset,
 		.pre_kickoff  = dsi_conn_pre_kickoff,
 		.clk_ctrl = dsi_display_clk_ctrl,
+#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
+		.set_power = somc_panel_set_doze_mode,
+#else
 		.set_power = dsi_display_set_power,
+#endif
 		.get_mode_info = dsi_conn_get_mode_info,
 		.get_dst_format = dsi_display_get_dst_format,
 		.post_kickoff = dsi_conn_post_kickoff,
+#ifdef CONFIG_DRM_MSM_EMU_HEADLESS
+		.check_status = kms_emu_headless_disp_check_status,
+#else
 		.check_status = dsi_display_check_status,
+#endif
 		.enable_event = dsi_conn_enable_event,
 		.cmd_transfer = dsi_display_cmd_transfer,
 		.cont_splash_config = dsi_display_cont_splash_config,
@@ -1413,7 +1461,6 @@ static int _sde_kms_setup_displays(struct drm_device *dev,
 		.get_panel_vfp = NULL,
 	};
 	static const struct sde_connector_ops dp_ops = {
-		.set_info_blob = dp_connnector_set_info_blob,
 		.post_init  = dp_connector_post_init,
 		.detect     = dp_connector_detect,
 		.get_modes  = dp_connector_get_modes,
@@ -1543,7 +1590,6 @@ static int _sde_kms_setup_displays(struct drm_device *dev,
 			sde_encoder_destroy(encoder);
 		}
 	}
-
 	/* dp */
 	for (i = 0; i < sde_kms->dp_display_count &&
 			priv->num_encoders < max_encoders; ++i) {
@@ -1590,7 +1636,6 @@ static int _sde_kms_setup_displays(struct drm_device *dev,
 
 		/* update display cap to MST_MODE for DP MST encoders */
 		info.capabilities |= MSM_DISPLAY_CAP_MST_MODE;
-		sde_kms->dp_stream_count = dp_display_get_num_of_streams();
 		for (idx = 0; idx < sde_kms->dp_stream_count; idx++) {
 			info.h_tile_instance[0] = idx;
 			encoder = sde_encoder_init(dev, &info);
@@ -2692,15 +2737,8 @@ static int sde_kms_get_mixer_count(const struct msm_kms *kms,
 	mode_clock_hz = drm_fixp_mul(temp, mdp_fudge_factor);
 
 	if (mode_clock_hz > max_mdp_clock_hz ||
-			mode->hdisplay > max_mixer_width) {
+			mode->hdisplay > max_mixer_width)
 		*num_lm = 2;
-		if ((mode_clock_hz >> 1) > max_mdp_clock_hz) {
-			SDE_DEBUG("[%s] clock %d exceeds max_mdp_clk %d\n",
-					mode->name, mode_clock_hz,
-					max_mdp_clock_hz);
-			return -EINVAL;
-		}
-	}
 
 	SDE_DEBUG("[%s] h=%d, v=%d, fps%d, max_mdp_pclk_hz=%llu, num_lm=%d\n",
 			mode->name, mode->htotal, mode->vtotal, mode->vrefresh,
@@ -3327,6 +3365,74 @@ static int _sde_kms_get_splash_data(struct sde_splash_data *data)
 	return ret;
 }
 
+#ifdef CONFIG_DRM_MSM_DSI_SOMC_PANEL
+/*
+ * sde_kms_dualdsi_workaround - Set the split-flush bit to the SSPP_SPARE
+ *                              register manually in case of continuous
+ *				splash on legacy devices with dual-dsi.
+ *
+ * New bootloader designs will set this bit in the SSPP spare register
+ * if we are booting with continuous splash enabled on a device featuring
+ * single display on dual-dsi but legacy SoCs usually feature older
+ * and non-upgradable (because signed) bootloaders which don't.
+ */
+static void sde_kms_dualdsi_workaround(struct sde_kms *sde_kms)
+{
+	struct sde_hw_blk_reg_map *sde_hw_blk = &sde_kms->hw_mdp->hw;
+	struct dsi_display *dsi_display = NULL;
+	void **dsi_displays = NULL;
+	const u32 sspp_spare_offset = 0x28;
+	bool set_split_flush = false;
+	int display_count, i;
+
+	display_count = dsi_display_get_num_of_displays();
+	dsi_displays = kcalloc(display_count, sizeof(void *), GFP_KERNEL);
+	if (!dsi_displays) {
+		SDE_ERROR("Memory exhausted. Goodbye.\n");
+		return;
+	}
+
+	display_count = dsi_display_get_active_displays(
+					dsi_displays, display_count);
+
+	/* No display, no workaround to apply for sure */
+	if (display_count < 1)
+		goto free;
+
+	for (i = 0; i < display_count; i++) {
+		dsi_display = dsi_displays[i];
+
+		if (unlikely(!dsi_display) ||
+		    unlikely(!dsi_display->disp_node))
+			continue;
+
+		/* Makes no sense if not using more than one CTRL and PHY */
+		if (dsi_display->ctrl_count < 2)
+			continue;
+
+		set_split_flush = of_property_read_bool(dsi_display->disp_node,
+						"qcom,set-split-flush-reg-wa");
+
+		/*
+		 * We currently enable the split flush bit on the SSPP SPARE
+		 * register (which has no hardware use, as it's a spare reg)
+		 * only once if any display here needs split flush, so we go
+		 * on if we can find the DT property to enable it in *any*
+		 * of the display nodes, as the register is not per-display.
+		 */
+		if (set_split_flush) {
+			pr_info("Workaround for continuous splash split-flush"
+				" bit: applying for display %d.\n", i);
+			SDE_REG_WRITE(sde_hw_blk, sspp_spare_offset, 0x1);
+			goto free;
+		}
+	}
+
+free:
+	kfree(dsi_displays);
+}
+#endif
+
 static int sde_kms_hw_init(struct msm_kms *kms)
 {
 	struct sde_kms *sde_kms;
@@ -3539,6 +3645,20 @@ static int sde_kms_hw_init(struct msm_kms *kms)
 		goto hw_intr_init_err;
 	}
 
+	sde_kms->hw_mdp = sde_rm_get_mdp(&sde_kms->rm);
+	if (IS_ERR_OR_NULL(sde_kms->hw_mdp)) {
+		rc = PTR_ERR(sde_kms->hw_mdp);
+		if (!sde_kms->hw_mdp)
+			rc = -EINVAL;
+		SDE_ERROR("failed to get hw_mdp: %d\n", rc);
+		sde_kms->hw_mdp = NULL;
+		goto power_error;
+	}
+
+#ifdef CONFIG_DRM_MSM_DSI_SOMC_PANEL
+	sde_kms_dualdsi_workaround(sde_kms);
+#endif
+
 	/*
 	 * Attempt continuous splash handoff only if reserved
 	 * splash memory is found & release resources on any error
@@ -3552,16 +3672,6 @@ static int sde_kms_hw_init(struct msm_kms *kms)
 		_sde_kms_unmap_all_splash_regions(sde_kms);
 		memset(&sde_kms->splash_data, 0x0,
 				sizeof(struct sde_splash_data));
-	}
-
-	sde_kms->hw_mdp = sde_rm_get_mdp(&sde_kms->rm);
-	if (IS_ERR_OR_NULL(sde_kms->hw_mdp)) {
-		rc = PTR_ERR(sde_kms->hw_mdp);
-		if (!sde_kms->hw_mdp)
-			rc = -EINVAL;
-		SDE_ERROR("failed to get hw_mdp: %d\n", rc);
-		sde_kms->hw_mdp = NULL;
-		goto power_error;
 	}
 
 	for (i = 0; i < sde_kms->catalog->vbif_count; i++) {

@@ -1048,7 +1048,7 @@ static inline void _sde_plane_set_scanout(struct drm_plane *plane,
 		psde->is_error = true;
 	}
 	else if (psde->pipe_hw->ops.setup_sourceaddress) {
-		SDE_EVT32(psde->pipe_hw->idx,
+		SDE_EVT32_VERBOSE(psde->pipe_hw->idx,
 				pipe_cfg->layout.width,
 				pipe_cfg->layout.height,
 				pipe_cfg->layout.plane_addr[0],
@@ -4848,6 +4848,44 @@ static void _sde_plane_set_excl_rect_v1(struct sde_plane *psde,
 			pstate->excl_rect.x, pstate->excl_rect.y,
 			pstate->excl_rect.w, pstate->excl_rect.h);
 }
+
+#ifdef CONFIG_DRM_MSM_DSI_SOMC_PANEL
+int sde_plane_set_property(struct drm_plane *plane,
+		struct drm_plane_state *state, struct drm_property *property,
+		uint64_t val)
+{
+	struct sde_plane *psde = plane ? to_sde_plane(plane) : NULL;
+	struct sde_plane_state *pstate;
+	int idx, ret = -EINVAL;
+
+	SDE_DEBUG_PLANE(psde, "\n");
+
+	if (!plane) {
+		SDE_ERROR("invalid plane\n");
+	} else if (!state) {
+		SDE_ERROR_PLANE(psde, "invalid state\n");
+	} else {	
+		pstate = to_sde_plane_state(state);
+		idx = msm_property_index(&psde->property_info,
+				property);
+		switch (idx) {
+		case PLANE_PROP_HUE_ADJUST:
+		case PLANE_PROP_SATURATION_ADJUST:
+		case PLANE_PROP_VALUE_ADJUST:
+		case PLANE_PROP_CONTRAST_ADJUST:
+			ret = msm_property_set_property(&psde->property_info,
+				&pstate->property_state, idx, val);
+			break;
+
+		default:
+			/* nothing to do */
+			break;
+		}
+	}
+
+	return ret;
+}
+#endif
 
 static int sde_plane_atomic_set_property(struct drm_plane *plane,
 		struct drm_plane_state *state, struct drm_property *property,

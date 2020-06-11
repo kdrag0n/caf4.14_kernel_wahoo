@@ -1046,9 +1046,10 @@ int sde_power_resource_enable(struct sde_power_handle *phandle,
 				SDE_POWER_EVENT_POST_DISABLE);
 	}
 
+end:
 	SDE_EVT32_VERBOSE(enable, SDE_EVTLOG_FUNC_EXIT);
-	SDE_ATRACE_END("sde_power_resource_enable");
 	mutex_unlock(&phandle->phandle_lock);
+	SDE_ATRACE_END("sde_power_resource_enable");
 	return rc;
 
 clk_err:
@@ -1062,10 +1063,8 @@ vreg_err:
 		sde_power_data_bus_update(&phandle->data_bus_handle[i], 0);
 data_bus_hdl_err:
 	phandle->current_usecase_ndx = prev_usecase_ndx;
-	SDE_ATRACE_END("sde_power_resource_enable");
-
-end:
 	mutex_unlock(&phandle->phandle_lock);
+	SDE_ATRACE_END("sde_power_resource_enable");
 	return rc;
 }
 
@@ -1234,6 +1233,10 @@ int sde_power_clk_set_flags(struct sde_power_handle *phandle,
 
 	clk = sde_power_clk_get_clk(phandle, clock_name);
 	if (!clk) {
+		if (!strcmp("lut_clk", clock_name)) {
+			pr_err_once("lut_clk not found\n");
+			return -ENOENT;
+		}
 		pr_err("get_clk failed for clk: %s\n", clock_name);
 		return -EINVAL;
 	}

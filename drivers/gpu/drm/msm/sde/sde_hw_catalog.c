@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2019, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -98,6 +98,7 @@
 #define VBIF_XIN_HALT_TIMEOUT		0x4000
 
 #define DEFAULT_PIXEL_RAM_SIZE		(50 * 1024)
+#define SDM630_PIXEL_RAM_SIZE		(40 * 1024)
 
 /* access property value based on prop_type and hardware index */
 #define PROP_VALUE_ACCESS(p, i, j)		((p + i)->value[j])
@@ -133,6 +134,7 @@
 #define DEFAULT_AMORTIZABLE_THRESHOLD		25
 #define DEFAULT_MNOC_PORTS			2
 #define DEFAULT_AXI_BUS_WIDTH			32
+#define DEFAULT_PERF_DEFAULT_MODE		0 // SDE_PERF_MODE_NORMAL
 #define DEFAULT_CPU_MASK			0
 #define DEFAULT_CPU_DMA_LATENCY			PM_QOS_DEFAULT_VALUE
 
@@ -211,6 +213,7 @@ enum {
 	PERF_SAFE_LUT_MACROTILE_QSEED,
 	PERF_NUM_MNOC_PORTS,
 	PERF_AXI_BUS_WIDTH,
+	PERF_DEFAULT_MODE,
 	PERF_PROP_MAX,
 };
 
@@ -533,6 +536,8 @@ static struct sde_prop_type sde_perf_prop[] = {
 	{PERF_NUM_MNOC_PORTS, "qcom,sde-num-mnoc-ports",
 			false, PROP_TYPE_U32},
 	{PERF_AXI_BUS_WIDTH, "qcom,sde-axi-bus-width",
+			false, PROP_TYPE_U32},
+	{PERF_DEFAULT_MODE, "qcom,sde-perf-default-mode",
 			false, PROP_TYPE_U32},
 };
 
@@ -1226,7 +1231,9 @@ static void _sde_sspp_setup_cursor(struct sde_mdss_cfg *sde_cfg,
 	struct sde_sspp_cfg *sspp, struct sde_sspp_sub_blks *sblk,
 	struct sde_prop_value *prop_value, u32 *cursor_count)
 {
-	if (!IS_SDE_MAJOR_MINOR_SAME(sde_cfg->hwversion, SDE_HW_VER_300))
+	if (!(IS_MSM8996_TARGET(sde_cfg->hwversion)) &&
+	    !(IS_MSM8998_TARGET(sde_cfg->hwversion)) &&
+	    !(IS_SDM630_TARGET(sde_cfg->hwversion)))
 		SDE_ERROR("invalid sspp type %d, xin id %d\n",
 				sspp->type, sspp->xin_id);
 	set_bit(SDE_SSPP_CURSOR, &sspp->features);
@@ -1333,7 +1340,7 @@ static int sde_dgm_parse_dt(struct device_node *np, u32 index,
 }
 
 static int sde_sspp_parse_dt(struct device_node *np,
-	struct sde_mdss_cfg *sde_cfg)
+	struct sde_mdss_cfg *sde_cfg, uint32_t hw_rev)
 {
 	int rc, prop_count[SSPP_PROP_MAX], off_count, i, j;
 	int vig_prop_count[VIG_PROP_MAX], rgb_prop_count[RGB_PROP_MAX];
@@ -1503,7 +1510,12 @@ static int sde_sspp_parse_dt(struct device_node *np,
 		}
 
 		sspp->xin_id = PROP_VALUE_ACCESS(prop_value, SSPP_XIN, i);
-		sblk->pixel_ram_size = DEFAULT_PIXEL_RAM_SIZE;
+
+		if (IS_SDM630_TARGET(hw_rev)) {
+			sblk->pixel_ram_size = SDM630_PIXEL_RAM_SIZE;
+		} else {
+			sblk->pixel_ram_size = DEFAULT_PIXEL_RAM_SIZE;
+		}
 		sblk->src_blk.len = PROP_VALUE_ACCESS(prop_value, SSPP_SIZE, 0);
 
 		if (PROP_VALUE_ACCESS(prop_value, SSPP_EXCL_RECT, i) == 1)
@@ -1594,7 +1606,10 @@ static int sde_ctl_parse_dt(struct device_node *np,
 
 		of_property_read_string_index(np,
 				ctl_prop[HW_DISP].prop_name, i, &disp_pref);
-		if (disp_pref && !strcmp(disp_pref, "primary"))
+
+		if (disp_pref && (!strcmp(disp_pref, "primary") ||
+				  !strcmp(disp_pref, "primary-nosplit") ||
+				  !strcmp(disp_pref, "primary-split")))
 			set_bit(SDE_CTL_PRIMARY_PREF, &ctl->features);
 		if (i < MAX_SPLIT_DISPLAY_CTL)
 			set_bit(SDE_CTL_SPLIT_DISPLAY, &ctl->features);
@@ -1604,6 +1619,15 @@ static int sde_ctl_parse_dt(struct device_node *np,
 			set_bit(SDE_CTL_SBUF, &ctl->features);
 		if (IS_SDE_CTL_REV_100(sde_cfg->ctl_rev))
 			set_bit(SDE_CTL_ACTIVE_CFG, &ctl->features);
+
+		/* MDP5 split display fixup */
+		if (disp_pref && (!strcmp(disp_pref, "primary-nosplit") ||
+				  !strcmp(disp_pref, "nosplit")))
+			clear_bit(SDE_CTL_SPLIT_DISPLAY, &ctl->features);
+
+		if (disp_pref && (!strcmp(disp_pref, "primary-split") ||
+				  !strcmp(disp_pref, "split")))
+			set_bit(SDE_CTL_SPLIT_DISPLAY, &ctl->features);
 	}
 end:
 	kfree(prop_value);
@@ -1932,7 +1956,11 @@ static int sde_wb_parse_dt(struct device_node *np, struct sde_mdss_cfg *sde_cfg)
 		}
 
 		if (IS_SDE_MAJOR_MINOR_SAME((sde_cfg->hwversion),
-				SDE_HW_VER_170))
+				SDE_HW_VER_170) ||
+		    IS_MSM8996_TARGET(sde_cfg->hwversion) ||
+		    IS_MSM8998_TARGET(sde_cfg->hwversion) ||
+		    IS_SDM630_TARGET(sde_cfg->hwversion) ||
+		    IS_SDM660_TARGET(sde_cfg->hwversion))
 			wb->vbif_idx = VBIF_NRT;
 		else
 			wb->vbif_idx = VBIF_RT;
@@ -3505,6 +3533,11 @@ static int sde_perf_parse_dt(struct device_node *np, struct sde_mdss_cfg *cfg)
 			PROP_VALUE_ACCESS(prop_value,
 				PERF_AXI_BUS_WIDTH, 0) :
 			DEFAULT_AXI_BUS_WIDTH;
+	cfg->perf.default_perf_mode =
+			prop_exists[PERF_DEFAULT_MODE] ?
+			PROP_VALUE_ACCESS(prop_value,
+				PERF_DEFAULT_MODE, 0) :
+			DEFAULT_PERF_DEFAULT_MODE;
 
 	if (prop_exists[PERF_DANGER_LUT] && prop_count[PERF_DANGER_LUT] <=
 			SDE_QOS_LUT_USAGE_MAX) {
@@ -3651,6 +3684,8 @@ static int sde_parse_merge_3d_dt(struct device_node *np,
 	bool prop_exists[HW_PROP_MAX];
 	struct sde_merge_3d_cfg *merge_3d;
 
+	sde_cfg->merge_3d_count = 0;
+
 	prop_value = kcalloc(HW_PROP_MAX, sizeof(struct sde_prop_value),
 			GFP_KERNEL);
 	if (!prop_value) {
@@ -3747,7 +3782,8 @@ static int sde_hardware_format_caps(struct sde_mdss_cfg *sde_cfg,
 	uint32_t cursor_list_size = 0;
 	uint32_t index = 0;
 
-	if (IS_SDE_MAJOR_MINOR_SAME((hw_rev), SDE_HW_VER_300)) {
+	if (IS_MSM8996_TARGET(hw_rev) || IS_MSM8998_TARGET(hw_rev) ||
+	    IS_SDM630_TARGET(hw_rev) || IS_SDM660_TARGET(hw_rev)) {
 		cursor_list_size = ARRAY_SIZE(cursor_formats);
 		sde_cfg->cursor_formats = kcalloc(cursor_list_size,
 			sizeof(struct sde_format_extended), GFP_KERNEL);
@@ -3875,14 +3911,32 @@ static int _sde_hardware_pre_caps(struct sde_mdss_cfg *sde_cfg, uint32_t hw_rev)
 		set_bit(i, sde_cfg->mdss_irqs);
 
 	if (IS_MSM8996_TARGET(hw_rev)) {
-		sde_cfg->perf.min_prefill_lines = 21;
-		sde_cfg->has_decimation = true;
-	} else if (IS_MSM8998_TARGET(hw_rev)) {
+		/* update msm8996 target here */
 		sde_cfg->has_wb_ubwc = true;
+		sde_cfg->perf.min_prefill_lines = 21;
+		sde_cfg->ts_prefill_rev = 1;
+		sde_cfg->vbif_qos_nlvl = 4;
+		sde_cfg->has_decimation = true;
+		clear_bit(MDSS_INTR_AD4_0_INTR, sde_cfg->mdss_irqs);
+		clear_bit(MDSS_INTR_AD4_1_INTR, sde_cfg->mdss_irqs);
+		clear_bit(MDSS_INTF_TEAR_1_INTR, sde_cfg->mdss_irqs);
+		clear_bit(MDSS_INTF_TEAR_2_INTR, sde_cfg->mdss_irqs);
+	} else if (IS_MSM8998_TARGET(hw_rev) || IS_SDM630_TARGET(hw_rev) ||
+		   IS_SDM660_TARGET(hw_rev)) {
+		/* update msm8998/sdm630 target here */
+		sde_cfg->has_wb_ubwc = true;
+		sde_cfg->has_cwb_support = true;
 		sde_cfg->perf.min_prefill_lines = 25;
 		sde_cfg->vbif_qos_nlvl = 4;
-		sde_cfg->ts_prefill_rev = 1;
 		sde_cfg->has_decimation = true;
+		if (IS_SDM630_TARGET(hw_rev) || IS_SDM660_TARGET(hw_rev))
+			sde_cfg->ts_prefill_rev = 1;
+		else
+			sde_cfg->ts_prefill_rev = 2;
+		clear_bit(MDSS_INTR_AD4_0_INTR, sde_cfg->mdss_irqs);
+		clear_bit(MDSS_INTR_AD4_1_INTR, sde_cfg->mdss_irqs);
+		clear_bit(MDSS_INTF_TEAR_1_INTR, sde_cfg->mdss_irqs);
+		clear_bit(MDSS_INTF_TEAR_2_INTR, sde_cfg->mdss_irqs);
 	} else if (IS_SDM845_TARGET(hw_rev)) {
 		sde_cfg->has_wb_ubwc = true;
 		sde_cfg->has_cwb_support = true;
@@ -3892,6 +3946,8 @@ static int _sde_hardware_pre_caps(struct sde_mdss_cfg *sde_cfg, uint32_t hw_rev)
 		sde_cfg->sui_misr_supported = true;
 		sde_cfg->sui_block_xin_mask = 0x3F71;
 		sde_cfg->has_decimation = true;
+		clear_bit(MDSS_INTF_TEAR_1_INTR, sde_cfg->mdss_irqs);
+		clear_bit(MDSS_INTF_TEAR_2_INTR, sde_cfg->mdss_irqs);
 	} else if (IS_SDM670_TARGET(hw_rev)) {
 		sde_cfg->has_wb_ubwc = true;
 		sde_cfg->perf.min_prefill_lines = 24;
@@ -4137,7 +4193,7 @@ struct sde_mdss_cfg *sde_hw_catalog_init(struct drm_device *dev, u32 hw_rev)
 	if (rc)
 		goto end;
 
-	rc = sde_sspp_parse_dt(np, sde_cfg);
+	rc = sde_sspp_parse_dt(np, sde_cfg, hw_rev);
 	if (rc)
 		goto end;
 

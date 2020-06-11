@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -102,6 +102,11 @@ static const struct of_device_id msm_dsi_phy_of_match[] = {
 	  .data = &dsi_phy_v4_0,},
 	{}
 };
+
+int dsi_phy_get_version(struct msm_dsi_phy *phy)
+{
+	return phy->ver_info->version;
+}
 
 static int dsi_phy_regmap_init(struct platform_device *pdev,
 			       struct msm_dsi_phy *phy)
@@ -756,6 +761,28 @@ error:
 	return rc;
 }
 
+int dsi_phy_set_idle_pc(struct msm_dsi_phy *dsi_phy, bool idle_pc_enabled)
+{
+	int rc = 0;
+
+	if (!dsi_phy) {
+		pr_err("PHY is NULL!!!\n");
+		return -EINVAL;
+	}
+
+	/* If PHY does not require special IdlePC handling, go out early */
+	if (!dsi_phy->hw.ops.set_idle_pc)
+		return 0;
+
+	mutex_lock(&dsi_phy->phy_lock);
+
+	dsi_phy->hw.ops.set_idle_pc(&dsi_phy->hw, idle_pc_enabled);
+
+	mutex_unlock(&dsi_phy->phy_lock);
+
+	return rc;
+}
+
 static int dsi_phy_enable_ulps(struct msm_dsi_phy *phy,
 		struct dsi_host_config *config, bool clamp_enabled)
 {
@@ -902,7 +929,6 @@ int dsi_phy_enable(struct msm_dsi_phy *phy,
 		   bool is_cont_splash_enabled)
 {
 	int rc = 0;
-	bool is_cphy = false;
 
 	if (!phy || !config) {
 		pr_err("Invalid params\n");
@@ -925,14 +951,11 @@ int dsi_phy_enable(struct msm_dsi_phy *phy,
 	 * If PHY timing parameters are not present in panel dtsi file,
 	 * then calculate them in the driver
 	 */
-	is_cphy = (config->common_config.phy_type == DSI_PHY_TYPE_CPHY) ?
-			true : false;
 	if (!phy->cfg.is_phy_timing_present)
 		rc = phy->hw.ops.calculate_timing_params(&phy->hw,
 						 &phy->mode,
 						 &config->common_config,
-						 &phy->cfg.timing, false,
-						is_cphy);
+						 &phy->cfg.timing, false);
 	if (rc) {
 		pr_err("[%s] failed to set timing, rc=%d\n", phy->name, rc);
 		goto error;
@@ -952,7 +975,7 @@ error:
 
 /* update dsi phy timings for dynamic clk switch use case */
 int dsi_phy_update_phy_timings(struct msm_dsi_phy *phy,
-		struct dsi_host_config *config, bool is_cphy)
+			       struct dsi_host_config *config)
 {
 	int rc = 0;
 
@@ -963,9 +986,8 @@ int dsi_phy_update_phy_timings(struct msm_dsi_phy *phy,
 
 	memcpy(&phy->mode, &config->video_timing, sizeof(phy->mode));
 	rc = phy->hw.ops.calculate_timing_params(&phy->hw, &phy->mode,
-					&config->common_config,
-					&phy->cfg.timing, true,
-					is_cphy);
+						 &config->common_config,
+						 &phy->cfg.timing, true);
 	if (rc)
 		pr_err("failed to calculate phy timings %d\n", rc);
 
@@ -1141,6 +1163,33 @@ int dsi_phy_set_timing_params(struct msm_dsi_phy *phy,
 	return rc;
 }
 
+/* TODO: Deduplicate this ASAP */
+int dsi_phy_set_timing_params_commit(struct msm_dsi_phy *phy,
+				     u32 *timing, u32 size)
+{
+	int rc = 0;
+
+	if (!phy || !timing || !size) {
+		pr_err("Invalid params\n");
+		return -EINVAL;
+	};
+
+	mutex_lock(&phy->phy_lock);
+
+	if (phy->hw.ops.phy_timing_val)
+		rc = phy->hw.ops.phy_timing_val(&phy->cfg.timing, timing, size);
+	if (!rc)
+		phy->cfg.is_phy_timing_present = true;
+
+	if (phy->hw.ops.commit_phy_timing)
+		phy->hw.ops.commit_phy_timing(&phy->hw, &phy->cfg.timing);
+	else
+		pr_warn("WARNING: No function to commit PHY timing!!\n");
+
+	mutex_unlock(&phy->phy_lock);
+	return rc;
+}
+
 /**
  * dsi_phy_conv_phy_to_logical_lane() - Convert physical to logical lane
  * @lane_map:     logical lane
@@ -1191,11 +1240,10 @@ int dsi_phy_conv_logical_to_phy_lane(
  * @phy:	DSI PHY handle
  * @delay:	pipe delays for dynamic refresh
  * @is_master:	Boolean to indicate if for master or slave.
- * @is_cphy:	Boolean to indicate cphy mode.
  */
 void dsi_phy_config_dynamic_refresh(struct msm_dsi_phy *phy,
 		struct dsi_dyn_clk_delay *delay,
-		bool is_master, bool is_cphy)
+		bool is_master)
 {
 	struct dsi_phy_cfg *cfg;
 
@@ -1207,7 +1255,7 @@ void dsi_phy_config_dynamic_refresh(struct msm_dsi_phy *phy,
 	cfg = &phy->cfg;
 	if (phy->hw.ops.dyn_refresh_ops.dyn_refresh_config)
 		phy->hw.ops.dyn_refresh_ops.dyn_refresh_config(&phy->hw, cfg,
-				is_master, is_cphy);
+				is_master);
 	if (phy->hw.ops.dyn_refresh_ops.dyn_refresh_pipe_delay)
 		phy->hw.ops.dyn_refresh_ops.dyn_refresh_pipe_delay(
 				&phy->hw, delay);
@@ -1266,7 +1314,6 @@ int dsi_phy_dyn_refresh_cache_phy_timings(struct msm_dsi_phy *phy, u32 *dst,
 		if (rc)
 			pr_err("failed to cache phy timings %d\n", rc);
 	}
-
 	return rc;
 }
 

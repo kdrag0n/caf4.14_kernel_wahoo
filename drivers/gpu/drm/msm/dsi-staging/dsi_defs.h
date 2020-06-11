@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -96,8 +96,6 @@ enum dsi_op_mode {
  * @DSI_MODE_FLAG_VRR: Seamless transition is DynamicFPS.
  *                     New timing values are sent from DAL.
  * @DSI_MODE_FLAG_DYN_CLK: Seamless transition is dynamic clock change
- * @DSI_MODE_FLAG_POMS:
- *     Seamless transition is dynamic panel operating mode switch
  */
 enum dsi_mode_flags {
 	DSI_MODE_FLAG_SEAMLESS			= BIT(0),
@@ -106,7 +104,6 @@ enum dsi_mode_flags {
 	DSI_MODE_FLAG_DMS			= BIT(3),
 	DSI_MODE_FLAG_VRR			= BIT(4),
 	DSI_MODE_FLAG_DYN_CLK			= BIT(5),
-	DSI_MODE_FLAG_POMS			= BIT(6),
 };
 
 /**
@@ -241,23 +238,6 @@ enum dsi_dfps_type {
 };
 
 /**
- * enum dsi_dyn_clk_feature_type - Dynamic clock feature support type
- * @DSI_DYN_CLK_TYPE_LEGACY:	Constant FPS is not supported
- * @DSI_DYN_CLK_TYPE_CONST_FPS_ADJUST_HFP:	Constant FPS supported with
- *		change in hfp
- * @DSI_DYN_CLK_TYPE_CONST_FPS_ADJUST_VFP:	Constant FPS supported with
- *		change in vfp
- * @DSI_DYN_CLK_TYPE_MAX:
- */
-
-enum dsi_dyn_clk_feature_type {
-	DSI_DYN_CLK_TYPE_LEGACY = 0,
-	DSI_DYN_CLK_TYPE_CONST_FPS_ADJUST_HFP,
-	DSI_DYN_CLK_TYPE_CONST_FPS_ADJUST_VFP,
-	DSI_DYN_CLK_TYPE_MAX
-};
-
-/**
  * enum dsi_cmd_set_type  - DSI command set type
  * @DSI_CMD_SET_PRE_ON:	                   Panel pre on
  * @DSI_CMD_SET_ON:                        Panel on
@@ -282,6 +262,16 @@ enum dsi_dyn_clk_feature_type {
  * @DSI_CMD_SET_POST_TIMING_SWITCH:        Post timing switch
  * @DSI_CMD_SET_QSYNC_ON                   Enable qsync mode
  * @DSI_CMD_SET_QSYNC_OFF                  Disable qsync mode
+#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
+ * @DSI_CMD_SET_M_PLUS_PEAK1000:           M+ mode 1
+ * @DSI_CMD_SET_M_PLUS_PEAK700:            M+ mode 2
+ * @DSI_CMD_SET_M_PLUS_PEAK600:            M+ mode 3
+ * @DSI_CMD_SET_M_PLUS_OFF:                M+ mode 4
+ * @DSI_CMD_SET_FPS_MODE_OFF_RR_OFF:       fps mode off / report rate off
+ * @DSI_CMD_SET_FPS_MODE_OFF_RR_ON:        fps mode off / report rate on
+ * @DSI_CMD_SET_FPS_MODE_ON_RR_OFF:        fps mode on / report rate off
+ * @DSI_CMD_SET_FPS_MODE_ON_RR_ON:         fps mode on / report rate on
+#endif / CONFIG_DRM_SDE_SPECIFIC_PANEL /
  * @DSI_CMD_SET_MAX
  */
 enum dsi_cmd_set_type {
@@ -308,6 +298,26 @@ enum dsi_cmd_set_type {
 	DSI_CMD_SET_POST_TIMING_SWITCH,
 	DSI_CMD_SET_QSYNC_ON,
 	DSI_CMD_SET_QSYNC_OFF,
+#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
+	DSI_CMD_SET_M_PLUS_PEAK1000,
+	DSI_CMD_SET_M_PLUS_PEAK700,
+	DSI_CMD_SET_M_PLUS_PEAK600,
+	DSI_CMD_SET_M_PLUS_OFF,
+	DSI_CMD_SET_FPS_MODE_OFF_RR_OFF,
+	DSI_CMD_SET_FPS_MODE_OFF_RR_ON,
+	DSI_CMD_SET_FPS_MODE_ON_RR_OFF,
+	DSI_CMD_SET_FPS_MODE_ON_RR_ON,
+	DSI_CMD_SET_AOD_ON,
+	DSI_CMD_SET_AOD_LOW,
+	DSI_CMD_SET_AOD_HIGH,
+	DSI_CMD_SET_AOD_OFF,
+	DSI_CMD_SET_HBM_ON,
+	DSI_CMD_SET_HBM_OFF,
+	DSI_CMD_SET_VR_ON,
+	DSI_CMD_SET_VR_OFF,
+	DSI_CMD_SET_DISPLAY_OFF,
+	DSI_CMD_SET_DISPLAY_ON,
+#endif /* CONFIG_DRM_SDE_SPECIFIC_PANEL */
 	DSI_CMD_SET_MAX
 };
 
@@ -479,8 +489,8 @@ struct dsi_split_link_config {
  * @ext_bridge_map:      External bridge config reg needs to match with the port
  *                       reg config.
  * @force_hs_clk_lane:   Send continuous clock to the panel.
- * @phy_type:            DPHY/CPHY is enabled for this panel.
  * @dsi_split_link_config:  Split Link Configuration.
+ * @byte_intf_clk_div:   Determines the factor for calculating byte intf clock.
  */
 struct dsi_host_common_cfg {
 	enum dsi_pixel_format dst_format;
@@ -502,8 +512,8 @@ struct dsi_host_common_cfg {
 	u32 ext_bridge_num;
 	u32 ext_bridge_map[MAX_DSI_CTRLS_PER_DISPLAY];
 	bool force_hs_clk_lane;
-	enum dsi_phy_type phy_type;
 	struct dsi_split_link_config split_link;
+	u32 byte_intf_clk_div;
 };
 
 /**
@@ -620,15 +630,17 @@ struct dsi_display_mode_priv_info {
  * @timing:         Timing parameters for the panel.
  * @pixel_clk_khz:  Pixel clock in Khz.
  * @dsi_mode_flags: Flags to signal other drm components via private flags
- * @panel_mode:     Panel operating mode
  * @priv_info:      Mode private info
  */
 struct dsi_display_mode {
 	struct dsi_mode_info timing;
 	u32 pixel_clk_khz;
-	enum dsi_op_mode panel_mode;
 	u32 dsi_mode_flags;
 	struct dsi_display_mode_priv_info *priv_info;
+#ifdef CONFIG_DRM_SDE_SPECIFIC_PANEL
+	bool isDefault;
+	bool splash_dms;
+#endif /* CONFIG_DRM_SDE_SPECIFIC_PANEL */
 };
 
 /**
