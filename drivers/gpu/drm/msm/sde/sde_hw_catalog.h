@@ -47,6 +47,8 @@
 #define SDE_HW_VER_172	SDE_HW_VER(1, 7, 2) /* 8996 v3.0 */
 #define SDE_HW_VER_300	SDE_HW_VER(3, 0, 0) /* 8998 v1.0 */
 #define SDE_HW_VER_301	SDE_HW_VER(3, 0, 1) /* 8998 v1.1 */
+#define SDE_HW_VER_320  SDE_HW_VER(3, 2, 0) /* sdm660 v1.0 */
+#define SDE_HW_VER_330	SDE_HW_VER(3, 3, 0) /* sdm630 v1.0 */
 #define SDE_HW_VER_400	SDE_HW_VER(4, 0, 0) /* sdm845 v1.0 */
 #define SDE_HW_VER_401	SDE_HW_VER(4, 0, 1) /* sdm845 v2.0 */
 #define SDE_HW_VER_410	SDE_HW_VER(4, 1, 0) /* sdm670 v1.0 */
@@ -58,8 +60,13 @@
 #define SDE_HW_VER_540	SDE_HW_VER(5, 4, 0) /* sdmtrinket v1.0 */
 #define SDE_HW_VER_620	SDE_HW_VER(6, 2, 0) /* atoll*/
 
-#define IS_MSM8996_TARGET(rev) IS_SDE_MAJOR_MINOR_SAME((rev), SDE_HW_VER_170)
-#define IS_MSM8998_TARGET(rev) IS_SDE_MAJOR_MINOR_SAME((rev), SDE_HW_VER_300)
+#define IS_MSM8996_TARGET(rev) IS_SDE_MAJOR_MINOR_SAME((rev), SDE_HW_VER_170) || \
+			       IS_SDE_MAJOR_MINOR_SAME((rev), SDE_HW_VER_171) || \
+			       IS_SDE_MAJOR_MINOR_SAME((rev), SDE_HW_VER_172)
+#define IS_MSM8998_TARGET(rev) IS_SDE_MAJOR_MINOR_SAME((rev), SDE_HW_VER_300) || \
+			       IS_SDE_MAJOR_MINOR_SAME((rev), SDE_HW_VER_301)
+#define IS_SDM630_TARGET(rev) IS_SDE_MAJOR_MINOR_SAME((rev), SDE_HW_VER_330)
+#define IS_SDM660_TARGET(rev) IS_SDE_MAJOR_MINOR_SAME((rev), SDE_HW_VER_320)
 #define IS_SDM845_TARGET(rev) IS_SDE_MAJOR_MINOR_SAME((rev), SDE_HW_VER_400)
 #define IS_SDM670_TARGET(rev) IS_SDE_MAJOR_MINOR_SAME((rev), SDE_HW_VER_410)
 #define IS_SM8150_TARGET(rev) IS_SDE_MAJOR_MINOR_SAME((rev), SDE_HW_VER_500)
@@ -1087,6 +1094,7 @@ struct sde_perf_cfg {
 	u32 cpu_dma_latency;
 	u32 axi_bus_width;
 	u32 num_mnoc_ports;
+	u32 default_perf_mode;
 };
 
 /**

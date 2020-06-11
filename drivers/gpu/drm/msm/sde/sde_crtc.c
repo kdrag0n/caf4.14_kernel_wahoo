@@ -1263,6 +1263,9 @@ static int _sde_crtc_set_crtc_roi(struct drm_crtc *crtc,
 			return -EINVAL;
 		}
 
+		if (!mode_info.roi_caps.enabled)
+			continue;
+
 		sde_conn = to_sde_connector(conn_state->connector);
 		sde_conn_state = to_sde_connector_state(conn_state);
 
@@ -1271,9 +1274,6 @@ static int _sde_crtc_set_crtc_roi(struct drm_crtc *crtc,
 						&sde_conn->property_info,
 						&sde_conn_state->property_state,
 						CONNECTOR_PROP_ROI_V1);
-
-		if (!mode_info.roi_caps.enabled)
-			continue;
 
 		/*
 		 * current driver only supports same connector and crtc size,
@@ -1695,28 +1695,28 @@ static int _sde_crtc_check_panel_stacking(struct drm_crtc *crtc,
 		return -EINVAL;
 	}
 
-	if (!mode_info.vpadding)
+	if (!mode_info.overlap_pixels)
 		goto done;
 
-	if (mode_info.vpadding < state->mode.vdisplay) {
+	if (mode_info.overlap_pixels < state->mode.vdisplay) {
 		SDE_ERROR("padding height %d is less than vdisplay %d\n",
-			mode_info.vpadding, state->mode.vdisplay);
+			mode_info.overlap_pixels, state->mode.vdisplay);
 		return -EINVAL;
 	}
 
 	/* skip calculation if already cached */
-	if (mode_info.vpadding == sde_crtc_state->padding_height)
+	if (mode_info.overlap_pixels == sde_crtc_state->padding_height)
 		return 0;
 
-	gcd = _sde_crtc_calc_gcd(mode_info.vpadding, state->mode.vdisplay);
+	gcd = _sde_crtc_calc_gcd(mode_info.overlap_pixels, state->mode.vdisplay);
 	if (!gcd) {
 		SDE_ERROR("zero gcd found for padding height %d %d\n",
-			mode_info.vpadding, state->mode.vdisplay);
+			mode_info.overlap_pixels, state->mode.vdisplay);
 		return -EINVAL;
 	}
 
 	m = state->mode.vdisplay / gcd;
-	n = mode_info.vpadding / gcd - m;
+	n = mode_info.overlap_pixels / gcd - m;
 
 	if (m > MAX_VPADDING_RATIO_M || n > MAX_VPADDING_RATIO_N) {
 		SDE_ERROR("unsupported panel stacking pattern %d:%d", m, n);
@@ -1727,7 +1727,7 @@ static int _sde_crtc_check_panel_stacking(struct drm_crtc *crtc,
 	sde_crtc_state->padding_dummy = n;
 
 done:
-	sde_crtc_state->padding_height = mode_info.vpadding;
+	sde_crtc_state->padding_height = mode_info.overlap_pixels;
 	return 0;
 }
 
@@ -2433,8 +2433,8 @@ int sde_crtc_get_secure_transition_ops(struct drm_crtc *crtc,
 		if (encoder->crtc != crtc)
 			continue;
 
-		post_commit |= sde_encoder_check_curr_mode(encoder,
-						MSM_DISPLAY_VIDEO_MODE);
+		post_commit |= sde_encoder_check_mode(encoder,
+						MSM_DISPLAY_CAP_VID_MODE);
 	}
 
 	SDE_DEBUG("crtc%d: secure_level %d old_valid_fb %d post_commit %d\n",
@@ -3770,8 +3770,8 @@ static void sde_crtc_atomic_begin(struct drm_crtc *crtc,
 	_sde_crtc_dest_scaler_setup(crtc);
 
 	/* cancel the idle notify delayed work */
-	if (sde_encoder_check_curr_mode(sde_crtc->mixers[0].encoder,
-					MSM_DISPLAY_VIDEO_MODE) &&
+	if (sde_encoder_check_mode(sde_crtc->mixers[0].encoder,
+					MSM_DISPLAY_CAP_VID_MODE) &&
 		kthread_cancel_delayed_work_sync(&sde_crtc->idle_notify_work))
 		SDE_DEBUG("idle notify work cancelled\n");
 
@@ -3879,8 +3879,8 @@ static void sde_crtc_atomic_flush(struct drm_crtc *crtc,
 	_sde_crtc_wait_for_fences(crtc);
 
 	/* schedule the idle notify delayed work */
-	if (sde_encoder_check_curr_mode(sde_crtc->mixers[0].encoder,
-				MSM_DISPLAY_VIDEO_MODE) && idle_time) {
+	if (idle_time && sde_encoder_check_mode(sde_crtc->mixers[0].encoder,
+						MSM_DISPLAY_CAP_VID_MODE)) {
 		kthread_queue_delayed_work(&event_thread->worker,
 					&sde_crtc->idle_notify_work,
 					msecs_to_jiffies(idle_time));
@@ -4664,8 +4664,10 @@ static void sde_crtc_handle_power_event(u32 event_type, void *arg)
 		/* disable mdp LUT memory retention */
 		ret = sde_power_clk_set_flags(&priv->phandle, "lut_clk",
 					CLKFLAG_NORETAIN_MEM);
-		if (ret)
-			SDE_ERROR("disable LUT memory retention err %d\n", ret);
+		if (ret == -ENOENT)
+			pr_err_once("disable LUT memory retention err %d\n", ret);
+		else if (ret)
+			pr_err("disable LUT memory retention err %d\n", ret);
 
 		/* restore encoder; crtc will be programmed during commit */
 		drm_for_each_encoder(encoder, crtc->dev) {
@@ -4702,8 +4704,10 @@ static void sde_crtc_handle_power_event(u32 event_type, void *arg)
 		/* enable mdp LUT memory retention */
 		ret = sde_power_clk_set_flags(&priv->phandle, "lut_clk",
 					CLKFLAG_RETAIN_MEM);
-		if (ret)
-			SDE_ERROR("enable LUT memory retention err %d\n", ret);
+		if (ret == -ENOENT)
+			pr_err_once("enable LUT memory retention err %d\n", ret);
+		else if (ret)
+			pr_err("enable LUT memory retention err %d\n", ret);
 
 		drm_for_each_encoder(encoder, crtc->dev) {
 			if (encoder->crtc != crtc)
@@ -5214,8 +5218,8 @@ static int _sde_crtc_check_secure_state(struct drm_crtc *crtc,
 		if (encoder->crtc != crtc)
 			continue;
 
-		is_video_mode |= sde_encoder_check_curr_mode(encoder,
-						MSM_DISPLAY_VIDEO_MODE);
+		is_video_mode |= sde_encoder_check_mode(encoder,
+						MSM_DISPLAY_CAP_VID_MODE);
 	}
 
 	sde_crtc = to_sde_crtc(crtc);
@@ -5427,8 +5431,8 @@ static int sde_crtc_atomic_check(struct drm_crtc *crtc,
 			SDE_ERROR("plane w/h:%x*%x > mixer w/h:%x*%x\n",
 				pstate->crtc_w, pstate->crtc_h,
 				mixer_width, mixer_height);
-			rc = -E2BIG;
-			goto end;
+			//return -E2BIG;
+			//goto end;
 		}
 	}
 
@@ -5921,9 +5925,7 @@ static int _sde_crtc_get_output_fence(struct drm_crtc *crtc,
 {
 	struct sde_crtc *sde_crtc;
 	struct sde_crtc_state *cstate;
-	uint32_t offset, i;
-	struct drm_connector_state *old_conn_state, *new_conn_state;
-	struct drm_connector *conn;
+	uint32_t offset;
 	bool is_vid = false;
 	struct drm_encoder *encoder;
 
@@ -5931,30 +5933,10 @@ static int _sde_crtc_get_output_fence(struct drm_crtc *crtc,
 	cstate = to_sde_crtc_state(state);
 
 	drm_for_each_encoder_mask(encoder, crtc->dev, state->encoder_mask) {
-		if (sde_encoder_check_curr_mode(encoder,
-			MSM_DISPLAY_VIDEO_MODE))
-			is_vid = true;
+		is_vid |= sde_encoder_check_mode(encoder,
+						MSM_DISPLAY_CAP_VID_MODE);
 		if (is_vid)
 			break;
-	}
-
-	/*
-	 * encoder_mask of drm_crtc_state will be zero until atomic_check
-	 * phase completes for first commit of dp. Hence, check for video
-	 * mode capability for current commit from new_connector_state.
-	 */
-	if (!state->encoder_mask) {
-		for_each_oldnew_connector_in_state(state->state, conn,
-				 old_conn_state, new_conn_state, i) {
-			if (!new_conn_state || new_conn_state->crtc != crtc)
-				continue;
-
-			if (sde_encoder_check_curr_mode(encoder,
-				MSM_DISPLAY_VIDEO_MODE))
-				is_vid = true;
-			if (is_vid)
-				break;
-		}
 	}
 
 	offset = sde_crtc_get_property(cstate, CRTC_PROP_OUTPUT_FENCE_OFFSET);
@@ -5974,7 +5956,6 @@ static int _sde_crtc_get_output_fence(struct drm_crtc *crtc,
 	 * which will be incremented during the prepare commit phase
 	 */
 	offset++;
-	SDE_EVT32(DRMID(crtc), is_vid, offset);
 
 	return sde_fence_create(sde_crtc->output_fence, val, offset);
 }
@@ -6999,6 +6980,7 @@ static int _sde_crtc_event_enable(struct sde_kms *kms,
 			if (!node)
 				return -ENOMEM;
 			INIT_LIST_HEAD(&node->list);
+			INIT_LIST_HEAD(&node->irq.list);
 			node->func = custom_events[i].func;
 			node->event = event;
 			node->state = IRQ_NOINIT;
@@ -7023,8 +7005,6 @@ static int _sde_crtc_event_enable(struct sde_kms *kms,
 			kfree(node);
 			return ret;
 		}
-
-		INIT_LIST_HEAD(&node->irq.list);
 
 		mutex_lock(&crtc->crtc_lock);
 		ret = node->func(crtc_drm, true, &node->irq);
