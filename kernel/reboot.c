@@ -623,7 +623,7 @@ static void debug_reboot_work_func(struct work_struct *work)
 	msleep(100);
 
 	emergency_sync();
-	kernel_restart("bootloader");
+	kernel_restart(NULL);
 }
 
 static DECLARE_DELAYED_WORK(debug_reboot_work, debug_reboot_work_func);
