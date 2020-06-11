@@ -250,18 +250,6 @@ enum msm_display_caps {
 };
 
 /**
- * enum panel_mode - panel operation mode
- * @MSM_DISPLAY_VIDEO_MODE: video mode panel
- * @MSM_DISPLAY_CMD_MODE:   Command mode panel
- * @MODE_MAX:
- */
-enum panel_op_mode {
-	MSM_DISPLAY_VIDEO_MODE = 0,
-	MSM_DISPLAY_CMD_MODE,
-	MSM_DISPLAY_MODE_MAX,
-};
-
-/**
  * enum msm_event_wait - type of HW events to wait for
  * @MSM_ENC_COMMIT_DONE - wait for the driver to flush the registers to HW
  * @MSM_ENC_TX_COMPLETE - wait for the HW to transfer the frame to panel
@@ -457,7 +445,6 @@ struct msm_display_topology {
  * @wide_bus_en:	wide-bus mode cfg for interface module
  * @mdp_transfer_time_us   Specifies the mdp transfer time for command mode
  *                         panels in microseconds.
- * @vpadding:        panel stacking height
  * @overlap_pixels:	overlap pixels for certain panels
  */
 struct msm_mode_info {
@@ -472,7 +459,6 @@ struct msm_mode_info {
 	struct msm_roi_caps roi_caps;
 	bool wide_bus_en;
 	u32 mdp_transfer_time_us;
-	u32 vpadding;
 	u32 overlap_pixels;
 };
 
@@ -501,7 +487,6 @@ struct msm_mode_info {
 struct msm_display_info {
 	int intf_type;
 	uint32_t capabilities;
-	enum panel_op_mode curr_panel_mode;
 
 	uint32_t num_of_h_tiles;
 	uint32_t h_tile_instance[MAX_H_TILES_PER_DISPLAY];
@@ -624,7 +609,6 @@ struct msm_drm_private {
 
 	/* crtcs pending async atomic updates: */
 	uint32_t pending_crtcs;
-	uint32_t pending_planes;
 	wait_queue_head_t pending_crtcs_event;
 
 	unsigned int num_planes;

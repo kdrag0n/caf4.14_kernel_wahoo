@@ -390,7 +390,6 @@ int dp_connector_get_mode_info(struct drm_connector *connector,
 	priv = connector->dev->dev_private;
 
 	topology = &mode_info->topology;
-
 	rc = msm_get_mixer_count(priv, drm_mode, max_mixer_width,
 			&topology->num_lm);
 	if (rc) {
@@ -537,19 +536,6 @@ int dp_connector_get_modes(struct drm_connector *connector,
 	kfree(dp_mode);
 
 	return rc;
-}
-
-int dp_connnector_set_info_blob(struct drm_connector *connector,
-		void *info, void *display, struct msm_mode_info *mode_info)
-{
-	struct dp_display *dp_display = display;
-	const char *display_type = NULL;
-
-	dp_display->get_display_type(dp_display, &display_type);
-	sde_kms_info_add_keystr(info,
-		"display type", display_type);
-
-	return 0;
 }
 
 int dp_drm_bridge_init(void *data, struct drm_encoder *encoder)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2016-2019, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -130,6 +130,14 @@ struct msm_dsi_phy *dsi_phy_get(struct device_node *of_node);
 void dsi_phy_put(struct msm_dsi_phy *dsi_phy);
 
 /**
+ * dsi_phy_get_version() - returns dsi phy version
+ * @dsi_phy:              DSI PHY handle.
+ *
+ * Return: phy version
+ */
+int dsi_phy_get_version(struct msm_dsi_phy *phy);
+
+/**
  * dsi_phy_drv_init() - initialize dsi phy driver
  * @dsi_phy:         DSI PHY handle.
  *
@@ -170,6 +178,12 @@ int dsi_phy_validate_mode(struct msm_dsi_phy *dsi_phy,
  * Return: error code.
  */
 int dsi_phy_set_power_state(struct msm_dsi_phy *dsi_phy, bool enable);
+
+/**
+ * dsi_phy_set_idle_pc() - set/unset idle dsi phy idle power collapse
+ *
+ */
+int dsi_phy_set_idle_pc(struct msm_dsi_phy *dsi_phy, bool idle_pc_enabled);
 
 /**
  * dsi_phy_enable() - enable DSI PHY hardware
@@ -261,6 +275,10 @@ int dsi_phy_set_clk_freq(struct msm_dsi_phy *phy,
 int dsi_phy_set_timing_params(struct msm_dsi_phy *phy,
 			      u32 *timing, u32 size);
 
+/* TODO: Deduplicate this */
+int dsi_phy_set_timing_params_commit(struct msm_dsi_phy *phy,
+				     u32 *timing, u32 size);
+
 /**
  * dsi_phy_lane_reset() - Reset DSI PHY lanes in case of error
  * @phy:	DSI PHY handle
@@ -302,24 +320,21 @@ void dsi_phy_drv_unregister(void);
  * dsi_phy_update_phy_timings() - Update dsi phy timings
  * @phy:	DSI PHY handle
  * @config:	DSI Host config parameters
- * @is_cphy:	Boolean to indicate cphy mode
  *
  * Return: error code.
  */
 int dsi_phy_update_phy_timings(struct msm_dsi_phy *phy,
-				struct dsi_host_config *config,
-				bool is_cphy);
+			       struct dsi_host_config *config);
 
 /**
  * dsi_phy_config_dynamic_refresh() - Configure dynamic refresh registers
  * @phy:	DSI PHY handle
  * @delay:	pipe delays for dynamic refresh
  * @is_master:	Boolean to indicate if for master or slave
- * @is_cphy:	Boolean to indicate cphy mode
  */
 void dsi_phy_config_dynamic_refresh(struct msm_dsi_phy *phy,
 				    struct dsi_dyn_clk_delay *delay,
-				    bool is_master, bool is_cphy);
+				    bool is_master);
 /**
  * dsi_phy_dynamic_refresh_trigger() - trigger dynamic refresh
  * @phy:	DSI PHY handle
