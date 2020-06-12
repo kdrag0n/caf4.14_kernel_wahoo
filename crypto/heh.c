@@ -67,8 +67,8 @@ struct heh_cmac_data {
 };
 
 struct heh_req_ctx { /* aligned to alignmask */
-	be128 beta1_key;
-	be128 beta2_key;
+	le128 beta1_key;
+	le128 beta2_key;
 	union {
 		struct {
 			struct heh_cmac_data data;
@@ -133,7 +133,7 @@ out:
  * therefore there is never any AAD, nor are variable-length nonces supported.
  */
 static int generate_betas(struct skcipher_request *req,
-			  be128 *beta1_key, be128 *beta2_key)
+			  le128 *beta1_key, le128 *beta2_key)
 {
 	struct crypto_skcipher *tfm = crypto_skcipher_reqtfm(req);
 	struct heh_tfm_ctx *ctx = crypto_skcipher_ctx(tfm);
@@ -175,7 +175,7 @@ struct poly_hash_tfm_ctx {
 };
 
 struct poly_hash_desc_ctx {
-	be128 digest;
+	le128 digest;
 	unsigned int count;
 };
 
@@ -183,7 +183,7 @@ static int poly_hash_setkey(struct crypto_shash *tfm,
 			    const u8 *key, unsigned int keylen)
 {
 	struct poly_hash_tfm_ctx *tctx = crypto_shash_ctx(tfm);
-	be128 key128;
+	le128 key128;
 
 	if (keylen != HEH_BLOCK_SIZE) {
 		crypto_shash_set_flags(tfm, CRYPTO_TFM_RES_BAD_KEY_LEN);
@@ -203,7 +203,7 @@ static int poly_hash_init(struct shash_desc *desc)
 {
 	struct poly_hash_desc_ctx *ctx = shash_desc_ctx(desc);
 
-	ctx->digest = (be128) { 0 };
+	ctx->digest = (le128) { 0 };
 	ctx->count = 0;
 	return 0;
 }
@@ -235,10 +235,10 @@ static int poly_hash_update(struct shash_desc *desc, const u8 *src,
 
 		/* Process zero or more full blocks. */
 		while (len >= HEH_BLOCK_SIZE) {
-			be128 coeff;
+			le128 coeff;
 
 			memcpy(&coeff, src, HEH_BLOCK_SIZE);
-			be128_xor(&ctx->digest, &ctx->digest, &coeff);
+			le128_xor(&ctx->digest, &ctx->digest, &coeff);
 			src += HEH_BLOCK_SIZE;
 			len -= HEH_BLOCK_SIZE;
 			gf128mul_4k_ble(&ctx->digest, tctx->tau_key);
@@ -313,7 +313,7 @@ static struct shash_alg poly_hash_alg = {
  * entirely of padding, i.e. 0x0100...00.
  */
 static int poly_hash(struct skcipher_request *req, struct scatterlist *sgl,
-		       be128 *hash)
+		       le128 *hash)
 {
 	struct heh_req_ctx *rctx = heh_req_ctx(req);
 	struct crypto_skcipher *tfm = crypto_skcipher_reqtfm(req);
@@ -321,7 +321,7 @@ static int poly_hash(struct skcipher_request *req, struct scatterlist *sgl,
 	struct shash_desc *desc = &rctx->u.poly_hash.desc;
 	unsigned int tail_offset = HEH_TAIL_OFFSET(req->cryptlen);
 	unsigned int tail_len = req->cryptlen - tail_offset;
-	be128 tail[2];
+	le128 tail[2];
 	unsigned int i, n;
 	struct sg_mapping_iter miter;
 	int err;
@@ -355,7 +355,7 @@ static int poly_hash(struct skcipher_request *req, struct scatterlist *sgl,
 	err = crypto_shash_final(desc, (u8 *)hash);
 	if (err)
 		return err;
-	be128_xor(hash, hash, &tail[0]);
+	le128_xor(hash, hash, &tail[0]);
 	return 0;
 }
 
@@ -366,22 +366,22 @@ static int poly_hash(struct skcipher_request *req, struct scatterlist *sgl,
 static int heh_tfm_blocks(struct skcipher_request *req,
 			  struct scatterlist *src_sgl,
 			  struct scatterlist *dst_sgl, unsigned int len,
-			  const be128 *hash, const be128 *beta_key)
+			  const le128 *hash, const le128 *beta_key)
 {
 	struct skcipher_walk walk;
-	be128 e = *beta_key;
+	le128 e = *beta_key;
 	int err;
 	unsigned int nbytes;
 
 	err = skcipher_walk_virt_init(&walk, req, false, src_sgl, dst_sgl, len);
 	while ((nbytes = walk.nbytes)) {
-		const be128 *src = (be128 *)walk.src.virt.addr;
-		be128 *dst = (be128 *)walk.dst.virt.addr;
+		const le128 *src = (le128 *)walk.src.virt.addr;
+		le128 *dst = (le128 *)walk.dst.virt.addr;
 
 		do {
 			gf128mul_x_ble(&e, &e);
-			be128_xor(dst, src, hash);
-			be128_xor(dst, dst, &e);
+			le128_xor(dst, src, hash);
+			le128_xor(dst, dst, &e);
 			src++;
 			dst++;
 		} while ((nbytes -= HEH_BLOCK_SIZE) >= HEH_BLOCK_SIZE);
@@ -406,9 +406,9 @@ static int heh_tfm_blocks(struct skcipher_request *req,
  * Note that the partial block remains unchanged, but it does affect the result
  * of poly_hash() and therefore the transformation of all the full blocks.
  */
-static int heh_hash(struct skcipher_request *req, const be128 *beta_key)
+static int heh_hash(struct skcipher_request *req, const le128 *beta_key)
 {
-	be128 hash;
+	le128 hash;
 	unsigned int tail_offset = HEH_TAIL_OFFSET(req->cryptlen);
 	unsigned int partial_len = req->cryptlen % HEH_BLOCK_SIZE;
 	int err;
@@ -425,7 +425,7 @@ static int heh_hash(struct skcipher_request *req, const be128 *beta_key)
 		return err;
 
 	/* Set the last full block to hash XOR beta_key */
-	be128_xor(&hash, &hash, beta_key);
+	le128_xor(&hash, &hash, beta_key);
 	scatterwalk_map_and_copy(&hash, req->dst, tail_offset, HEH_BLOCK_SIZE,
 				 1);
 
@@ -442,10 +442,10 @@ static int heh_hash(struct skcipher_request *req, const be128 *beta_key)
 /*
  * The inverse hash phase of HEH.  This undoes the result of heh_hash().
  */
-static int heh_hash_inv(struct skcipher_request *req, const be128 *beta_key)
+static int heh_hash_inv(struct skcipher_request *req, const le128 *beta_key)
 {
-	be128 hash;
-	be128 tmp;
+	le128 hash;
+	le128 tmp;
 	struct scatterlist tmp_sgl[2];
 	struct scatterlist *tail_sgl;
 	unsigned int tail_offset = HEH_TAIL_OFFSET(req->cryptlen);
@@ -458,7 +458,7 @@ static int heh_hash_inv(struct skcipher_request *req, const be128 *beta_key)
 	 */
 	tail_sgl = scatterwalk_ffwd(tmp_sgl, sgl, tail_offset);
 	scatterwalk_map_and_copy(&hash, tail_sgl, 0, HEH_BLOCK_SIZE, 0);
-	be128_xor(&hash, &hash, beta_key);
+	le128_xor(&hash, &hash, beta_key);
 
 	/* Transform all full blocks except the last */
 	err = heh_tfm_blocks(req, sgl, sgl, tail_offset, &hash, beta_key);
@@ -476,7 +476,7 @@ static int heh_hash_inv(struct skcipher_request *req, const be128 *beta_key)
 	err = poly_hash(req, sgl, &tmp);
 	if (err)
 		return err;
-	be128_xor(&tmp, &tmp, &hash);
+	le128_xor(&tmp, &tmp, &hash);
 	scatterwalk_map_and_copy(&tmp, tail_sgl, 0, HEH_BLOCK_SIZE, 1);
 	return 0;
 }
@@ -796,7 +796,7 @@ static int heh_create_common(struct crypto_template *tmpl, struct rtattr **tb,
 	inst->alg.base.cra_blocksize = HEH_BLOCK_SIZE;
 	inst->alg.base.cra_ctxsize = sizeof(struct heh_tfm_ctx);
 	inst->alg.base.cra_alignmask = ecb->base.cra_alignmask |
-					(__alignof__(be128) - 1);
+					(__alignof__(le128) - 1);
 	inst->alg.base.cra_priority = ecb->base.cra_priority;
 
 	inst->alg.ivsize = HEH_BLOCK_SIZE;
