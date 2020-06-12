@@ -2,6 +2,7 @@
 #define _UAPI_LINUX_MSM_ION_H
 
 #include <linux/types.h>
+#include "ion.h"
 
 #define ION_BIT(nr) (1U << (nr))
 
@@ -100,6 +101,26 @@ enum ion_heap_ids {
 
 #define ION_IOC_MSM_MAGIC 'M'
 
+/* struct ion_flush_data - data passed to ion for flushing caches
+ *
+ * @handle:	handle with data to flush
+ * @fd:		fd to flush
+ * @vaddr:	userspace virtual address mapped with mmap
+ * @offset:	offset into the handle to flush
+ * @length:	length of handle to flush
+ *
+ * Performs cache operations on the handle. If p is the start address
+ * of the handle, p + offset through p + offset + length will have
+ * the cache operations performed
+ */
+struct ion_flush_data {
+	ion_user_handle_t handle;
+	int fd;
+	void *vaddr;
+	unsigned int offset;
+	unsigned int length;
+};
+
 struct ion_prefetch_regions {
 	__u64 sizes;
 	__u32 vmid;
@@ -112,6 +133,28 @@ struct ion_prefetch_data {
 	__u32 heap_id;
 	__u32 nr_regions;
 };
+
+/**
+ * DOC: ION_IOC_CLEAN_CACHES - clean the caches
+ *
+ * Clean the caches of the handle specified.
+ */
+#define ION_IOC_CLEAN_CACHES	_IOWR(ION_IOC_MSM_MAGIC, 0, \
+						struct ion_flush_data)
+/**
+ * DOC: ION_IOC_INV_CACHES - invalidate the caches
+ *
+ * Invalidate the caches of the handle specified.
+ */
+#define ION_IOC_INV_CACHES	_IOWR(ION_IOC_MSM_MAGIC, 1, \
+						struct ion_flush_data)
+/**
+ * DOC: ION_IOC_CLEAN_INV_CACHES - clean and invalidate the caches
+ *
+ * Clean and invalidate the caches of the handle specified.
+ */
+#define ION_IOC_CLEAN_INV_CACHES	_IOWR(ION_IOC_MSM_MAGIC, 2, \
+						struct ion_flush_data)
 
 #define ION_IOC_PREFETCH		_IOWR(ION_IOC_MSM_MAGIC, 3, \
 						struct ion_prefetch_data)
