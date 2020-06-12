@@ -25,6 +25,9 @@ union ion_ioctl_arg {
 	struct ion_allocation_data allocation;
 	struct ion_heap_query query;
 	struct ion_prefetch_data prefetch_data;
+	struct ion_fd_data fd;
+	struct ion_handle_data handle;
+	struct ion_custom_data custom;
 };
 
 static int validate_ioctl_arg(unsigned int cmd, union ion_ioctl_arg *arg)
@@ -48,6 +51,10 @@ static int validate_ioctl_arg(unsigned int cmd, union ion_ioctl_arg *arg)
 static unsigned int ion_ioctl_dir(unsigned int cmd)
 {
 	switch (cmd) {
+	case ION_IOC_SYNC:
+	case ION_IOC_FREE:
+	case ION_IOC_CUSTOM:
+		return _IOC_WRITE;
 	default:
 		return _IOC_DIR(cmd);
 	}
@@ -87,15 +94,52 @@ long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		int fd;
 
 		fd = ion_alloc_fd(data.allocation.len,
-				  data.allocation.heap_id_mask,
+				  data.allocation.heap_mask,
 				  data.allocation.flags);
 		if (fd < 0)
 			return fd;
 
-		data.allocation.fd = fd;
+		data.allocation.handle = fd;
 
 		break;
 	}
+	case ION_IOC_FREE:
+	{
+		struct dma_buf *dmabuf = dma_buf_get(data.fd.fd);
+		if (IS_ERR(dmabuf))
+			return PTR_ERR(dmabuf);
+
+		/*
+		 * This is intentionally called twice:
+		 *   - once to drop our temporary reference
+		 *   - once to "free" by dropping another reference
+		 */
+		dma_buf_put(dmabuf);
+		dma_buf_put(dmabuf);
+		break;
+	}
+	case ION_IOC_SHARE:
+	case ION_IOC_MAP:
+		data.fd.fd = data.handle.handle;
+		break;
+	case ION_IOC_IMPORT:
+		data.handle.handle = data.fd.fd;
+		break;
+	case ION_IOC_SYNC:
+		ret = ion_sync_for_device(data.fd.fd);
+		break;
+	case ION_IOC_CUSTOM:
+		pr_warn_ratelimited("ion: %s is using IOC_CUSTOM\n", current->comm);
+		break;
+	case ION_IOC_CLEAN_CACHES:
+		pr_warn_ratelimited("ion: %s is using IOC_CLEAN_CACHES\n", current->comm);
+		break;
+	case ION_IOC_INV_CACHES:
+		pr_warn_ratelimited("ion: %s is using IOC_INV_CACHES\n", current->comm);
+		break;
+	case ION_IOC_CLEAN_INV_CACHES:
+		pr_warn_ratelimited("ion: %s is using IOC_CLEAN_INV_CACHES\n", current->comm);
+		break;
 	case ION_IOC_HEAP_QUERY:
 		ret = ion_query_heaps(&data.query);
 		break;
