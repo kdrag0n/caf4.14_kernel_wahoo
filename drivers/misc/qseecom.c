@@ -8068,8 +8068,47 @@ static long qseecom_ioctl(struct file *file,
 	}
 	default:
 		pr_err("Invalid IOCTL: 0x%x\n", cmd);
-		return -EINVAL;
+		ret = -EINVAL;
 	}
+
+	switch (cmd) {
+	case QSEECOM_IOCTL_REGISTER_LISTENER_REQ: pr_info("%s cmd=QSEECOM_IOCTL_REGISTER_LISTENER_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_UNREGISTER_LISTENER_REQ: pr_info("%s cmd=QSEECOM_IOCTL_UNREGISTER_LISTENER_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_SEND_CMD_REQ: pr_info("%s cmd=QSEECOM_IOCTL_SEND_CMD_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_SEND_MODFD_CMD_REQ: pr_info("%s cmd=QSEECOM_IOCTL_SEND_MODFD_CMD_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_RECEIVE_REQ: pr_info("%s cmd=QSEECOM_IOCTL_RECEIVE_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_SEND_RESP_REQ: pr_info("%s cmd=QSEECOM_IOCTL_SEND_RESP_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_LOAD_APP_REQ: pr_info("%s cmd=QSEECOM_IOCTL_LOAD_APP_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_SET_MEM_PARAM_REQ: pr_info("%s cmd=QSEECOM_IOCTL_SET_MEM_PARAM_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_UNLOAD_APP_REQ: pr_info("%s cmd=QSEECOM_IOCTL_UNLOAD_APP_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_GET_QSEOS_VERSION_REQ: pr_info("%s cmd=QSEECOM_IOCTL_GET_QSEOS_VERSION_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_PERF_ENABLE_REQ: pr_info("%s cmd=QSEECOM_IOCTL_PERF_ENABLE_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_PERF_DISABLE_REQ: pr_info("%s cmd=QSEECOM_IOCTL_PERF_DISABLE_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_LOAD_EXTERNAL_ELF_REQ: pr_info("%s cmd=QSEECOM_IOCTL_LOAD_EXTERNAL_ELF_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_UNLOAD_EXTERNAL_ELF_REQ: pr_info("%s cmd=QSEECOM_IOCTL_UNLOAD_EXTERNAL_ELF_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_APP_LOADED_QUERY_REQ: pr_info("%s cmd=QSEECOM_IOCTL_APP_LOADED_QUERY_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_SEND_CMD_SERVICE_REQ: pr_info("%s cmd=QSEECOM_IOCTL_SEND_CMD_SERVICE_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_CREATE_KEY_REQ: pr_info("%s cmd=QSEECOM_IOCTL_CREATE_KEY_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_WIPE_KEY_REQ: pr_info("%s cmd=QSEECOM_IOCTL_WIPE_KEY_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_SAVE_PARTITION_HASH_REQ: pr_info("%s cmd=QSEECOM_IOCTL_SAVE_PARTITION_HASH_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_IS_ES_ACTIVATED_REQ: pr_info("%s cmd=QSEECOM_IOCTL_IS_ES_ACTIVATED_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_SEND_MODFD_RESP: pr_info("%s cmd=QSEECOM_IOCTL_SEND_MODFD_RESP ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_SET_BUS_SCALING_REQ: pr_info("%s cmd=QSEECOM_IOCTL_SET_BUS_SCALING_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_UPDATE_KEY_USER_INFO_REQ: pr_info("%s cmd=QSEECOM_IOCTL_UPDATE_KEY_USER_INFO_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_QTEEC_IOCTL_OPEN_SESSION_REQ: pr_info("%s cmd=QSEECOM_QTEEC_IOCTL_OPEN_SESSION_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_QTEEC_IOCTL_CLOSE_SESSION_REQ: pr_info("%s cmd=QSEECOM_QTEEC_IOCTL_CLOSE_SESSION_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_QTEEC_IOCTL_INVOKE_MODFD_CMD_REQ: pr_info("%s cmd=QSEECOM_QTEEC_IOCTL_INVOKE_MODFD_CMD_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_QTEEC_IOCTL_REQUEST_CANCELLATION_REQ: pr_info("%s cmd=QSEECOM_QTEEC_IOCTL_REQUEST_CANCELLATION_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_MDTP_CIPHER_DIP_REQ: pr_info("%s cmd=QSEECOM_IOCTL_MDTP_CIPHER_DIP_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_SEND_MODFD_CMD_64_REQ: pr_info("%s cmd=QSEECOM_IOCTL_SEND_MODFD_CMD_64_REQ ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_SEND_MODFD_RESP_64: pr_info("%s cmd=QSEECOM_IOCTL_SEND_MODFD_RESP_64 ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_GET_CE_PIPE_INFO: pr_info("%s cmd=QSEECOM_IOCTL_GET_CE_PIPE_INFO ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_FREE_CE_PIPE_INFO: pr_info("%s cmd=QSEECOM_IOCTL_FREE_CE_PIPE_INFO ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_QUERY_CE_PIPE_INFO: pr_info("%s cmd=QSEECOM_IOCTL_QUERY_CE_PIPE_INFO ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_SET_ICE_INFO: pr_info("%s cmd=QSEECOM_IOCTL_SET_ICE_INFO ret=%d\n", current->comm, ret); break;
+	case QSEECOM_IOCTL_FBE_CLEAR_KEY: pr_info("%s cmd=QSEECOM_IOCTL_FBE_CLEAR_KEY ret=%d\n", current->comm, ret); break;
+	}
+
 	return ret;
 }
 
