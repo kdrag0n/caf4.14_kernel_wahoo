@@ -120,11 +120,25 @@ long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	}
 	case ION_IOC_SHARE:
 	case ION_IOC_MAP:
+	{
+		/* Not dropping this reference is intentional */
+		struct dma_buf *dmabuf = dma_buf_get(data.handle.handle);
+		if (IS_ERR(dmabuf))
+			return PTR_ERR(dmabuf);
+
 		data.fd.fd = data.handle.handle;
 		break;
+	}
 	case ION_IOC_IMPORT:
+	{
+		/* Not dropping this reference is intentional */
+		struct dma_buf *dmabuf = dma_buf_get(data.fd.fd);
+		if (IS_ERR(dmabuf))
+			return PTR_ERR(dmabuf);
+
 		data.handle.handle = data.fd.fd;
 		break;
+	}
 	case ION_IOC_SYNC:
 		ret = ion_sync_for_device(data.fd.fd);
 		break;
