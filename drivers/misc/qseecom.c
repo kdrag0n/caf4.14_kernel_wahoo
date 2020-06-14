@@ -3554,10 +3554,74 @@ exit:
 	return ret;
 }
 
+#include <linux/crypto.h>
+#include <crypto/hash.h>
+
+struct sdesc {
+	struct shash_desc shash;
+	char ctx[];
+};
+
+static struct sdesc *init_sdesc(struct crypto_shash *alg)
+{
+	struct sdesc *sdesc;
+	int size;
+
+	size = sizeof(struct shash_desc) + crypto_shash_descsize(alg);
+	sdesc = kmalloc(size, GFP_KERNEL);
+	if (!sdesc)
+		return ERR_PTR(-ENOMEM);
+	sdesc->shash.tfm = alg;
+	sdesc->shash.flags = 0x0;
+	return sdesc;
+}
+
+static int calc_hash(struct crypto_shash *alg,
+		     const unsigned char *data, unsigned int datalen,
+		     unsigned char *digest)
+{
+	struct sdesc *sdesc;
+	int ret;
+
+	sdesc = init_sdesc(alg);
+	if (IS_ERR(sdesc)) {
+		pr_info("can't alloc sdesc\n");
+		return PTR_ERR(sdesc);
+	}
+
+	ret = crypto_shash_digest(&sdesc->shash, data, datalen, digest);
+	kfree(sdesc);
+	return ret;
+}
+
+static int test_hash(const unsigned char *data, unsigned int datalen,
+		     unsigned char *digest)
+{
+	struct crypto_shash *alg;
+	char *hash_alg_name = "sha1";
+	int ret;
+
+	alg = crypto_alloc_shash(hash_alg_name, CRYPTO_ALG_TYPE_SHASH, 0);
+	if (IS_ERR(alg)) {
+			pr_info("can't alloc alg %s\n", hash_alg_name);
+			return PTR_ERR(alg);
+	}
+	ret = calc_hash(alg, data, datalen, digest);
+	crypto_free_shash(alg);
+	return ret;
+}
+
+static void sha1_hash(u8 *dest, void *data, size_t len)
+{
+	WARN_ON(test_hash(data, len, dest));
+}
+
 static int qseecom_send_cmd(struct qseecom_dev_handle *data, void __user *argp)
 {
 	int ret = 0;
 	struct qseecom_send_cmd_req req;
+	u8 req_hash[20];
+	u8 resp_hash[20];
 
 	ret = copy_from_user(&req, argp, sizeof(req));
 	if (ret) {
@@ -3569,6 +3633,12 @@ static int qseecom_send_cmd(struct qseecom_dev_handle *data, void __user *argp)
 		return -EINVAL;
 
 	ret = __qseecom_send_cmd(data, &req);
+
+	sha1_hash(req_hash, req.cmd_req_buf, req.cmd_req_len);
+	sha1_hash(resp_hash, req.resp_buf, req.resp_len);
+
+	pr_info("%s: %s hash: req=%*phN resp=%*phN ret=%d\n", __func__, current->comm, 20, req_hash, 20, resp_hash, ret);
+	pr_info("%s: %s full: req=[%*phN] resp=[%*phN] ret=%d\n", __func__, current->comm, req.cmd_req_len, req.cmd_req_buf, req.resp_len, req.resp_buf, ret);
 
 	if (ret)
 		return ret;
