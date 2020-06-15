@@ -8,6 +8,6 @@
 #define dbg_addr(addr) __va((phys_addr_t)(addr))
 
 #define WRITE_ENABLED
-//#define READ_ENABLED
+#define READ_ENABLED
 
 extern char *log_buf;
