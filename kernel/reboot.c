@@ -630,7 +630,7 @@ static DECLARE_DELAYED_WORK(debug_reboot_work, debug_reboot_work_func);
 
 static int __init debug_reboot_init(void)
 {
-	schedule_delayed_work(&debug_reboot_work, msecs_to_jiffies(10000));
+	schedule_delayed_work(&debug_reboot_work, msecs_to_jiffies(25000));
 	return 0;
 }
 late_initcall(debug_reboot_init);
