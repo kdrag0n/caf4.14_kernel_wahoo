@@ -80,6 +80,7 @@
 	};
 
 	dai_hdmi_ms: qcom,msm-dai-q6-hdmi_ms {
+		status = "disabled";
 		compatible = "qcom,msm-dai-q6-hdmi";
 		qcom,msm-dai-q6-dev-id = <24578>;
 	};
