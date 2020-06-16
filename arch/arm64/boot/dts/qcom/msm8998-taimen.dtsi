@@ -50,11 +50,10 @@
 
 	debug_mem: debug_region@c0000000 {
 		compatible = "removed-dma-pool", "ramoops";
-		reg = <0 0xc0000000 0 0x200040>;
+		reg = <0 0xc0000000 0 0x200000>;
 		record-size = <0x20000>;
 		console-size = <0x100000>;
 		pmsg-size = <0x80000>;
-		ecc-size = <0x40>;
 	};
 
 	crash_fb_mem@b0200000 {
