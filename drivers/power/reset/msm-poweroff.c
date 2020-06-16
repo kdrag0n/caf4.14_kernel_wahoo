@@ -298,8 +298,6 @@ static void msm_restart_prepare(const char *cmd)
 
 	need_warm_reset = true;
 	in_panic = false;
-	cmd = NULL;
-	__raw_writel(0x77665501, restart_reason);
 
 	if (force_warm_reboot)
 		pr_info("Forcing a warm reset of the system\n");
