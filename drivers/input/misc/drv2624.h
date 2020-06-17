@@ -27,7 +27,7 @@
 #include <linux/timer.h>
 #include <linux/workqueue.h>
 #include <linux/hrtimer.h>
-#include <linux/wakelock.h>
+#include <linux/pm_wakeup.h>
 #include <linux/mutex.h>
 #include <linux/cdev.h>
 #include <linux/firmware.h>
@@ -304,7 +304,7 @@ struct drv2624_data {
 	bool vibrator_playing;
 	char work_mode;
 	unsigned char current_reg;
-	struct wake_lock wklock;
+	struct wakeup_source wklock;
 	struct mutex lock;	/* protect mode switching */
 	struct workqueue_struct *drv2624_wq;
 	struct work_struct vibrator_work;
