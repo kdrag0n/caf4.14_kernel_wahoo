@@ -34,47 +34,6 @@
 		status = "disabled";
 	};
 
-	sound-tavil {
-		qcom,model = "msm8998-tavil-taimen-snd-card";
-		qcom,audio-routing =
-			"RX_BIAS", "MCLK",
-			"MADINPUT", "MCLK",
-			"AMIC1", "MIC BIAS1",
-			"MIC BIAS1", "Handset Mic",
-			"AMIC2", "MIC BIAS2",
-			"MIC BIAS2", "Headset Mic",
-			"AMIC3", "MIC BIAS3",
-			"MIC BIAS3", "Handset 2nd Mic",
-			"AMIC4", "MIC BIAS4",
-			"MIC BIAS4", "Handset 3rd Mic",
-			"DMIC0", "MIC BIAS1",
-			"MIC BIAS1", "Digital Mic0",
-			"DMIC1", "MIC BIAS1",
-			"MIC BIAS1", "Digital Mic1",
-			"DMIC2", "MIC BIAS3",
-			"MIC BIAS3", "Digital Mic2",
-			"DMIC3", "MIC BIAS3",
-			"MIC BIAS3", "Digital Mic3",
-			"DMIC4", "MIC BIAS4",
-			"MIC BIAS4", "Digital Mic4",
-			"DMIC5", "MIC BIAS4",
-			"MIC BIAS4", "Digital Mic5",
-			"SpkrLeft IN", "SPK1 OUT",
-			"SpkrRight IN", "SPK2 OUT";
-
-		qcom,us-euro-gpios = <>;
-		qcom,hph-en0-gpio = <>;
-		qcom,hph-en1-gpio = <>;
-		qcom,wsa-max-devs = <0>;
-
-		wahoo,use-external-amp;
-		wahoo,external-amp-be-sname = "Quaternary MI2S Playback";
-
-		wahoo,external-amp-be-codec-phandle = <&ti_tas2557_4d>;
-
-		wahoo,external-amp-be-codec-dai-name = "tas2557 Stereo ASI1";
-	};
-
 	qcom,msm-dai-mi2s {
 		qcom,msm-dai-q6-mi2s-quat {
 			qcom,msm-mi2s-rx-lines = <2>; /* SD1 used as output */
@@ -138,6 +97,47 @@
 
 &snd_9335 {
 	status = "disabled";
+};
+
+&snd_934x {
+	qcom,model = "msm8998-tavil-taimen-snd-card";
+	qcom,audio-routing =
+		"RX_BIAS", "MCLK",
+		"MADINPUT", "MCLK",
+		"AMIC1", "MIC BIAS1",
+		"MIC BIAS1", "Handset Mic",
+		"AMIC2", "MIC BIAS2",
+		"MIC BIAS2", "Headset Mic",
+		"AMIC3", "MIC BIAS3",
+		"MIC BIAS3", "Handset 2nd Mic",
+		"AMIC4", "MIC BIAS4",
+		"MIC BIAS4", "Handset 3rd Mic",
+		"DMIC0", "MIC BIAS1",
+		"MIC BIAS1", "Digital Mic0",
+		"DMIC1", "MIC BIAS1",
+		"MIC BIAS1", "Digital Mic1",
+		"DMIC2", "MIC BIAS3",
+		"MIC BIAS3", "Digital Mic2",
+		"DMIC3", "MIC BIAS3",
+		"MIC BIAS3", "Digital Mic3",
+		"DMIC4", "MIC BIAS4",
+		"MIC BIAS4", "Digital Mic4",
+		"DMIC5", "MIC BIAS4",
+		"MIC BIAS4", "Digital Mic5",
+		"SpkrLeft IN", "SPK1 OUT",
+		"SpkrRight IN", "SPK2 OUT";
+
+	qcom,us-euro-gpios = <>;
+	qcom,hph-en0-gpio = <>;
+	qcom,hph-en1-gpio = <>;
+	qcom,wsa-max-devs = <0>;
+
+	wahoo,use-external-amp;
+	wahoo,external-amp-be-sname = "Quaternary MI2S Playback";
+
+	wahoo,external-amp-be-codec-phandle = <&ti_tas2557_4d>;
+
+	wahoo,external-amp-be-codec-dai-name = "tas2557 Stereo ASI1";
 };
 
 &slim_aud {
