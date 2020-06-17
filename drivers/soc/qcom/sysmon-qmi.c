@@ -125,6 +125,8 @@ static bool is_ssctl_event(enum subsys_notif_type notif)
 	return notif_map[notif] != SSCTL_SSR_EVENT_INVALID;
 }
 
+extern void apr_adsp_up(void);
+
 static int ssctl_new_server(struct qmi_handle *qmi, struct qmi_service *svc)
 {
 	struct sysmon_qmi_data *data = container_of(qmi,
@@ -137,6 +139,10 @@ static int ssctl_new_server(struct qmi_handle *qmi, struct qmi_service *svc)
 	data->ssctl.sq_node = svc->node;
 	data->ssctl.sq_port = svc->port;
 	data->connected = true;
+
+	if (!strcmp(data->name, "adsp"))
+		apr_adsp_up();
+
 	return 0;
 }
 
