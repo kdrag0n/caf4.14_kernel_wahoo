@@ -12,6 +12,7 @@
 
 #include <linux/delay.h>
 #include <linux/gpio.h>
+#include <linux/miscdevice.h>
 #include <linux/of_gpio.h>
 #include <linux/of_device.h>
 #include <linux/spi/spi.h>
