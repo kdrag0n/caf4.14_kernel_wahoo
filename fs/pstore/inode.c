@@ -36,7 +36,6 @@
 #include <linux/slab.h>
 #include <linux/spinlock.h>
 #include <linux/uaccess.h>
-#include <linux/vmalloc.h>
 
 #include "internal.h"
 
@@ -64,7 +63,7 @@ static void free_pstore_private(struct pstore_private *private)
 	if (!private)
 		return;
 	if (private->record) {
-		vfree(private->record->buf);
+		kfree(private->record->buf);
 		kfree(private->record);
 	}
 	kfree(private);
