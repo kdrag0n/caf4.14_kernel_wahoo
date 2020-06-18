@@ -64,7 +64,7 @@
 
 		stm,firmware_name = "ftm4_fw.ftb";
 
-		power-supplies = <&pmi8998_charger>;
+		//power-supplies = <&pmi8998_charger>;
 	};
 };
 
