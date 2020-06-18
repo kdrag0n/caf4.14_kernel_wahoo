@@ -19,6 +19,11 @@ choice
         help
           This option chooses compression algorithm.
 
+config PSTORE_NO_COMPRESS
+        bool "None"
+        help
+          This option disables compression.
+
 config PSTORE_ZLIB_COMPRESS
         bool "ZLIB"
         select ZLIB_DEFLATE
