@@ -44,7 +44,6 @@
 #include <linux/hardirq.h>
 #include <linux/jiffies.h>
 #include <linux/workqueue.h>
-#include <linux/vmalloc.h>
 
 #include "internal.h"
 
@@ -662,7 +661,7 @@ static int pstore_write_user_compat(struct pstore_record *record,
 
 	ret = record->psi->write(record);
 
-	vfree(record->buf);
+	kfree(record->buf);
 out:
 	record->buf = NULL;
 
@@ -804,7 +803,8 @@ static void decompress_record(struct pstore_record *record)
 	}
 
 	/* Build new buffer for decompressed contents. */
-	decompressed = vmalloc(unzipped_len + record->ecc_notice_size);
+	decompressed = kmalloc(unzipped_len + record->ecc_notice_size,
+			       GFP_KERNEL);
 	if (!decompressed) {
 		pr_err("decompression ran out of memory\n");
 		return;
@@ -816,7 +816,7 @@ static void decompress_record(struct pstore_record *record)
 	       record->ecc_notice_size);
 
 	/* Swap out compresed contents with decompressed contents. */
-	vfree(record->buf);
+	kfree(record->buf);
 	record->buf = decompressed;
 	record->size = unzipped_len;
 	record->compressed = false;
@@ -869,7 +869,7 @@ void pstore_get_backend_records(struct pstore_info *psi,
 		rc = pstore_mkfile(root, record);
 		if (rc) {
 			/* pstore_mkfile() did not take record, so free it. */
-			vfree(record->buf);
+			kfree(record->buf);
 			kfree(record);
 			if (rc != -EEXIST || !quiet)
 				failed++;
