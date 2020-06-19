@@ -1182,4 +1182,22 @@ config SND_SOC_TPA6130A2
 	tristate "Texas Instruments TPA6130A2 headphone amplifier"
 	depends on I2C
 
+config SND_SOC_TAS2557_STEREO
+	tristate "Texas Instruments TAS2557 SmartAmp(R)"
+
+config TAS2557_REGMAP_STEREO
+	bool "Use of RegMap API"
+	depends on SND_SOC_TAS2557_STEREO
+	default y
+
+config TAS2557_CODEC_STEREO
+	bool "Codec Driver support"
+	depends on SND_SOC_TAS2557_STEREO
+	default y
+
+config TAS2557_MISC_STEREO
+	bool "Misc Driver support"
+	depends on SND_SOC_TAS2557_STEREO
+	default y
+
 endmenu

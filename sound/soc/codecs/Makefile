@@ -476,3 +476,4 @@ obj-$(CONFIG_SND_SOC_MAX98504)	+= snd-soc-max98504.o
 obj-$(CONFIG_SND_SOC_TPA6130A2)	+= snd-soc-tpa6130a2.o
 
 obj-$(CONFIG_SND_SOC_TFA98XX) += tfa/
+obj-$(CONFIG_SND_SOC_TAS2557_STEREO) += tas2557/
