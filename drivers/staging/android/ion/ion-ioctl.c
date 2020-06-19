@@ -104,31 +104,14 @@ long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		break;
 	}
 	case ION_IOC_FREE:
-	{
-		struct dma_buf *dmabuf = dma_buf_get(data.fd.fd);
-		if (IS_ERR(dmabuf))
-			return PTR_ERR(dmabuf);
-
-		/*
-		 * This is intentionally called twice:
-		 *   - once to drop our temporary reference
-		 *   - once to "free" by dropping another reference
-		 */
-		dma_buf_put(dmabuf);
-		dma_buf_put(dmabuf);
 		break;
-	}
 	case ION_IOC_SHARE:
 	case ION_IOC_MAP:
-	{
 		data.fd.fd = data.handle.handle;
 		break;
-	}
 	case ION_IOC_IMPORT:
-	{
 		data.handle.handle = data.fd.fd;
 		break;
-	}
 	case ION_IOC_SYNC:
 		ret = ion_sync_for_device(data.fd.fd);
 		break;
