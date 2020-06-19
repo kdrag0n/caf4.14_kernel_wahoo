@@ -1494,7 +1494,7 @@ CONFIG_QPNP_MISC=y
 #
 # FingerprintCard fingerprint driver
 #
-# CONFIG_FPR_FPC is not set
+CONFIG_FPR_FPC=y
 
 #
 # SCSI device support
