@@ -6727,6 +6727,83 @@ struct snd_soc_card snd_soc_card_tavil_msm = {
 	.late_probe	= msm_snd_card_tavil_late_probe,
 };
 
+static int wahoo_populate_external_amp(struct snd_soc_card *card)
+{
+	int i, j, count, ret = 0;
+	struct device *cdev = card->dev;
+	struct snd_soc_dai_link *dai_link = card->dai_link;
+	struct device_node *np;
+	const char *codec_dai_str = NULL;
+	const char *be_sname_str = NULL;
+
+	if (!cdev) {
+		pr_err("%s: Sound card device memory NULL\n", __func__);
+		return -ENODEV;
+	}
+
+	if (of_property_read_bool(cdev->of_node, "wahoo,use-external-amp")) {
+
+		count = of_property_count_strings(cdev->of_node,
+						  "wahoo,external-amp-be-sname");
+		if (count > 0) {
+			for (i = 0; i < count; i++) {
+				codec_dai_str = NULL;
+				be_sname_str = NULL;
+
+				ret =
+				    of_property_read_string_index(cdev->of_node,
+								  "wahoo,external-amp-be-sname",
+								  i,
+								  &be_sname_str);
+
+				if (ret) {
+					pr_err("%s: failed to get be sname%d\n",
+					       __func__, i);
+					continue;
+				}
+
+				np = of_parse_phandle(cdev->of_node,
+						      "wahoo,external-amp-be-codec-phandle",
+						      i);
+
+				if (!np) {
+					pr_err
+					    ("%s: can't find codec hanlde for %d\n",
+					     __func__, i);
+					continue;
+				}
+
+				ret =
+				    of_property_read_string_index(cdev->of_node,
+								  "wahoo,external-amp-be-codec-dai-name",
+								  i,
+								  &codec_dai_str);
+
+				if (ret) {
+					pr_err
+					    ("%s: failed to get be codec_dai %d\n",
+					     __func__, i);
+					continue;
+				}
+
+				for (j = 0; j < card->num_links; j++) {
+					if (dai_link[j].no_pcm &&	/* Only check BE */
+					    !strcmp(dai_link[j].stream_name,
+						    be_sname_str)) {
+						dai_link[j].codec_of_node = np;
+						dai_link[j].codec_dai_name =
+						    codec_dai_str;
+						dai_link[j].codec_name = NULL;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	return ret;
+}
+
 static int msm_populate_dai_link_component_of_node(
 					struct snd_soc_card *card)
 {
@@ -7268,6 +7345,8 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 		ret = -EPROBE_DEFER;
 		goto err;
 	}
+
+	wahoo_populate_external_amp(card);
 
 	ret = devm_snd_soc_register_card(&pdev->dev, card);
 	if (ret == -EPROBE_DEFER) {
