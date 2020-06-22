@@ -1,4 +1,6 @@
-obj-$(CONFIG_QRTR) := qrtr.o
+obj-$(CONFIG_QRTR) := qrtr-core.o
+qrtr-core-y	:= qrtr.o
+qrtr-core-$(CONFIG_QRTR_IPC_ROUTER_COMPAT) += msm_ipc_compat.o
 
 obj-$(CONFIG_QRTR_SMD) += qrtr-smd.o
 qrtr-smd-y	:= smd.o
