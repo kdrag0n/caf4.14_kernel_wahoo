@@ -25,6 +25,13 @@ config QRTR_NODE_ID
 	  but the name service application is not priveleged enough to use
 	  netlink sockets.
 
+config QRTR_IPC_ROUTER_COMPAT
+	bool "Compatibility with legacy MSM IPC Router API"
+	---help---
+	  This enables compatibility with the legacy MSM IPC Router API used
+	  on downstream MSM kernels prior to 4.14. The native QRTR API will
+	  be included regardless of whether this option is enabled.
+
 config QRTR_SMD
 	tristate "SMD IPC Router channels"
 	depends on RPMSG || (COMPILE_TEST && RPMSG=n)
