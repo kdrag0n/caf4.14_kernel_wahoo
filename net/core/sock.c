@@ -445,13 +445,11 @@ int __sock_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	if (atomic_read(&sk->sk_rmem_alloc) >= sk->sk_rcvbuf) {
 		atomic_inc(&sk->sk_drops);
 		trace_sock_rcvqueue_full(sk, skb);
-		pr_err_ratelimited("%s: SARU: %s rcvqueue full\n", __func__, current->comm);
 		return -ENOMEM;
 	}
 
 	if (!sk_rmem_schedule(sk, skb, skb->truesize)) {
 		atomic_inc(&sk->sk_drops);
-		pr_err_ratelimited("%s: SARU: %s sk rmem schedule\n", __func__, current->comm);
 		return -ENOBUFS;
 	}
 
@@ -479,8 +477,6 @@ int sock_queue_rcv_skb(struct sock *sk, struct sk_buff *skb)
 	int err;
 
 	err = sk_filter(sk, skb);
-	if (err)
-		pr_err_ratelimited("%s: SARU: %s sk filter fail %d\n", __func__, current->comm, err);
 	if (err)
 		return err;
 
