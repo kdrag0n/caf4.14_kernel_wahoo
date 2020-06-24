@@ -261,50 +261,6 @@ static inline int kref_put_rwsem_lock(struct kref *kref,
 	return 0;
 }
 
-#ifdef CONFIG_QRTR_IPC_ROUTER_COMPAT
-static void qrtr_msm_ipc_save_server(struct qrtr_node *node, struct sk_buff *skb)
-{
-	const struct qrtr_ctrl_pkt *pkt;
-
-	if (!node || !skb || !skb->data)
-		return;
-
-	pkt = (struct qrtr_ctrl_pkt *)(skb->data + QRTR_HDR_MAX_SIZE);
-	node->service = le32_to_cpu(pkt->server.service);
-	node->instance = le32_to_cpu(pkt->server.instance);
-	node->port = le32_to_cpu(pkt->server.port);
-}
-
-int qrtr_msm_ipc_lookup_server(struct msm_ipc_server_info *srv_info,
-			       u32 service, u32 instance, int limit, u32 mask)
-{
-	struct radix_tree_iter iter;
-	int found = 0;
-	void __rcu **slot;
-
-	down_read(&qrtr_node_lock);
-	radix_tree_for_each_slot(slot, &qrtr_nodes, &iter, 0) {
-		struct qrtr_node *node = *slot;
-
-		if (node->service != service ||
-		    (node->instance & mask) != instance)
-			continue;
-
-		if (found < limit) {
-			srv_info[found].node_id = node->nid;
-			srv_info[found].port_id = node->port;
-			srv_info[found].service = service;
-			srv_info[found].instance = instance;
-
-			found++;
-		}
-	}
-	up_read(&qrtr_node_lock);
-
-	return found;
-}
-#endif
-
 /* Release node resources and free the node.
  *
  * Do not call directly, use qrtr_node_release.  To be used with
@@ -539,11 +495,6 @@ static int qrtr_node_enqueue(struct qrtr_node *node, struct sk_buff *skb,
 	hdr->dst_port_id = cpu_to_le32(to->sq_port);
 	hdr->size = cpu_to_le32(len);
 	hdr->confirm_rx = !!confirm_rx;
-
-#ifdef CONFIG_QRTR_IPC_ROUTER_COMPAT
-	if (type == QRTR_TYPE_NEW_SERVER)
-		qrtr_msm_ipc_save_server(node, skb);
-#endif
 
 	qrtr_log_tx_msg(node, hdr, skb);
 	rc = skb_put_padto(skb, ALIGN(len, 4) + sizeof(*hdr));
@@ -1430,6 +1381,7 @@ static int qrtr_local_enqueue(struct qrtr_node *node, struct sk_buff *skb,
 	cb->src_port = from->sq_port;
 
 	if (sock_queue_rcv_skb(&ipc->sk, skb)) {
+		pr_err_ratelimited("%s: SARU: %s rcv skb fail\n", __func__, current->comm);
 		qrtr_port_put(ipc);
 		kfree_skb(skb);
 		return -ENOSPC;

@@ -7,10 +7,6 @@
 #include <net/sock.h>
 #include <uapi/linux/qrtr.h>
 
-#ifdef CONFIG_QRTR_IPC_ROUTER_COMPAT
-#include <uapi/linux/msm_ipc.h>
-#endif
-
 struct sk_buff;
 
 /* qrtr socket states */
@@ -74,11 +70,6 @@ struct qrtr_node {
 	unsigned int net_id;
 	atomic_t hello_sent;
 	atomic_t hello_rcvd;
-#ifdef CONFIG_QRTR_IPC_ROUTER_COMPAT
-	u32 service;
-	u32 instance;
-	u32 port;
-#endif
 
 	struct radix_tree_root qrtr_tx_flow;
 	struct wait_queue_head resume_tx;
@@ -120,11 +111,5 @@ int qrtr_sendmsg(struct socket *sock, struct msghdr *msg, size_t len);
 int qrtr_recvmsg(struct socket *sock, struct msghdr *msg, size_t size, int flags);
 int qrtr_connect(struct socket *sock, struct sockaddr *saddr, int len, int flags);
 int qrtr_release(struct socket *sock);
-
-/* Other functions for msm_ipc_compat */
-#ifdef CONFIG_QRTR_IPC_ROUTER_COMPAT
-int qrtr_msm_ipc_lookup_server(struct msm_ipc_server_info *srv_info,
-			       u32 service, u32 instance, int limit, u32 mask);
-#endif
 
 #endif
