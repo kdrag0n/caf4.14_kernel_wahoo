@@ -11,6 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+#include <linux/kthread.h>
 #include <linux/module.h>
 #include <linux/netlink.h>
 #include <linux/qrtr.h>
@@ -21,6 +22,7 @@
 #include <linux/uidgid.h>
 #include <linux/pm_wakeup.h>
 
+#include <net/sock.h>
 #include <uapi/linux/sched/types.h>
 
 #include "qrtr.h"
@@ -37,6 +39,10 @@
 #define QRTR_MAX_EPH_SOCKET 0x7fff
 
 #define QRTR_PORT_CTRL_LEGACY 0xffff
+
+/* qrtr socket states */
+#define QRTR_STATE_MULTI	-2
+#define QRTR_STATE_INIT	-1
 
 #define AID_VENDOR_QRTR	KGIDT_INIT(2906)
 
@@ -101,7 +107,22 @@ struct qrtr_cb {
 #define QRTR_HDR_MAX_SIZE max_t(size_t, sizeof(struct qrtr_hdr_v1), \
 					sizeof(struct qrtr_hdr_v2))
 
-unsigned int qrtr_local_nid = CONFIG_QRTR_NODE_ID;
+struct qrtr_sock {
+	/* WARNING: sk must be the first member */
+	struct sock sk;
+	struct sockaddr_qrtr us;
+	struct sockaddr_qrtr peer;
+
+	int state;
+};
+
+static inline struct qrtr_sock *qrtr_sk(struct sock *sk)
+{
+	BUILD_BUG_ON(offsetof(struct qrtr_sock, sk) != 0);
+	return container_of(sk, struct qrtr_sock, sk);
+}
+
+static unsigned int qrtr_local_nid = CONFIG_QRTR_NODE_ID;
 
 /* for node ids */
 static RADIX_TREE(qrtr_nodes, GFP_KERNEL);
@@ -113,6 +134,52 @@ static DECLARE_RWSEM(qrtr_node_lock);
 /* local port allocation management */
 static DEFINE_IDR(qrtr_ports);
 static DEFINE_MUTEX(qrtr_port_lock);
+
+/**
+ * struct qrtr_node - endpoint node
+ * @ep_lock: lock for endpoint management and callbacks
+ * @ep: endpoint
+ * @ref: reference count for node
+ * @nid: node id
+ * @net_id: network cluster identifer
+ * @hello_sent: hello packet sent to endpoint
+ * @qrtr_tx_flow: remote port tx flow control list
+ * @resume_tx: wait until remote port acks control flag
+ * @qrtr_tx_lock: lock for qrtr_tx_flow
+ * @rx_queue: receive queue
+ * @item: list item for broadcast list
+ * @kworker: worker thread for recv work
+ * @task: task to run the worker thread
+ * @read_data: scheduled work for recv work
+ * @say_hello: scheduled work for initiating hello
+ * @ws: wakeupsource avoid system suspend
+ * @ilc: ipc logging context reference
+ */
+struct qrtr_node {
+	struct mutex ep_lock;
+	struct qrtr_endpoint *ep;
+	struct kref ref;
+	unsigned int nid;
+	unsigned int net_id;
+	atomic_t hello_sent;
+	atomic_t hello_rcvd;
+
+	struct radix_tree_root qrtr_tx_flow;
+	struct wait_queue_head resume_tx;
+	struct mutex qrtr_tx_lock;	/* for qrtr_tx_flow */
+
+	struct sk_buff_head rx_queue;
+	struct list_head item;
+
+	struct kthread_worker kworker;
+	struct task_struct *task;
+	struct kthread_work read_data;
+	struct kthread_work say_hello;
+
+	struct wakeup_source *ws;
+
+	void *ilc;
+};
 
 struct qrtr_tx_flow_waiter {
 	struct list_head node;
@@ -260,50 +327,6 @@ static inline int kref_put_rwsem_lock(struct kref *kref,
 	}
 	return 0;
 }
-
-#ifdef CONFIG_QRTR_IPC_ROUTER_COMPAT
-static void qrtr_msm_ipc_save_server(struct qrtr_node *node, struct sk_buff *skb)
-{
-	const struct qrtr_ctrl_pkt *pkt;
-
-	if (!node || !skb || !skb->data)
-		return;
-
-	pkt = (struct qrtr_ctrl_pkt *)(skb->data + QRTR_HDR_MAX_SIZE);
-	node->service = le32_to_cpu(pkt->server.service);
-	node->instance = le32_to_cpu(pkt->server.instance);
-	node->port = le32_to_cpu(pkt->server.port);
-}
-
-int qrtr_msm_ipc_lookup_server(struct msm_ipc_server_info *srv_info,
-			       u32 service, u32 instance, int limit, u32 mask)
-{
-	struct radix_tree_iter iter;
-	int found = 0;
-	void __rcu **slot;
-
-	down_read(&qrtr_node_lock);
-	radix_tree_for_each_slot(slot, &qrtr_nodes, &iter, 0) {
-		struct qrtr_node *node = *slot;
-
-		if (node->service != service ||
-		    (node->instance & mask) != instance)
-			continue;
-
-		if (found < limit) {
-			srv_info[found].node_id = node->nid;
-			srv_info[found].port_id = node->port;
-			srv_info[found].service = service;
-			srv_info[found].instance = instance;
-
-			found++;
-		}
-	}
-	up_read(&qrtr_node_lock);
-
-	return found;
-}
-#endif
 
 /* Release node resources and free the node.
  *
@@ -539,11 +562,6 @@ static int qrtr_node_enqueue(struct qrtr_node *node, struct sk_buff *skb,
 	hdr->dst_port_id = cpu_to_le32(to->sq_port);
 	hdr->size = cpu_to_le32(len);
 	hdr->confirm_rx = !!confirm_rx;
-
-#ifdef CONFIG_QRTR_IPC_ROUTER_COMPAT
-	if (type == QRTR_TYPE_NEW_SERVER)
-		qrtr_msm_ipc_save_server(node, skb);
-#endif
 
 	qrtr_log_tx_msg(node, hdr, skb);
 	rc = skb_put_padto(skb, ALIGN(len, 4) + sizeof(*hdr));
@@ -1376,7 +1394,7 @@ static int qrtr_autobind(struct socket *sock)
 }
 
 /* Bind socket to specified sockaddr. */
-int qrtr_bind(struct socket *sock, struct sockaddr *saddr, int len)
+static int qrtr_bind(struct socket *sock, struct sockaddr *saddr, int len)
 {
 	DECLARE_SOCKADDR(struct sockaddr_qrtr *, addr, saddr);
 	struct qrtr_sock *ipc = qrtr_sk(sock->sk);
@@ -1464,7 +1482,7 @@ static int qrtr_bcast_enqueue(struct qrtr_node *node, struct sk_buff *skb,
 	return 0;
 }
 
-int qrtr_sendmsg(struct socket *sock, struct msghdr *msg, size_t len)
+static int qrtr_sendmsg(struct socket *sock, struct msghdr *msg, size_t len)
 {
 	DECLARE_SOCKADDR(struct sockaddr_qrtr *, addr, msg->msg_name);
 	int (*enqueue_fn)(struct qrtr_node *, struct sk_buff *, int,
@@ -1617,7 +1635,8 @@ static int qrtr_resume_tx(struct qrtr_cb *cb)
 	return ret;
 }
 
-int qrtr_recvmsg(struct socket *sock, struct msghdr *msg, size_t size, int flags)
+static int qrtr_recvmsg(struct socket *sock, struct msghdr *msg,
+			size_t size, int flags)
 {
 	DECLARE_SOCKADDR(struct sockaddr_qrtr *, addr, msg->msg_name);
 	struct sock *sk = sock->sk;
@@ -1668,7 +1687,8 @@ out:
 	return rc;
 }
 
-int qrtr_connect(struct socket *sock, struct sockaddr *saddr, int len, int flags)
+static int qrtr_connect(struct socket *sock, struct sockaddr *saddr,
+			int len, int flags)
 {
 	DECLARE_SOCKADDR(struct sockaddr_qrtr *, addr, saddr);
 	struct qrtr_sock *ipc = qrtr_sk(sock->sk);
@@ -1789,7 +1809,7 @@ static int qrtr_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 	return rc;
 }
 
-int qrtr_release(struct socket *sock)
+static int qrtr_release(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
 	struct qrtr_sock *ipc;
