@@ -134,7 +134,6 @@ static int ssctl_new_server(struct qmi_handle *qmi, struct qmi_service *svc)
 
 	pr_info("Connection established between QMI handle and %s's SSCTL service\n"
 								, data->name);
-	pr_info("SARU: %s: srv=0x%x inst=0x%x node=0x%x port=0x%x\n", data->name, svc->service, svc->instance, svc->node, svc->port);
 
 	data->ssctl.sq_family = AF_QIPCRTR;
 	data->ssctl.sq_node = svc->node;
