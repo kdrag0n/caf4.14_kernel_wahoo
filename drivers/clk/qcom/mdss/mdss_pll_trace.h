@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2018, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -20,7 +20,7 @@
 #undef TRACE_SYSTEM
 #define TRACE_SYSTEM mdss_pll
 #undef TRACE_INCLUDE_FILE
-#define TRACE_INCLUDE_FILE mdss_pll_trace
+#define TRACE_INCLUDE_FILE ../../../../drivers/clk/qcom/mdss/mdss_pll_trace
 
 
 TRACE_EVENT(mdss_pll_lock_start,
@@ -112,5 +112,5 @@ TRACE_EVENT(mdss_pll_trace_counter,
 
 /* This part must be outside protection */
 #undef TRACE_INCLUDE_PATH
-#define TRACE_INCLUDE_PATH ../../drivers/clk/qcom/mdss/
+#define TRACE_INCLUDE_PATH .
 #include <trace/define_trace.h>
