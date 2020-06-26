@@ -11,4 +11,3 @@
  */
 
 #include "msm8998-taimen-touch-stm-ftm4.dtsi"
-#include "msm8998-taimen-touch-sic-sw49408.dtsi"
