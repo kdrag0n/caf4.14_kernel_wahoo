@@ -1,4 +1,4 @@
-/* Copyright (c) 2016-2018, 2020 The Linux Foundation. All rights reserved.
+/* Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -63,7 +63,6 @@ enum ipahal_rt_rule_hdr_type {
  * @hdr_ofst: Offset of the header in the header table
  * @priority: Rule priority
  * @id: Rule ID
- * @cnt_idx: Stats counter index
  * @rule: Rule info
  */
 struct ipahal_rt_rule_gen_params {
@@ -74,8 +73,7 @@ struct ipahal_rt_rule_gen_params {
 	u32 hdr_ofst;
 	u32 priority;
 	u32 id;
-	u8 cnt_idx;
-	const struct ipa_rt_rule_i *rule;
+	const struct ipa_rt_rule *rule;
 };
 
 /*
@@ -87,7 +85,6 @@ struct ipahal_rt_rule_gen_params {
  * @priority: Rule priority
  * @retain_hdr: to retain the removed header in header removal
  * @id: Rule ID
- * @cnt_idx: stats counter index
  * @eq_attrib: Equations and their params in the rule
  * @rule_size: Rule size in memory
  */
@@ -99,7 +96,6 @@ struct ipahal_rt_rule_entry {
 	u32 priority;
 	bool retain_hdr;
 	u32 id;
-	u8 cnt_idx;
 	struct ipa_ipfltri_rule_eq eq_attrib;
 	u32 rule_size;
 };
@@ -110,7 +106,6 @@ struct ipahal_rt_rule_entry {
  * @rt_tbl_idx: Routing table the rule pointing to
  * @priority: Rule priority
  * @id: Rule ID
- * @cnt_idx: Stats counter index
  * @rule: Rule info
  */
 struct ipahal_flt_rule_gen_params {
@@ -118,8 +113,7 @@ struct ipahal_flt_rule_gen_params {
 	u32 rt_tbl_idx;
 	u32 priority;
 	u32 id;
-	u8 cnt_idx;
-	const struct ipa_flt_rule_i *rule;
+	const struct ipa_flt_rule *rule;
 };
 
 /*
@@ -127,14 +121,12 @@ struct ipahal_flt_rule_gen_params {
  * @rule: Rule info
  * @priority: Rule priority
  * @id: Rule ID
- * @cnt_idx: stats counter index
  * @rule_size: Rule size in memory
  */
 struct ipahal_flt_rule_entry {
-	struct ipa_flt_rule_i rule;
+	struct ipa_flt_rule rule;
 	u32 priority;
 	u32 id;
-	u8 cnt_idx;
 	u32 rule_size;
 };
 
@@ -146,9 +138,6 @@ u32 ipahal_get_hw_tbl_hdr_width(void);
  * This function return the alignment of the offset that IPA expects
  */
 u32 ipahal_get_lcl_tbl_addr_alignment(void);
-
-/* Get the H/W (flt/rt) prefetch buf size */
-u32 ipahal_get_hw_prefetch_buf_size(void);
 
 /*
  * Rule priority is used to distinguish rules order
@@ -173,22 +162,6 @@ u32 ipahal_get_rule_id_hi_bit(void);
 
 /* Get the low value possible to be used for rule-id */
 u32 ipahal_get_low_rule_id(void);
-
-/*
- * low value possible for counter hdl id
- */
-u32 ipahal_get_low_hdl_id(void);
-
-/*
- * max counter hdl id for stats
- */
-u32 ipahal_get_high_hdl_id(void);
-
-/* used for query check and associated with rt/flt rules */
-bool ipahal_is_rule_cnt_id_valid(u8 cnt_id);
-
-/* max rule id for stats */
-bool ipahal_get_max_stats_rule_id(void);
 
 /*
  * ipahal_rt_generate_empty_img() - Generate empty route image
