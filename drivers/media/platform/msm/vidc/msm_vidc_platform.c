@@ -296,53 +296,6 @@ static struct msm_vidc_common_data sm6150_common_data[] = {
 	},
 };
 
-static struct msm_vidc_common_data msm8998_common_data[] = {
-	{
-		.key = "qcom,sw-power-collapse",
-		.value = 1,
-	},
-	{
-		.key = "qcom,never-unload-fw",
-		.value = 1,
-	},
-	{
-		.key = "qcom,max-secure-instances",
-		.value = 5,
-	},
-	{
-		.key = "qcom,max-hw-load",
-		.value = 2563200, /* Full 4k @ 60 + 1080p @ 60 */
-	},
-	{
-		.key = "qcom,max-hq-mbs-per-frame",
-		.value = 8160,
-	},
-	{
-		.key = "qcom,max-hq-frames-per-sec",
-		.value = 60,
-	},
-	{
-		.key = "qcom,max-b-frame-size",
-		.value = 8160,
-	},
-	{
-		.key = "qcom,max-b-frames-per-sec",
-		.value = 60,
-	},
-	{
-		.key = "qcom,power-collapse-delay",
-		.value = 1500,
-	},
-	{
-		.key = "qcom,hw-resp-timeout",
-		.value = 1000,
-	},
-	{
-		.key = "qcom,hfi-version",
-		.value = 3,
-	},
-};
-
 static struct msm_vidc_common_data trinket_common_data[] = {
 	{
 		.key = "qcom,never-unload-fw",
@@ -949,6 +902,7 @@ static struct msm_vidc_platform_data sdm670_data = {
 	.vpu_ver = VPU_VERSION_4,
 };
 
+<<<<<<< HEAD
 static struct msm_vidc_platform_data msm8998_data = {
 	.codec_data = sdm845_codec_data,
 	.codec_data_length =  ARRAY_SIZE(sdm845_codec_data),
@@ -965,6 +919,8 @@ static struct msm_vidc_platform_data msm8998_data = {
 	.vpu_ver = VPU_VERSION_4,
 };
 
+=======
+>>>>>>> parent of 95c29a85445cb6... arm64: DT: msm8998-vidc: Small adaptation for k4.14 new vidc driver
 static const struct of_device_id msm_vidc_dt_match[] = {
 	{
 		.compatible = "qcom,atoll-vidc",
@@ -993,10 +949,6 @@ static const struct of_device_id msm_vidc_dt_match[] = {
 	{
 		.compatible = "qcom,sdm670-vidc",
 		.data = &sdm670_data,
-	},
-	{
-		.compatible = "qcom,msm8998-vidc",
-		.data = &msm8998_data,
 	},
 	{},
 };
