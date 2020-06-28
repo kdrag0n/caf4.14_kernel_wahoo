@@ -58,8 +58,9 @@
 			reg = <0x0 0x0>;
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			enable-method = "psci";
-			capacity-dmips-mhz = <1024>;
+			capacity-dmips-mhz = <419>;
 			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>;
+			freq-energy-model;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_0>;
 			L2_0: l2-cache {
@@ -86,8 +87,9 @@
 			reg = <0x0 0x1>;
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			enable-method = "psci";
-			capacity-dmips-mhz = <1024>;
+			capacity-dmips-mhz = <419>;
 			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>;
+			freq-energy-model;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_0>;
 			L1_I_1: l1-icache {
@@ -109,8 +111,9 @@
 			reg = <0x0 0x2>;
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			enable-method = "psci";
-			capacity-dmips-mhz = <1024>;
+			capacity-dmips-mhz = <419>;
 			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>;
+			freq-energy-model;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_0>;
 			L1_I_2: l1-icache {
@@ -132,8 +135,9 @@
 			reg = <0x0 0x3>;
 			qcom,lmh-dcvs = <&lmh_dcvs0>;
 			enable-method = "psci";
-			capacity-dmips-mhz = <1024>;
+			capacity-dmips-mhz = <419>;
 			sched-energy-costs = <&CPU_COST_0 &CLUSTER_COST_0>;
+			freq-energy-model;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_0>;
 			L1_I_3: l1-icache {
@@ -155,8 +159,9 @@
 			reg = <0x0 0x100>;
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			enable-method = "psci";
-			capacity-dmips-mhz = <1536>;
+			capacity-dmips-mhz = <1024>;
 			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
+			freq-energy-model;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_1>;
 			L2_1: l2-cache {
@@ -182,8 +187,9 @@
 			reg = <0x0 0x101>;
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			enable-method = "psci";
-			capacity-dmips-mhz = <1536>;
+			capacity-dmips-mhz = <1024>;
 			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
+			freq-energy-model;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_1>;
 			L1_I_101: l1-icache {
@@ -205,8 +211,9 @@
 			reg = <0x0 0x102>;
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			enable-method = "psci";
-			capacity-dmips-mhz = <1536>;
+			capacity-dmips-mhz = <1024>;
 			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
+			freq-energy-model;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_1>;
 			L1_I_102: l1-icache {
@@ -228,8 +235,9 @@
 			reg = <0x0 0x103>;
 			qcom,lmh-dcvs = <&lmh_dcvs1>;
 			enable-method = "psci";
-			capacity-dmips-mhz = <1536>;
+			capacity-dmips-mhz = <1024>;
 			sched-energy-costs = <&CPU_COST_1 &CLUSTER_COST_1>;
+			freq-energy-model;
 			#cooling-cells = <2>;
 			next-level-cache = <&L2_1>;
 			L1_I_103: l1-icache {
@@ -284,6 +292,8 @@
 		};
 
 		energy-costs {
+			compatible = "sched-energy";
+
 			CPU_COST_0: core-cost0 {
 				busy-cost-data = <
 					300000  11
