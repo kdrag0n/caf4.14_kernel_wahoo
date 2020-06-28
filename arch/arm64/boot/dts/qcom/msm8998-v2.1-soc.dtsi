@@ -10,8 +10,6 @@
  * GNU General Public License for more details.
  */
 
-/dts-v1/;
-
 #include "../qcom/msm8998-v2.1.dtsi"
 / {
 	compatible = "qcom,msm8998-mtp", "qcom,msm8998", "qcom,mtp";
