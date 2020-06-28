@@ -23,11 +23,18 @@
 
 union ion_ioctl_arg {
 	struct ion_allocation_data allocation;
+	struct ion_old_allocation_data old_allocation;
 	struct ion_heap_query query;
 	struct ion_prefetch_data prefetch_data;
 	struct ion_fd_data fd;
 	struct ion_handle_data handle;
 	struct ion_custom_data custom;
+};
+
+union msm_ion_custom_ioctl_arg {
+	struct ion_flush_data flush;
+	struct ion_prefetch_data prefetch;
+	struct ion_old_prefetch_data old_prefetch;
 };
 
 static int validate_ioctl_arg(unsigned int cmd, union ion_ioctl_arg *arg)
@@ -54,10 +61,75 @@ static unsigned int ion_ioctl_dir(unsigned int cmd)
 	case ION_IOC_SYNC:
 	case ION_IOC_FREE:
 	case ION_IOC_CUSTOM:
+	case ION_IOC_CLEAN_CACHES:
+	case ION_IOC_INV_CACHES:
+	case ION_IOC_CLEAN_INV_CACHES:
+	case ION_IOC_PREFETCH:
+	case ION_IOC_DRAIN:
 		return _IOC_WRITE;
 	default:
 		return _IOC_DIR(cmd);
 	}
+}
+
+static int dma_buf_cache_op(struct ion_flush_data data,
+			    enum dma_data_direction direction)
+{
+	int ret;
+	struct dma_buf *dmabuf;
+
+	dmabuf = dma_buf_get(data.fd);
+	if (IS_ERR(dmabuf))
+		return PTR_ERR(dmabuf);
+
+	ret = dma_buf_begin_cpu_access_partial(dmabuf, direction,
+					       data.offset, data.length);
+	if (ret)
+		goto out;
+
+	ret = dma_buf_end_cpu_access_partial(dmabuf, direction,
+					     data.offset, data.length);
+
+out:
+	dma_buf_put(dmabuf);
+	return ret;
+}
+
+static long msm_ion_custom_ioctl(unsigned int cmd, unsigned long arg)
+{
+	unsigned int dir = ion_ioctl_dir(cmd);
+	union msm_ion_custom_ioctl_arg data;
+	int ret;
+
+	if (_IOC_SIZE(cmd) > sizeof(data))
+		return -EINVAL;
+
+	if (dir & _IOC_WRITE) {
+		if (copy_from_user(&data, (void __user *)arg, _IOC_SIZE(cmd)))
+			return -EFAULT;
+	}
+
+	switch (cmd) {
+	case ION_IOC_CLEAN_CACHES:
+		ret = dma_buf_cache_op(data.flush, DMA_TO_DEVICE);
+		break;
+	case ION_IOC_CLEAN_INV_CACHES:
+		ret = dma_buf_cache_op(data.flush, DMA_BIDIRECTIONAL);
+		break;
+	case ION_IOC_INV_CACHES:
+		ret = dma_buf_cache_op(data.flush, DMA_FROM_DEVICE);
+		break;
+	default:
+		pr_warn_ratelimited("ion: SARU: %s is using custom ioctl %x\n", cmd);
+		return -ENOTTY;
+	}
+
+	if (dir & _IOC_READ) {
+		if (copy_to_user((void __user *)arg, &data, _IOC_SIZE(cmd)))
+			return -EFAULT;
+	}
+
+	return ret;
 }
 
 long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
@@ -89,21 +161,45 @@ long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		memset(&data, 0, sizeof(data));
 
 	switch (cmd) {
-	case ION_IOC_ALLOC:
+        case ION_IOC_ALLOC:
+        {
+                int fd;
+
+                fd = ion_alloc_fd(data.allocation.len,
+                                  data.allocation.heap_id_mask,
+                                  data.allocation.flags);
+                if (fd < 0)
+                        return fd;
+
+                data.allocation.fd = fd;
+
+                break;
+        }
+	case ION_IOC_ALLOC_OLD:
 	{
 		int fd;
 
-		fd = ion_alloc_fd(data.allocation.len,
-				  data.allocation.heap_mask,
-				  data.allocation.flags);
+		fd = ion_alloc_fd(data.old_allocation.len,
+				  data.old_allocation.heap_id_mask,
+				  data.old_allocation.flags);
 		if (fd < 0)
 			return fd;
 
-		data.allocation.handle = fd;
+		data.old_allocation.handle = fd;
 
 		break;
 	}
 	case ION_IOC_FREE:
+		/*
+		 * libion passes 0 as the handle to check for this ioctl's
+		 * existence and expects -ENOTTY on kernel 4.12+ as an indicator
+		 * of having a new ION ABI. We want to use new ION as much as
+		 * possible, so pretend that this ioctl doesn't exist when
+		 * libion checks for it.
+		 */
+		if (!data.handle.handle)
+			ret = -ENOTTY;
+
 		break;
 	case ION_IOC_SHARE:
 	case ION_IOC_MAP:
@@ -112,20 +208,8 @@ long ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	case ION_IOC_IMPORT:
 		data.handle.handle = data.fd.fd;
 		break;
-	case ION_IOC_SYNC:
-		ret = ion_sync_for_device(data.fd.fd);
-		break;
 	case ION_IOC_CUSTOM:
-		pr_warn_ratelimited("ion: %s is using IOC_CUSTOM\n", current->comm);
-		break;
-	case ION_IOC_CLEAN_CACHES:
-		pr_warn_ratelimited("ion: %s is using IOC_CLEAN_CACHES\n", current->comm);
-		break;
-	case ION_IOC_INV_CACHES:
-		pr_warn_ratelimited("ion: %s is using IOC_INV_CACHES\n", current->comm);
-		break;
-	case ION_IOC_CLEAN_INV_CACHES:
-		pr_warn_ratelimited("ion: %s is using IOC_CLEAN_INV_CACHES\n", current->comm);
+		ret = msm_ion_custom_ioctl(data.custom.cmd, data.custom.arg);
 		break;
 	case ION_IOC_HEAP_QUERY:
 		ret = ion_query_heaps(&data.query);
