@@ -82,7 +82,10 @@ static int dma_buf_cache_op(struct ion_flush_data data,
 	if (IS_ERR(dmabuf))
 		return PTR_ERR(dmabuf);
 
-	/* We ignore offset and length because new ion do */
+	/*
+	 * We ignore offset and length because new ION doesn't support partial
+	 * flushes, and updated userspace is effectively doing the same thing
+	 */
 	ret = dma_buf_begin_cpu_access(dmabuf, direction);
 	if (ret)
 		goto out;
