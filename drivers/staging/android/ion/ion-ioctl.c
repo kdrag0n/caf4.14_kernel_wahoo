@@ -78,17 +78,16 @@ static int dma_buf_cache_op(struct ion_flush_data data,
 	int ret;
 	struct dma_buf *dmabuf;
 
-	dmabuf = dma_buf_get(data.fd);
+	dmabuf = dma_buf_get(data.handle);
 	if (IS_ERR(dmabuf))
 		return PTR_ERR(dmabuf);
 
-	ret = dma_buf_begin_cpu_access_partial(dmabuf, direction,
-					       data.offset, data.length);
+	/* We ignore offset and length because new ion do */
+	ret = dma_buf_begin_cpu_access(dmabuf, direction);
 	if (ret)
 		goto out;
 
-	ret = dma_buf_end_cpu_access_partial(dmabuf, direction,
-					     data.offset, data.length);
+	ret = dma_buf_end_cpu_access(dmabuf, direction);
 
 out:
 	dma_buf_put(dmabuf);
