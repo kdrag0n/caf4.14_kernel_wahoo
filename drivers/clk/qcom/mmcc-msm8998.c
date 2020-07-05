@@ -755,11 +755,11 @@ static struct freq_tbl ftbl_video_core_clk_src[] = {
 };
 
 static struct freq_tbl ftbl_video_core_clk_src_vq[] = {
-	F( 200000000, P_GPLL0,      3,    0,     0),
 	F( 269330000, P_MMPLL0,     3,    0,     0),
-	F( 355200000, P_MMPLL6,   2.5,    0,     0),
-	F( 444000000, P_MMPLL6,     2,    0,     0),
-	F( 533000000, P_MMPLL3,     2,    0,     0),
+	F( 269330000, P_MMPLL0,     3,    0,     0),
+	F( 269330000, P_MMPLL0,     3,    0,     0),
+	F( 269330000, P_MMPLL0,     3,    0,     0),
+	F( 269330000, P_MMPLL0,     3,    0,     0),
 	{ }
 };
 
@@ -774,8 +774,8 @@ static struct clk_rcg2 video_core_clk_src = {
 		.parent_names = mmcc_parent_names_7a,
 		.num_parents = ARRAY_SIZE(mmcc_parent_names_7a),
 		.ops = &clk_rcg2_ops,
-		VDD_DIG_FMAX_MAP4(LOWER, 100000000, LOW, 186000000,
-					NOMINAL, 360000000, HIGH, 465000000),
+		VDD_DIG_FMAX_MAP4(LOWER, 186000000, LOW, 186000000,
+					NOMINAL, 186000000, HIGH, 186000000),
 	},
 };
 
@@ -966,11 +966,11 @@ static struct freq_tbl ftbl_video_subcore_clk_src[] = {
 };
 
 static struct freq_tbl ftbl_video_subcore_clk_src_vq[] = {
-	F( 200000000, P_GPLL0,      3,    0,     0),
 	F( 269330000, P_MMPLL0,     3,    0,     0),
-	F( 355200000, P_MMPLL6,   2.5,    0,     0),
-	F( 444000000, P_MMPLL6,     2,    0,     0),
-	F( 533000000, P_MMPLL3,     2,    0,     0),
+	F( 269330000, P_MMPLL0,     3,    0,     0),
+	F( 269330000, P_MMPLL0,     3,    0,     0),
+	F( 269330000, P_MMPLL0,     3,    0,     0),
+	F( 269330000, P_MMPLL0,     3,    0,     0),
 	{ }
 };
 
@@ -987,8 +987,8 @@ static struct clk_rcg2 video_subcore0_clk_src = {
 		.num_parents = ARRAY_SIZE(mmcc_parent_names_7a),
 		.flags = CLK_SET_RATE_PARENT,
 		.ops = &clk_rcg2_ops,
-		VDD_DIG_FMAX_MAP4(LOWER, 100000000, LOW, 186000000,
-					NOMINAL, 360000000, HIGH, 465000000),
+		VDD_DIG_FMAX_MAP4(LOWER, 186000000, LOW, 186000000,
+					NOMINAL, 186000000, HIGH, 186000000),
 	},
 };
 
@@ -3565,25 +3565,25 @@ static void msm_mmsscc_hamster_fixup(void)
 	rot_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOW_L1] = 330000000;
 
 	video_core_clk_src.freq_tbl = ftbl_video_core_clk_src_vq;
-	video_core_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOWER] = 200000000;
+	video_core_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOWER] = 269330000;
 	video_core_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOW] = 269330000;
-	video_core_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOW_L1] = 355200000;
-	video_core_clk_src.clkr.hw.init->rate_max[VDD_DIG_NOMINAL] = 444000000;
-	video_core_clk_src.clkr.hw.init->rate_max[VDD_DIG_HIGH] = 533000000;
+	video_core_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOW_L1] = 269330000;
+	video_core_clk_src.clkr.hw.init->rate_max[VDD_DIG_NOMINAL] = 269330000;
+	video_core_clk_src.clkr.hw.init->rate_max[VDD_DIG_HIGH] = 269330000;
 
 	video_subcore0_clk_src.freq_tbl = ftbl_video_subcore_clk_src_vq;
-	video_subcore0_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOWER] = 200000000;
+	video_subcore0_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOWER] = 269330000;
 	video_subcore0_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOW] = 269330000;
-	video_subcore0_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOW_L1] = 355200000;
-	video_subcore0_clk_src.clkr.hw.init->rate_max[VDD_DIG_NOMINAL] = 444000000;
-	video_subcore0_clk_src.clkr.hw.init->rate_max[VDD_DIG_HIGH] = 533000000;
+	video_subcore0_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOW_L1] = 269330000;
+	video_subcore0_clk_src.clkr.hw.init->rate_max[VDD_DIG_NOMINAL] = 269330000;
+	video_subcore0_clk_src.clkr.hw.init->rate_max[VDD_DIG_HIGH] = 269330000;
 
 	video_subcore1_clk_src.freq_tbl = ftbl_video_subcore_clk_src_vq;
-	video_subcore1_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOWER] = 200000000;
+	video_subcore1_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOWER] = 269330000;
 	video_subcore1_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOW] = 269330000;
-	video_subcore1_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOW_L1] = 355200000;
-	video_subcore1_clk_src.clkr.hw.init->rate_max[VDD_DIG_NOMINAL] = 444000000;
-	video_subcore1_clk_src.clkr.hw.init->rate_max[VDD_DIG_HIGH] = 533000000;
+	video_subcore1_clk_src.clkr.hw.init->rate_max[VDD_DIG_LOW_L1] = 269330000;
+	video_subcore1_clk_src.clkr.hw.init->rate_max[VDD_DIG_NOMINAL] = 269330000;
+	video_subcore1_clk_src.clkr.hw.init->rate_max[VDD_DIG_HIGH] = 269330000;
 };
 
 static void msm_mmsscc_v2_fixup(void)
