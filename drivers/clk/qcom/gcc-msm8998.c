@@ -160,7 +160,7 @@ static unsigned int soft_vote_gpll0;
 
 static struct clk_alpha_pll gpll0 = {
 	.offset = 0x0,
-	.type = FABIA_PLL,
+	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
 	.vco_table = fabia_vco,
 	.num_vco = ARRAY_SIZE(fabia_vco),
 	.soft_vote = &soft_vote_gpll0,
@@ -173,7 +173,7 @@ static struct clk_alpha_pll gpll0 = {
 			.name = "gpll0",
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
-			.ops = &clk_fabia_fixed_pll_ops,
+			.ops = &clk_alpha_pll_fixed_fabia_ops,
 		}
 	},
 };
@@ -191,7 +191,7 @@ static struct clk_fixed_factor gpll0_early_div = {
 
 static struct clk_alpha_pll gpll0_ao = {
 	.offset = 0x00000,
-	.type = FABIA_PLL,
+	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
 	.soft_vote = &soft_vote_gpll0,
 	.soft_vote_mask = PLL_SOFT_VOTE_CPU,
 	.flags = SUPPORTS_FSM_VOTE,
@@ -202,37 +202,28 @@ static struct clk_alpha_pll gpll0_ao = {
 			.name = "gpll0_ao",
 			.parent_names = (const char *[]){ "bi_tcxo_ao" },
 			.num_parents = 1,
-			.ops = &clk_fabia_fixed_pll_ops,
+			.ops = &clk_alpha_pll_fixed_fabia_ops,
 		},
 	},
 };
 
-static const struct clk_div_table post_div_table_fabia_even[] = {
-	{ 0x0, 1 },
-	{ 0x1, 2 },
-	{ 0x3, 4 },
-	{ 0x7, 8 },
-	{ 0xf, 16 },
-	{ }
-};
-
 static struct clk_alpha_pll_postdiv gpll0_out_main = {
 	.offset = 0x0,
-	.type = FABIA_PLL,
-	.post_div_table = post_div_table_fabia_even,
-	.post_div_shift = 8,
-	.num_post_div = ARRAY_SIZE(post_div_table_fabia_even),
+	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.post_div_table = clk_alpha_div_table,
+	.post_div_shift = ALPHA_POST_DIV_EVEN_SHIFT,
+	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll0_out_main",
 		.parent_names = (const char *[]){ "gpll0" },
 		.num_parents = 1,
-		.ops = &clk_generic_pll_postdiv_ops,
+		.ops = &clk_alpha_pll_postdiv_fabia_ops,
 	},
 };
 
 static struct clk_alpha_pll gpll1 = {
 	.offset = 0x1000,
-	.type = FABIA_PLL,
+	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
 	.vco_table = fabia_vco,
 	.num_vco = ARRAY_SIZE(fabia_vco),
 	.clkr = {
@@ -242,28 +233,28 @@ static struct clk_alpha_pll gpll1 = {
 			.name = "gpll1",
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
-			.ops = &clk_fabia_fixed_pll_ops,
+			.ops = &clk_alpha_pll_fixed_fabia_ops,
 		}
 	},
 };
 
 static struct clk_alpha_pll_postdiv gpll1_out_main = {
 	.offset = 0x1000,
-	.type = FABIA_PLL,
-	.post_div_table = post_div_table_fabia_even,
-	.post_div_shift = 8,
-	.num_post_div = ARRAY_SIZE(post_div_table_fabia_even),
+	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.post_div_table = clk_alpha_div_table,
+	.post_div_shift = ALPHA_POST_DIV_EVEN_SHIFT,
+	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll1_out_main",
 		.parent_names = (const char *[]){ "gpll1" },
 		.num_parents = 1,
-		.ops = &clk_generic_pll_postdiv_ops,
+		.ops = &clk_alpha_pll_postdiv_fabia_ops,
 	},
 };
 
 static struct clk_alpha_pll gpll2 = {
 	.offset = 0x2000,
-	.type = FABIA_PLL,
+	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
 	.vco_table = fabia_vco,
 	.num_vco = ARRAY_SIZE(fabia_vco),
 	.clkr = {
@@ -273,28 +264,28 @@ static struct clk_alpha_pll gpll2 = {
 			.name = "gpll2",
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
-			.ops = &clk_fabia_fixed_pll_ops,
+			.ops = &clk_alpha_pll_fixed_fabia_ops,
 		}
 	},
 };
 
 static struct clk_alpha_pll_postdiv gpll2_out_main = {
 	.offset = 0x2000,
-	.type = FABIA_PLL,
-	.post_div_table = post_div_table_fabia_even,
-	.post_div_shift = 8,
-	.num_post_div = ARRAY_SIZE(post_div_table_fabia_even),
+	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.post_div_table = clk_alpha_div_table,
+	.post_div_shift = ALPHA_POST_DIV_EVEN_SHIFT,
+	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll2_out_main",
 		.parent_names = (const char *[]){ "gpll2" },
 		.num_parents = 1,
-		.ops = &clk_generic_pll_postdiv_ops,
+		.ops = &clk_alpha_pll_postdiv_fabia_ops,
 	},
 };
 
 static struct clk_alpha_pll gpll3 = {
 	.offset = 0x3000,
-	.type = FABIA_PLL,
+	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
 	.vco_table = fabia_vco,
 	.num_vco = ARRAY_SIZE(fabia_vco),
 	.clkr = {
@@ -304,28 +295,28 @@ static struct clk_alpha_pll gpll3 = {
 			.name = "gpll3",
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
-			.ops = &clk_fabia_fixed_pll_ops,
+			.ops = &clk_alpha_pll_fixed_fabia_ops,
 		}
 	},
 };
 
 static struct clk_alpha_pll_postdiv gpll3_out_main = {
 	.offset = 0x3000,
-	.type = FABIA_PLL,
-	.post_div_table = post_div_table_fabia_even,
-	.post_div_shift = 8,
-	.num_post_div = ARRAY_SIZE(post_div_table_fabia_even),
+	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.post_div_table = clk_alpha_div_table,
+	.post_div_shift = ALPHA_POST_DIV_EVEN_SHIFT,
+	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll3_out_main",
 		.parent_names = (const char *[]){ "gpll3" },
 		.num_parents = 1,
-		.ops = &clk_generic_pll_postdiv_ops,
+		.ops = &clk_alpha_pll_postdiv_fabia_ops,
 	},
 };
 
 static struct clk_alpha_pll gpll4 = {
 	.offset = 0x77000,
-	.type = FABIA_PLL,
+	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
 	.vco_table = fabia_vco,
 	.num_vco = ARRAY_SIZE(fabia_vco),
 	.clkr = {
@@ -335,7 +326,7 @@ static struct clk_alpha_pll gpll4 = {
 			.name = "gpll4",
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
-			.ops = &clk_fabia_fixed_pll_ops,
+			.ops = &clk_alpha_pll_fixed_fabia_ops,
 			VDD_DIG_FMAX_MAP3(LOWER, 400000000, LOW, 800000000,
 					NOMINAL, 1600000000),
 		}
@@ -344,15 +335,15 @@ static struct clk_alpha_pll gpll4 = {
 
 static struct clk_alpha_pll_postdiv gpll4_out_main = {
 	.offset = 0x77000,
-	.type = FABIA_PLL,
-	.post_div_table = post_div_table_fabia_even,
-	.post_div_shift = 8,
-	.num_post_div = ARRAY_SIZE(post_div_table_fabia_even),
+	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_FABIA],
+	.post_div_table = clk_alpha_div_table,
+	.post_div_shift = ALPHA_POST_DIV_EVEN_SHIFT,
+	.num_post_div = ARRAY_SIZE(clk_alpha_div_table),
 	.clkr.hw.init = &(struct clk_init_data){
 		.name = "gpll4_out_main",
 		.parent_names = (const char *[]){ "gpll4" },
 		.num_parents = 1,
-		.ops = &clk_generic_pll_postdiv_ops,
+		.ops = &clk_alpha_pll_postdiv_fabia_ops,
 	},
 };
 

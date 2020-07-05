@@ -153,6 +153,7 @@ static int clk_cbcr_set_flags(struct regmap *regmap, unsigned int reg,
 {
 	u32 cbcr_val = 0;
 	u32 cbcr_mask;
+	int delay_us = 1;
 	int ret;
 
 	switch (flags) {
@@ -173,6 +174,7 @@ static int clk_cbcr_set_flags(struct regmap *regmap, unsigned int reg,
 		break;
 	case CLKFLAG_NORETAIN_MEM:
 		cbcr_mask = BIT(14);
+		delay_us = 0;
 		break;
 	default:
 		return -EINVAL;
@@ -184,7 +186,7 @@ static int clk_cbcr_set_flags(struct regmap *regmap, unsigned int reg,
 
 	/* Make sure power is enabled/disabled before returning. */
 	mb();
-	udelay(1);
+	udelay(delay_us);
 
 	return 0;
 }
@@ -375,7 +377,8 @@ static void clk_branch2_list_registers(struct seq_file *f, struct clk_hw *hw)
 							data[i].name, val);
 	}
 
-	if (br->halt_check & BRANCH_HALT_VOTED) {
+	if ((br->halt_check & BRANCH_HALT_VOTED) &&
+			!(br->halt_check & BRANCH_VOTED)) {
 		if (rclk->enable_reg) {
 			size = ARRAY_SIZE(data1);
 			for (i = 0; i < size; i++) {
