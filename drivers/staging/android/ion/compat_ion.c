@@ -49,7 +49,7 @@ struct compat_ion_handle_data {
 
 static int compat_get_ion_allocation_data(
 			struct compat_ion_allocation_data __user *data32,
-			struct ion_allocation_data __user *data)
+			struct ion_old_allocation_data __user *data)
 {
 	compat_size_t s;
 	compat_uint_t u;
@@ -85,7 +85,7 @@ static int compat_get_ion_handle_data(
 
 static int compat_put_ion_allocation_data(
 			struct compat_ion_allocation_data __user *data32,
-			struct ion_allocation_data __user *data)
+			struct ion_old_allocation_data __user *data)
 {
 	compat_size_t s;
 	compat_uint_t u;
@@ -133,7 +133,7 @@ long compat_ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	case COMPAT_ION_IOC_ALLOC:
 	{
 		struct compat_ion_allocation_data __user *data32;
-		struct ion_allocation_data __user *data;
+		struct ion_old_allocation_data __user *data;
 		int err;
 
 		data32 = compat_ptr(arg);
@@ -144,7 +144,7 @@ long compat_ion_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		err = compat_get_ion_allocation_data(data32, data);
 		if (err)
 			return err;
-		ret = filp->f_op->unlocked_ioctl(filp, ION_IOC_ALLOC,
+		ret = filp->f_op->unlocked_ioctl(filp, ION_IOC_ALLOC_OLD,
 							(unsigned long)data);
 		err = compat_put_ion_allocation_data(data32, data);
 		return ret ? ret : err;
