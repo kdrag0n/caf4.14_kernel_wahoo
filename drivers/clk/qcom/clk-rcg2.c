@@ -125,7 +125,7 @@ static int update_config(struct clk_rcg2 *rcg, u32 cfg)
 		return ret;
 
 	/* Wait for update to take effect */
-	for (count = 500; count > 0; count--) {
+	for (count = 1000; count > 0; count--) {
 		ret = regmap_read(rcg->clkr.regmap, rcg->cmd_rcgr + CMD_REG, &cmd);
 		if (ret)
 			return ret;
