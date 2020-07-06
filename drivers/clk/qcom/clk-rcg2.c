@@ -548,6 +548,13 @@ static int __clk_rcg2_set_rate(struct clk_hw *hw, unsigned long rate,
 	int ret, curr_src_index, new_src_index;
 	struct clk_hw *curr_src = NULL, *new_src = NULL;
 
+	pr_info("SARU: %s: clk set clk=%s rate=%lu\n", __func__, hw->init->name, rate);
+	/*
+	if (((!strcmp(hw->init->name, "video_subcore0_clk_src") || !strcmp(hw->init->name, "video_subcore1_clk_src")) && (rate / 10000) == 26933)  ){// || (!strcmp(hw->init->name, "ahb_clk_src") && (rate / 100000) == 808)) {
+		pr_warn("SARU: %s: skipped for clk=%s rate=%lu\n", __func__, hw->init->name, rate);
+		return 0;
+	}*/
+
 	switch (policy) {
 	case FLOOR:
 		f = qcom_find_freq_floor(rcg->freq_tbl, rate);
