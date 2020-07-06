@@ -322,17 +322,9 @@ static const struct alpha_pll_config mmpll0_config = {
 	.frac = 0x1556,
 };
 
-static struct pll_vco fabia_vco[] = {
-	{ 249600000, 2000000000, 0 },
-	{ 125000000, 1000000000, 1 },
-};
-
 static struct clk_alpha_pll mmpll0 = {
 	.offset = 0xC000,
 	.type = FABIA_PLL,
-	.vco_table = fabia_vco,
-	.num_vco = ARRAY_SIZE(fabia_vco),
-	.flags = SUPPORTS_FSM_VOTE,
 	.clkr = {
 		.enable_reg = 0x1E0,
 		.enable_mask = BIT(0),
