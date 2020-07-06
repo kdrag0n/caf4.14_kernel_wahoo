@@ -319,12 +319,13 @@ static const char * const disp_cc_parent_names_5[] = {
 static const struct alpha_pll_config mmpll0_config = {
 	/*.config_ctl_val = 0x20485699,*/
 	.l = 0x2a,
-	.frac = 0x1556,
+	.frac = 0x1555,
 };
 
 static struct pll_vco fabia_vco[] = {
-	{ 249600000, 2000000000, 0 },
-	{ 125000000, 1000000000, 1 },
+//	{ 249600000, 2000000000, 0 },
+//	{ 125000000, 1000000000, 1 },
+	{ 0, 2147483647, 0 }
 };
 
 static struct clk_alpha_pll mmpll0 = {
@@ -332,7 +333,7 @@ static struct clk_alpha_pll mmpll0 = {
 	.type = FABIA_PLL,
 	.vco_table = fabia_vco,
 	.num_vco = ARRAY_SIZE(fabia_vco),
-	.flags = SUPPORTS_FSM_VOTE,
+	//.flags = SUPPORTS_FSM_VOTE,
 	.clkr = {
 		.enable_reg = 0x1E0,
 		.enable_mask = BIT(0),
@@ -340,7 +341,7 @@ static struct clk_alpha_pll mmpll0 = {
 			.name = "mmpll0",
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
-			.ops = &clk_fabia_fixed_pll_ops,
+			.ops = &clk_fabia_pll_ops,
 			VDD_MM_PLL_FMAX_MAP2(LOWER, 404000000, NOMINAL, 808000195),
 		},
 	},
@@ -351,7 +352,7 @@ static struct clk_alpha_pll mmpll0 = {
 static const struct alpha_pll_config mmpll1_config = {
 	/*.config_ctl_val = 0x20485699,*/
 	.l = 0x2a,
-	.frac = 0x4aab,
+	.frac = 0x4aaa,
 };
 
 static struct clk_alpha_pll mmpll1 = {
@@ -641,6 +642,7 @@ static struct clk_rcg2 maxi_clk_src = {
 	.hid_width = 5,
 	.parent_map = mmcc_parent_map_4,
 	.freq_tbl = ftbl_maxi_clk_src,
+	.enable_safe_config = true,
 	.clkr.hw.init = &(struct clk_init_data) {
 		.name = "maxi_clk_src",
 		.parent_names = mmcc_parent_names_4,
@@ -993,7 +995,7 @@ static struct clk_rcg2 video_subcore0_clk_src = {
 		.name = "video_subcore0_clk_src",
 		.parent_names = mmcc_parent_names_7a,
 		.num_parents = ARRAY_SIZE(mmcc_parent_names_7a),
-		.flags = CLK_SET_RATE_PARENT,
+		.flags = CLK_SET_RATE_PARENT | CLK_GET_RATE_NOCACHE,
 		.ops = &clk_rcg2_ops,
 		VDD_DIG_FMAX_MAP4(LOWER, 100000000, LOW, 186000000,
 					NOMINAL, 360000000, HIGH, 465000000),
@@ -1011,7 +1013,7 @@ static struct clk_rcg2 video_subcore1_clk_src = {
 		.name = "video_subcore1_clk_src",
 		.parent_names = mmcc_parent_names_7a,
 		.num_parents = ARRAY_SIZE(mmcc_parent_names_7a),
-		.flags = CLK_SET_RATE_PARENT,
+		.flags = CLK_SET_RATE_PARENT | CLK_GET_RATE_NOCACHE,
 		.ops = &clk_rcg2_ops,
 		VDD_DIG_FMAX_MAP4(LOWER, 100000000, LOW, 186000000,
 					NOMINAL, 360000000, HIGH, 465000000),
@@ -3036,8 +3038,8 @@ static struct clk_branch mmss_video_subcore0_clk = {
 };
 
 static struct clk_branch mmss_video_subcore1_clk = {
-	.halt_reg = 0x0104C,
-	.halt_check = BRANCH_HALT,
+	//.halt_reg = 0x0104C,
+	//.halt_check = BRANCH_HALT,
 	.clkr = {
 		.enable_reg = 0x0104C,
 		.enable_mask = BIT(0),
@@ -3124,8 +3126,8 @@ static struct clk_branch mmss_video_maxi_clk = {
 static struct clk_branch mmss_vmem_ahb_clk = {
 	.halt_reg = 0x0F068,
 	.halt_check = BRANCH_HALT,
-	.hwcg_reg = 0x0F068,
-	.hwcg_bit = 1,
+	//.hwcg_reg = 0x0F068,
+	//.hwcg_bit = 1,
 	.clkr = {
 		.enable_reg = 0x0F068,
 		.enable_mask = BIT(0),
