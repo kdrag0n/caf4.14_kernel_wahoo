@@ -38,18 +38,6 @@
 
 #define F(f, s, h, m, n) { (f), (s), (2 * (h) - 1), (m), (n) }
 
-static int vdd_mx_corner[] = {
-	RPM_REGULATOR_LEVEL_NONE,		/* VDD_NONE */
-	RPM_REGULATOR_LEVEL_MIN_SVS,		/* VDD_MIN */
-	RPM_REGULATOR_LEVEL_LOW_SVS,		/* VDD_LOWER */
-	RPM_REGULATOR_LEVEL_SVS,		/* VDD_LOW */
-	RPM_REGULATOR_LEVEL_SVS_PLUS,		/* VDD_LOW_L1 */
-	RPM_REGULATOR_LEVEL_NOM,		/* VDD_NOMINAL */
-	RPM_REGULATOR_LEVEL_TURBO,		/* VDD_HIGH */
-	RPM_REGULATOR_LEVEL_TURBO_NO_CPR,	/* VDD_HIGH_L1 */
-	RPM_REGULATOR_LEVEL_MAX
-};
-
 static DEFINE_VDD_REGULATORS(vdd_cx, VDD_NUM, 1, vdd_corner);
 static DEFINE_VDD_REGULATORS(vdd_mx, VDD_MX_NUM, 1, vdd_mx_corner);
 
@@ -113,8 +101,8 @@ static struct pll_vco gpu_cc_pll_vco[] = {
 static const struct alpha_pll_config gpu_pll0_config = {
 	.l = 0x35,
 	.config_ctl_val = 0x4001055b,
-	/* .test_ctl_hi_mask = 0x1, */
-	.alpha_hi = 0x20,
+	.test_ctl_hi_mask = 0x1,
+	.alpha_u = 0x20,
 	.alpha = 0x00,
 	.alpha_en_mask = BIT(24),
 	.vco_val = 0x0 << 20,
@@ -126,8 +114,8 @@ static const struct alpha_pll_config gpu_pll0_config = {
 static const struct alpha_pll_config gpu_pll1_config = {
 	.l = 0x30,
 	.config_ctl_val = 0x4001055b,
-	/* .test_ctl_hi_mask = 0x1, */
-	.alpha_hi = 0x70,
+	.test_ctl_hi_mask = 0x1,
+	.alpha_u = 0x70,
 	.alpha = 0x00,
 	.alpha_en_mask = BIT(24),
 	.vco_val = 0x2 << 20,
@@ -139,7 +127,6 @@ static struct clk_alpha_pll gpu_cc_pll0_out_aux2 = {
 	.offset = 0x0,
 	.vco_table = gpu_cc_pll_vco,
 	.num_vco = ARRAY_SIZE(gpu_cc_pll_vco),
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_DEFAULT],
 	.flags = SUPPORTS_DYNAMIC_UPDATE,
 	.clkr = {
 		.hw.init = &(struct clk_init_data){
@@ -160,7 +147,6 @@ static struct clk_alpha_pll gpu_cc_pll1_out_aux2 = {
 	.offset = 0x100,
 	.vco_table = gpu_cc_pll_vco,
 	.num_vco = ARRAY_SIZE(gpu_cc_pll_vco),
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_DEFAULT],
 	.flags = SUPPORTS_DYNAMIC_UPDATE,
 	.clkr = {
 		.hw.init = &(struct clk_init_data){

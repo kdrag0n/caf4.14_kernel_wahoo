@@ -39,7 +39,6 @@
 static DEFINE_VDD_REGULATORS(vdd_scc_cx, VDD_NUM, 1, vdd_corner);
 
 enum {
-	P_SSC_BI_TCXO,
 	P_AON_SLEEP_CLK,
 	P_AOSS_CC_RO_CLK,
 	P_QDSP6SS_PLL_OUT_ODD,
@@ -47,6 +46,7 @@ enum {
 	P_SCC_PLL_OUT_MAIN,
 	P_SCC_PLL_OUT_ODD,
 	P_SSC_BI_PLL_TEST_SE,
+	P_SSC_BI_TCXO,
 };
 
 static const struct parent_map scc_parent_map_0[] = {
@@ -104,14 +104,14 @@ static struct clk_alpha_pll scc_pll = {
 	.offset = 0x0,
 	.vco_table = trion_vco,
 	.num_vco = ARRAY_SIZE(trion_vco),
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_TRION],
+	.type = TRION_PLL,
 	.config = &scc_pll_config,
 	.clkr = {
 		.hw.init = &(struct clk_init_data){
 			.name = "scc_pll",
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
-			.ops = &clk_alpha_pll_trion_ops,
+			.ops = &clk_trion_pll_ops,
 			.vdd_class = &vdd_scc_cx,
 			.num_rate_max = VDD_NUM,
 			.rate_max = (unsigned long[VDD_NUM]) {
@@ -133,8 +133,7 @@ static const struct clk_div_table post_div_table_trion_even[] = {
 
 static struct clk_alpha_pll_postdiv scc_pll_out_even = {
 	.offset = 0x0,
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_TRION],
-	.post_div_shift = ALPHA_POST_DIV_EVEN_SHIFT,
+	.post_div_shift = 8,
 	.post_div_table = post_div_table_trion_even,
 	.num_post_div = ARRAY_SIZE(post_div_table_trion_even),
 	.width = 4,
@@ -577,9 +576,18 @@ static const struct qcom_cc_desc scc_sm8150_desc = {
 static const struct of_device_id scc_sm8150_match_table[] = {
 	{ .compatible = "qcom,scc-sm8150" },
 	{ .compatible = "qcom,scc-sm8150-v2" },
+	{ .compatible = "qcom,scc-sa8195" },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, scc_sm8150_match_table);
+
+static void scc_sa8195_fixup(struct platform_device *pdev)
+{
+	if (of_device_is_compatible(pdev->dev.of_node, "qcom,scc-sa8195")) {
+		vdd_scc_cx.num_levels = VDD_MM_NUM;
+		vdd_scc_cx.cur_level = VDD_MM_NUM;
+	}
+}
 
 static void scc_sm8150_fixup_sm8150v2(struct regmap *regmap)
 {
@@ -636,7 +644,8 @@ static int scc_sm8150_fixup(struct platform_device *pdev, struct regmap *regmap)
 	if (!compat || (compatlen <= 0))
 		return -EINVAL;
 
-	if (!strcmp(compat, "qcom,scc-sm8150-v2"))
+	if (!strcmp(compat, "qcom,scc-sm8150-v2") ||
+			!strcmp(compat, "qcom,scc-sa8195"))
 		scc_sm8150_fixup_sm8150v2(regmap);
 
 	return 0;
@@ -653,6 +662,8 @@ static int scc_sm8150_probe(struct platform_device *pdev)
 		return PTR_ERR(regmap);
 	}
 
+	scc_sa8195_fixup(pdev);
+
 	vdd_scc_cx.regulator[0] = devm_regulator_get(&pdev->dev, "vdd_scc_cx");
 	if (IS_ERR(vdd_scc_cx.regulator[0])) {
 		ret = PTR_ERR(vdd_scc_cx.regulator[0]);
@@ -666,7 +677,7 @@ static int scc_sm8150_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
-	clk_alpha_pll_trion_configure(&scc_pll, regmap, scc_pll.config);
+	clk_trion_pll_configure(&scc_pll, regmap, scc_pll.config);
 
 	ret = qcom_cc_really_probe(pdev, &scc_sm8150_desc, regmap);
 	if (ret) {

@@ -132,14 +132,14 @@ static struct clk_alpha_pll video_pll0 = {
 	.offset = 0x42c,
 	.vco_table = trion_vco,
 	.num_vco = ARRAY_SIZE(trion_vco),
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_TRION],
+	.type = TRION_PLL,
 	.config = &video_pll0_config,
 	.clkr = {
 		.hw.init = &(struct clk_init_data){
 			.name = "video_pll0",
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
-			.ops = &clk_alpha_pll_trion_ops,
+			.ops = &clk_trion_pll_ops,
 			.vdd_class = &vdd_mm,
 			.num_rate_max = VDD_NUM,
 			.rate_max = (unsigned long[VDD_NUM]) {
@@ -392,7 +392,7 @@ static int video_cc_sm8150_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
-	clk_alpha_pll_trion_configure(&video_pll0, regmap, video_pll0.config);
+	clk_trion_pll_configure(&video_pll0, regmap, video_pll0.config);
 
 	ret = qcom_cc_really_probe(pdev, &video_cc_sm8150_desc, regmap);
 	if (ret) {

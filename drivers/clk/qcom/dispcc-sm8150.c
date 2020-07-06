@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2017-2019, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -233,14 +233,14 @@ static struct clk_alpha_pll disp_cc_pll0 = {
 	.offset = 0x0,
 	.vco_table = trion_vco,
 	.num_vco = ARRAY_SIZE(trion_vco),
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_TRION],
+	.type = TRION_PLL,
 	.config = &disp_cc_pll0_config,
 	.clkr = {
 		.hw.init = &(struct clk_init_data){
 			.name = "disp_cc_pll0",
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
-			.ops = &clk_alpha_pll_trion_ops,
+			.ops = &clk_trion_pll_ops,
 			.vdd_class = &vdd_mm,
 			.num_rate_max = VDD_NUM,
 			.rate_max = (unsigned long[VDD_NUM]) {
@@ -281,14 +281,14 @@ static struct clk_alpha_pll disp_cc_pll1 = {
 	.offset = 0x1000,
 	.vco_table = trion_vco,
 	.num_vco = ARRAY_SIZE(trion_vco),
-	.regs = clk_alpha_pll_regs[CLK_ALPHA_PLL_TYPE_TRION],
+	.type = TRION_PLL,
 	.config = &disp_cc_pll1_config,
 	.clkr = {
 		.hw.init = &(struct clk_init_data){
 			.name = "disp_cc_pll1",
 			.parent_names = (const char *[]){ "bi_tcxo" },
 			.num_parents = 1,
-			.ops = &clk_alpha_pll_trion_ops,
+			.ops = &clk_trion_pll_ops,
 			.vdd_class = &vdd_mm,
 			.num_rate_max = VDD_NUM,
 			.rate_max = (unsigned long[VDD_NUM]) {
@@ -1548,6 +1548,7 @@ static const struct qcom_cc_desc disp_cc_sm8150_desc = {
 static const struct of_device_id disp_cc_sm8150_match_table[] = {
 	{ .compatible = "qcom,dispcc-sm8150" },
 	{ .compatible = "qcom,dispcc-sm8150-v2" },
+	{ .compatible = "qcom,dispcc-sdmshrike-v2" },
 	{ }
 };
 MODULE_DEVICE_TABLE(of, disp_cc_sm8150_match_table);
@@ -1577,6 +1578,18 @@ static void disp_cc_sm8150_fixup_sm8150v2(struct regmap *regmap)
 		675000000;
 }
 
+static void disp_cc_sm8150_fixup_sdmshrikev2(struct regmap *regmap)
+{
+	disp_cc_sm8150_fixup_sm8150v2(regmap);
+
+	disp_cc_mdss_edp_pixel_clk_src.clkr.hw.init->rate_max[VDD_LOWER] =
+		337500000;
+	disp_cc_mdss_edp_pixel_clk_src.clkr.hw.init->rate_max[VDD_LOW_L1] =
+		371500000;
+	disp_cc_mdss_edp_pixel_clk_src.clkr.hw.init->rate_max[VDD_NOMINAL] =
+		675000000;
+}
+
 static int disp_cc_sm8150_fixup(struct platform_device *pdev,
 	struct regmap *regmap)
 {
@@ -1589,6 +1602,8 @@ static int disp_cc_sm8150_fixup(struct platform_device *pdev,
 
 	if (!strcmp(compat, "qcom,dispcc-sm8150-v2"))
 		disp_cc_sm8150_fixup_sm8150v2(regmap);
+	else if (!strcmp(compat, "qcom,dispcc-sdmshrike-v2"))
+		disp_cc_sm8150_fixup_sdmshrikev2(regmap);
 
 	return 0;
 }
@@ -1638,8 +1653,8 @@ static int disp_cc_sm8150_probe(struct platform_device *pdev)
 	if (ret)
 		return ret;
 
-	clk_alpha_pll_trion_configure(&disp_cc_pll0, regmap, disp_cc_pll0.config);
-	clk_alpha_pll_trion_configure(&disp_cc_pll1, regmap, disp_cc_pll1.config);
+	clk_trion_pll_configure(&disp_cc_pll0, regmap, disp_cc_pll0.config);
+	clk_trion_pll_configure(&disp_cc_pll1, regmap, disp_cc_pll1.config);
 
 	/* Enable clock gating for DSI and MDP clocks */
 	regmap_update_bits(regmap, DISP_CC_MISC_CMD, 0x10, 0x10);
