@@ -214,6 +214,7 @@ static const struct parent_map mmcc_parent_map_7a[] = {
 	{ P_BI_TCXO, 0 },
 	{ P_GPLL0, 5 },
 	{ P_MMPLL0, 1 },
+	{ P_MMPLL1, 2 },
 	{ P_MMPLL3, 3 },
 	{ P_MMPLL6, 4 },
 };
@@ -222,6 +223,7 @@ static const char * const mmcc_parent_names_7a[] = {
 	"bi_tcxo",
 	"gcc_mmss_gpll0_clk",
 	"mmpll0",
+	"mmpll1",
 	"mmpll3",
 	"mmpll6",
 };
@@ -756,7 +758,7 @@ static struct freq_tbl ftbl_video_core_clk_src[] = {
 
 static struct freq_tbl ftbl_video_core_clk_src_vq[] = {
 	F( 200000000, P_GPLL0,      3,    0,     0),
-	F( 269330000, P_MMPLL0,     3,    0,     0),
+	F( 269330000, P_MMPLL1,     3,    0,     0),
 	F( 355200000, P_MMPLL6,   2.5,    0,     0),
 	F( 444000000, P_MMPLL6,     2,    0,     0),
 	F( 533000000, P_MMPLL3,     2,    0,     0),
@@ -967,7 +969,7 @@ static struct freq_tbl ftbl_video_subcore_clk_src[] = {
 
 static struct freq_tbl ftbl_video_subcore_clk_src_vq[] = {
 	F( 200000000, P_GPLL0,      3,    0,     0),
-	F( 269330000, P_MMPLL0,     3,    0,     0),
+	F( 269330000, P_MMPLL1,     3,    0,     0),
 	F( 355200000, P_MMPLL6,   2.5,    0,     0),
 	F( 444000000, P_MMPLL6,     2,    0,     0),
 	F( 533000000, P_MMPLL3,     2,    0,     0),
