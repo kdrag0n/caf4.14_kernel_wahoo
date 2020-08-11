@@ -30,7 +30,7 @@ kmake_flags=(
 )
 
 # Target device name to use in flashable package names
-device_name="pixel2"
+device_name="pixel2-4.14"
 
 # Target device's SSH hostname (on LAN)
 lan_ssh_host="pixel2"
