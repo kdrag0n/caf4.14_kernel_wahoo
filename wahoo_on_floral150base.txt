@@ -1,0 +1,586 @@
+Project merge wahoo on floral 4.14.150 base.
+---------------------------------------------
+
+git log --oneline
+d543ed1bcfc0 sync cfg cmdline
+b6ae27ca158e helpers: Add 4.14 suffix to flashable zips
+7bd4be7bca1c Makefile: Fix GCC_TOOLCHAIN_DIR prefix for Clang cross compilation
+36c9246e1b30 iommu/arm-smmu: Avoid constant zero in TLBI writes
+a00f01a6b5ea Revert "IOMMU: Revert "arm64/io: Allow I/O writes to use {W,X}ZR""
+6bafeec05bf4 arm64: untag user address in msm_cpp_copy_from_ioctl_ptr
+b4815884b226 remove laser
+93fd6e8c05b8 media: msm: camera_v2: csid: Use lower clock rate if configured
+9eefdce8c257 media: msm: camera_v2: Zero the memory on GPIO val_array allocation
+32aeeb0f50e1 media: msm: camera_v2: actuator: Fix init focus address type switch
+c6701eb13d32 media: msm: camera_v2: isp: Memset the vfe_common_data at probe
+a49a26a23323 media: msm: camera_v2: Set regulator mode fast on poweron
+ffac1cdf6147 media: msm: camera_v2: CSIPHY: Fix settle count and clk setting
+34b4a80ef5eb msm: sensor: Fix invalid memory access for CCI I2C write
+a62df8567898 msm: camera: ois: Fix copy from userspace and a memory leak
+ac3207f10f80 msm: camera: disable CSID virtualization
+dff5c5780de6 Revert "msm: camera: Send topology and stream status to TZ"
+07a475e57b12 Revert "msm: camera_v2: isp: Double stats ub size"
+2b2039cea0ad Revert "msm:camera_v2:isp:Increasing stats ub size"
+79e450394185 Revert "msm: camera: Write a few registers before camera probe"
+b27e5bfb3258 msm: camera: Bring back old subdev ids
+944e54e6c1b8 msm: camera: cpp: Define entity.revision on probe
+287f0d2b2ef1 msm: camera: Define group_id where required
+58c23c9b09d9 HACK: media: Restore old entity_id logic
+b8aefeb0e45a media: Bring back function and group_id members
+b92543774b15 fast 3mbaud console, no earlycon
+1b5322383861 clk: qcom: clk-rcg2: Reverse the pixel fraction array for MSM8998
+fafddb956e2b checkout 660 rcg
+94716b98b0c1 clk: qcom: rcg2: set default freq to clk_gfx3d_src
+324fb8188e06 clk: qcom: Allow constant ratio freq tables for rcg
+5e39409e82c3 clk: qcom: clk-rcg2: Add support for duty-cycle for RCG
+846474283664 rcg delay
+20778650463f compat ion hook up and fix alloc ioc
+9b3ca9b9dbe8 quick audio hack
+8fcaf590c6d9 fix partial ion comment
+b9329f3645a7 more temp sched fix
+d6b2357de54a Revert "STOPSHIP HACK FIXME ack freq em msm8998"
+1d875cfd127a fix pelt errors again
+7176a2e71d18 sched/rt: Fix compile errors when WALT is disabled
+1e76426f9657 sched/fair: Fix compile errors when WALT is disabled
+ca72e6becadd Revert "Revert "freq em""
+15bcbe0e9d61 Revert "freq em"
+86a4d26d43f6 fix ion cache ops
+289d0e157ec1 ion stuff compat 1
+59e460b28aa6 STOPSHIP HACK FIXME ack freq em msm8998
+cb20058c89e1 wahoo_defconfig: Switch to legacy vidc_3x driver
+a68e74e1e56e Revert "checkout mdss dsi"
+b1b2f6827230 checkout mdss dsi
+e1106822494e msm: vidc: Fix v4l2 format warnings
+0b9f89a44aa9 ion: msm: Add video HEAP ID
+e78d732e9374 ion: msm: Add support for VMID_CP_CAMERA_ENCODE
+5d591b5251fc msm: vidc_3x: correct ion flags for CP_CAMERA_ENCODE context bank
+bce8d4bf2aaf msm: vidc_3x: Add new video driver to support CMA buffers
+a2fcddae4ca2 msm: vidc_3x: Add changes to read video CMA configuration information
+3bf81fc83a30 msm: vidc_3x: populate sid list for each context bank
+d31461152014 vidc_3x: Fix qbuf error in gralloc buffers encoding
+68e8cffc2533 vidc_3x: Query Entropy property only for H264 format
+d7dee71ba17b vidc_3x: Fix HFR recording issue.
+1453d78abb85 msm: vidc: avoid OOB write while accessing memory
+4ef0f6047e5f msm: vidc: Re-calculate buffer requirement
+0b5d80e13abc msm: vidc_3x: Add partial cache operations support
+7321bebf4a9d msm: vidc_3x: Assign and pass hal buffer type to smem
+a3b9459bf34c msm: vidc: remove additional checks in response_handler
+1c364e39811d defconfig: vidc: Enable video drivers for sdm660
+e8482724f3a1 media: msm: vidc_3x: Source vmem Kconfig file; rename to VIDC_3X_VMEM.
+0969b0226081 msm: vidc_3x: ION Upgrade changes for video
+1de59557e251 msm: vidc_3x: Add snapshot of video driver
+151ce4c0e488 wahoo_defconfig: Enable USB Type-C state machine for USB OTG
+f26190fd465e STOPSHIP: wahoo_defconfig: Enable kernelsu
+0789239ac92c STOPSHIP: android: Add superuser driver
+3eb6f2d47589 msm: add ERR_FG interrupt for ESD recovery mechanism
+d271df2e1b9e msm: mdss: To send DDIC the vr mode command.
+db81f868736d msm: mdss: add an option to send all DSI commands under HS mode
+554fd9d48128 msm: mdss: To avoid EM multi phenomenon send display on cmd using post panel on cmd
+4a278d131fb0 wahoo_defconfig: Enable IPA and RmNet drivers for cellular data
+344757c47056 msm: mdss: send blank backlight after panel on
+735d2f538bd8 msm: mdss: allow mapping remapping backlight off level
+e0ff5f73f5e4 msm: mdss: Change display power on/off sequence about extra LDOs
+b8ecc1249670 msm: mdss: Add external LDO controls
+12d01755f694 arm64: dts: wahoo: Remove LED config overlays
+9c553b50746f ipa pil v3.1
+1b79bcf9cc62 checkout ipa sodp
+67b7f37d82d2 Revert "arm64: dts: msm8998: Match old removed region"
+32e27e56c007 Revert "Revert "Revert "msm ipc compat"""
+d8518f662f6e Revert "more msm ipc compat"
+da2f857cec6b more msm ipc compat
+c27183616f28 Revert "Revert "msm ipc compat""
+448b8c03a938 arm64: dts: msm8998: Match old removed region
+67c095afb213 freq em
+34e76018aae5 ARM: dts: msm: update mincpu BW vote when Big CPU runs at Max freq
+7c9a93929570 Revert "Revert "sched: energy: calculate and update CPU capacity dynamically""
+08fbecc0296d wahoo_defconfig: Enable HTC wlan_nv driver for Wi-Fi MAC address
+adeb3919eca5 Revert "msm ipc compat"
+1b510d666359 wlan_mac: Change from icnss to cnss_utils api
+492d196d837f drivers: soc: read WiFi MAC from mfg partition
+28663c93fb50 msm ipc compat
+c8e302c22284 wahoo_defconfig: Enable TAS2557 and TFA98xx codec drivers
+da8e1afcdf76 sq tfa import
+1ad667442716 ASoC: tas2557: Split component driver data for 4.14 kernel
+9f27d25eccc7 sound: msm8998: configure codec though device tree
+2c7d58b24b6c ASoC: Import TI TAS2557 amplifier driver
+cd9b3ba84eae tfa98xx: add build option to kconfig
+720014e21774 ANDROID: fix uninitilized variable
+0c4e45bad2f4 tfs_dsp: Fix potential handles_local overflow
+9430b490ceeb sound: soc: import NXP tfa driver
+d9450928e2da staging: qcacld-3.0: Load driver on late initcall when not built as a module
+f874849f5e24 Revert "qcacld: discard wlan_boot sysfs code on !CONFIG_MODULES"
+d57791c81786 Revert "qcacld: defer hdd initialization and rely on userspace writing to /dev/wlan"
+0f8dd484bd20 defconfig: Enable FPC1020 fingerprint sensor driver
+483f4e147e95 fix ion free
+e3e84763ab25 Revert "sched: energy: calculate and update CPU capacity dynamically"
+bbc63aa77424 arm64: dts: msm8998: Import EAS energy model from Pixel 2
+b41a88c4073b defconfig: Enable MSM cpufreq driver for msm8998
+b1655fe0d7b5 ion don't get ref
+5e41a88c4d32 defconfig: Enable qcacld-3.0 Wi-Fi driver
+76eedcc92f13 qcacld: defer hdd initialization and rely on userspace writing to /dev/wlan
+bf4add8e09c2 qcacld: discard wlan_boot sysfs code on !CONFIG_MODULES
+54f44b769327 qcacld: default_config: tone down debugging
+6c842d973cc4 qcacld: nuke Kconfig-based configuration entirely
+48fbee1cb610 qcacld-3.0: Select necessary wireless extensions
+b08b8ca8139e qcacld: Disable build timestamp
+dcfc0a00962b qcacld: always force user build
+4605e30f4a24 qcacld-3.0: Remove explicit -Werror flags
+c4a45c42d8d6 staging: add qcacld-3.0 to config+build
+8ac1832fce56 staging: import wifi drivers as of LA.UM.8.1.r1-15100-sm8150.0
+af8d330be135 Revert "Revert "disable swap for pstore alloc""
+1ed5e27053d9 Revert "ANDROID: pstore: Use vmalloc for large allocations due to ramoops size"
+a3e4ffc8e21f Revert "ANDROID: fs/pstore/ramoops: Use vmalloc() for old buffer"
+a03f429fd9de ftm4 powersupply fix
+28bf21e77c03 Revert "disable swap for pstore alloc"
+1b9a9ffc4759 ANDROID: pstore: Use vmalloc for large allocations due to ramoops size
+3f23c3f1114b ANDROID: fs/pstore/ramoops: Use vmalloc() for old buffer
+1ba9cb52a722 disable swap for pstore alloc
+69d7b3a3c9aa defconfig: Dislbe compression
+448a8c49e3d9 fs: pstore: Allow disabling compression
+75ebf0fbf517 sound and more
+d3547e7aad4b pinctrl: qcom: Add direct connect pinctrl
+375b3b564f39 input: touchscreen: Import STMicroelectronics FTM4 driver
+f0f7fb7587e4 UPSTREAM: Input: reset device timestamp on sync
+82fbc12ae3d6 UPSTREAM: input: allow drivers specify timestamp for input events
+ec71f29d8cef no autoreboot for twrp
+88f577f6c30d nfc: pn81a: Add misc device header for 4.14 kernel
+bf597a5e0172 drivers/nfc: pn81a: expose the clear_n gpio to be set.
+13951853719f pn81a: do not implicitly manage power
+0db9d438a7a2 drivers/nfc: add PN81A eSE SPI support
+949420b8a08c led: ledtrig-transient: add support for hrtimer
+121bc51fdd9a apr init bypass
+8c074b4e24de leds: Add the LED_BRIGHTNESS_FAST flag
+57da82579498 input: drv2624: Convert to new PM wakeup source API
+490f52538398 input: misc: Import DRV2624 haptics driver
+53462dcbaca2 asoc msm8998 rm wsa881x
+943b6af2cfd9 taimen sound move q6core
+a09ada4a604a msm8998 audio rm wsa881x
+004e74ceae82 Revert "arm64: MSM8998: Switch to fastrpc-compute and add PDRs for audio/sensors"
+59d0802fb8b3 force less regular reboots
+9657bc3ddfd4 disable some audio gpio67/68 stuff
+2325d8abf674 no more pstore ecc
+9923c611742d dd: log device probes
+9e645a305dfd techpack: add audio techpack
+cf0df055f161 techpack: add tech package support
+65c7af9aaa91 25sec reboot
+3ca9bc72a7a6 temp cfg sync
+e51739586741 ion share/import get ref
+c49057512394 arm64: Add CNTPCT_EL0 trap handler for Qualcomm time_daemon
+0372e60f8195 sq crypto heh - both, split
+810d50f7c5a1 crypto: testmgr - Add test vectors for HEH
+674e5118e6f8 ANDROID: crypto: heh - factor out poly_hash algorithm
+86f20f6b3c83 crypto: heh - Add Hash Encrypt Hash(HEH) algorithm
+2dbf8f3c1c18 BACKPORT, FROMLIST: crypto: skcipher adding skciper_walk_virt_init
+b7cce9d231e2 ANDROID: fscrypt: add a non-reversible key derivation method
+7241536603af ANDROID: fscrypt: allow encrypting filenames using HEH algorithm
+2d98513b688e ANDROID: arm64/crypto: add ARMv8-CE optimized poly_hash algorithm
+71fcd01548f3 ANDROID: crypto: allow blkcipher walks over ablkcipher data
+0f9b5e8bc391 ANDROID: crypto: gf128mul - Add ble multiplication functions
+d7146c93a9c3 ANDROID: crypto: shash - Add crypto_grab_shash() and crypto_spawn_shash_alg()
+1c2dda6caa6d force regular reboots
+04814ef7801b ion shim
+
+------------------ALL OF THE BELOWS ARE IMPORTED (few commits were not picked,------------------
+------------------to follow up later. To find them search "FARO")------------------
+dd1d905fafd4 custom unencrypted ecc pstore
+d4a286892ae6 arm64: DT: MSM8998-SDE: Never use LM_1 for primary display
+cd1faa4fe748 arm64: DT: MSM8998-sde: Setup the right conf for mixers and DualDSI
+d175e48dcaa3 arm64: DT: MSM8998-SDE: Specify DSI PHY dynamic refresh iospace
+57b75ecf8755 arm64: DT: msm8998-mdss-pll: Add support for dynamic pll clocks
+0e1e174dd88c arm64: DT: MSM8998-sde: Add MMSS MEMNoC clock to dsi control hw conf
+4745283392a9 arm64: DT: MSM8998-sde: Remove useless address and size cells in sde_kms
+d0902ea0347e arm64: DT: msm8998-sde: Add properties required for the SDE on k4.14
+de58e412474d drm msm checkout sony  NOT PICKED FAROVITUS
+3eba752bab36 regular reboot
+107779dd6c75 10 sec reboot stack dump hack
+9a516ee03025 arm64: dts: taimen: update usb
+7d7d2e9346c5 arm64: dts: msm8998: Import SMB1381 charger device
+880b454b7300 checkout usb  NOT PICKED FAROVITUS
+cfa0c1b329dc checkout power supply  NOT PICKED FAROVITUS
+d35d83fb35e3 platform: msm: usb_bam: Implement dummyfied msm_do_bam_disable_enable
+b5cb35327987 usb: phy: Add missing OTG_STATE_B_CHARGER definition in enum
+b77b27e97be5 platform: msm: usb_bam: Set default bam type as USB_CTRL_UNUSED
+b12b92c73d2b checkout msm bus
+0315ac61450f sde rot: comment vbif lock like caf sdm660
+c86cd50fd5b3 checkout mdss from sdm660  NOT PICKED FAROVITUS
+9d5dfe537e02 fbdev: changes to enable recovery ui
+692a11195eaa dwc3 checkout  NOT PICKED FAROVITUS
+d25971d0c7c7 iommu checkout to fix smmu lockup  NOT PICKED FAROVITUS
+1fac57762448 soc: qcom: msm_bus: Add RPMh NoC throttle workaround
+42d52e9b5f92 iommu: Support dynamic pgsize_bitmap
+ed9586b7cb3c watchdog: dump all cpu stacks on bark
+0f8512a4e02f STOPSHIP TEMP HACK: checkout clk-smd-rpm and qcom,rpmcc.h to sodp
+791ba83c3084 arm64: dts: pm8998: Add missing regulator type for LDOA4
+09aca7f45c2e soc: qcom: peripheral-loader: Modify minidump ToC guard for wahoo REVISE MINOR FARO
+4af5b698acd1 soc: qcom: peripheral-loader: Disable minidump ToC search for Sony REVISE MINOR FARO
+37ea8f6d6984 clk: qcom: smd-rpm: tcxo branch voter fixes
+5acf43c2f3b7 usb: phy: msm-qusb-v2: Update enable_power calls
+7202c4f13637 clk: qcom: smd-rpm: debug
+3f6b726354a3 platform: msm: sps: Support BAM force reset for CI controllers
+f9ddf7db3e80 platform: msm: usb_bam: Reintroduce support for ChipIdea controllers
+0a7fb82ee815 Revert "media: msm: camera_v2: Sanitize some probe failures"
+1c1184bd1f5f wahoo_defconfig: Disable all charging drivers for now
+fcf55dd34d8d STOPSHIP: TEMP: HACK: wahoo_defconfig: Disable SDE rotator
+03e9821bdeb9 wahoo_defconfig: Append wahoo msm8998 SoC base DTB to kernel image
+0a7413decf1c wahoo_defconfig: Sync for reference board config
+229e307e643d arm64: dts: walleye: Remove deprecated panels from HTC MTP base
+694fe7131e95 ARM: dts: msm: Bit-banging ability for i2c-5 to reset the bus
+6a0d1a5dc54a arm64: dts: qcom: Omit reference platforms if building for wahoo REVISE FARO arch/arm64/boot/dts/qcom/Makefile
+1180980519a2 wahoo_defconfig: Update charging and q6v5 options for msm8998
+bd3c90b1ef77 ion: Add support for Google's custom Easel heap
+9f94081a93c1 HACK: TEMP: STOPSHIP: msm8998: remove rdbg
+770e608682b6 arm64: dts: walleye: Fix duplicate inclusion of NFC tree
+942b306aa253 arm64: dts: walleye: Don't override GPIO 20 camera VDIG
+2d8bb4f07cea arm64: dts: wahoo: Update qpnp-power-on bindings
+41867d5cbd12 arm64: dts: wahoo: Update binding headers for 4.14 kernel
+6bae5daf0b0e arm64: dts: walleye: Update touchscreen I2C clocks
+578f0ccfbf80 arm64: dts: wahoo: Move GPIO 13 to common SoC base
+ab3351e37b9e arm64: dts: walleye: Fix duplicate inclusion of NFC overlay
+4fb52682ead5 regulator: qpnp-labibb: Obey to current limit pref in PFM case
+6c3ec4b02c51 arm64: DT: MSM8998: Fix DWC3 GSI registers configuration
+0c32cc7f4146 arm64: DT: MSM8998-audio: Add address/size cells to q6core
+40dc35776b14 arm64: DT: msm-audio-lpass: Remove size/address cells from q6core
+42db7858a7da arm64: DT: msm-audio-lpass: Fixup node name for q6core
+a7577d70ef9b arm64: DT: pm8998-rpm-regulator: Specify min load for HPM setting
+69a593d32a34 arm64: DT: PM8998: Declare PMIC type for LDOs
+6c4661248b7c regulator: rpm-smd-regulator: Set initialized when effectively inited
+bff61fe095f6 regulator: rpm-smd-regulator: Fix rpm_regulator_get function
+f5b51876bc29 msm: gsi: Avoid kernel panic on gsi ch8 teardown on MSM8998
+74db63de2f66 arm64: DT: msm8998: Remove BAM address and interrupt from IPAv3
+f3b907e27cb8 icnss: Check for modem shutdown on server arrive   NOT PICKED FARO
+0f5b84f9bbcf rpmsg: glink: Send READ_NOTIFY command in FIFO full case
+b40d6f786d55 diag: Read and drop incoming data when channels are not opened
+aee8342db311 diag: Adding remote proc check for hsic
+0ee1be3cede0 arm64: DT: msm8998: Enable MMSS SMMU AHB clock with BIMC_SMMU GDSC
+c424099edab7 clk: qcom: dsi-pll-10nm: Allow caching rates for PLL clocks   REVISE FARO
+76621d318735 clk: qcom: dsi-pll-10nm: Set cached rate during dsi_pll_enable
+e0f78071d19d clk: qcom: smd-rpm: Add new msm8998 MMAXI clocks
+e2098b02da20 clk: qcom: smd-rpm/8998: Move MMAXI clocks and add SW voter
+bbee157c9a9a arm64: DT: MSM8998: Correctly configure ADSPRPC memory and usage
+0a2552aa8cd6 arm64: DT: MSM8998: Enlarge ADSP shared memory DMA carveout
+6f7f74a2a163 arm64: DT: arm-smmu-8998: Exclude SMR check on Q6 IOMMU
+0b5f7cb99928 arm64: DT: MSM8998: Notify ADSP and SLPI on SPSS SSR event
+0142417afde9 arm64: DT: MSM8998: Enlarge QSEE-TA DMA carveout
+42a2cd621565 uio: msm_sharedmem: Port MSM Shared Memory QMI service
+9bb4c478cae1 arm64: DT: MSM8998: Fix VDD-CX-MX supply for ICNSS
+c12eab3f85d8 clk: qcom: gcc-msm8998: Rewire gpll0_out_msscc to alwayson set
+cd0d2722ad4e clk: qcom: mmcc-msm8998: Reroute mmss_misc_cxo parent to bi_tcxo_ao
+a4481c469403 arm64: DT: MSM8998: Wire up the remote subsystem WDT IRQ from MPM
+1bcc30dc0c20 arm64: DT: MSM8998-pm: Allow probing rpm-master-stats driver
+c0ee0bf0f197 gpu: KGSL: Use ADRENO_A5XX_GPMU implementation on A530/A540
+b74db517982e gpu: KGSL: Implement simple ops for Adreno A5XX GPMU
+06d48d06bc08 clk: qcom: mmcc-8998: Add frequency table to ESC0/1 clocks
+4b33e0677332 clk: qcom: cpu-osm-legacy: Migrate to bi_tcxo_ao parent clock
+ddeb8bcb65a0 mm-camera_v2: Check proper VFE h/w versions
+8699561e43a2 mm-camera2:isp2: Reset the ksof id
+
+
+3bdb4e57e530 arm64: DT: MSM8998: Fixup clock-cells for chip sleep clock
+00e8192816dc clk: qcom: clk-rcg2: Always update RCGs on MSM8956, 8996, 8998
+1a49312a5297 clk: qcom: mdss-pll-28lpm: Reparent xo to bi_tcxo
+8176d5da47f7 clk: qcom: msm8998: Restructure clock trees for bi_tcxo(_ao)
+bc0922f6364f clk: qcom: clk-smd-rpm: Rename cxo/cxo_a to bi_tcxo/bi_tcxo_ao
+a79dee4b0859 arm64: DT: msm8998-audio: Specify glink channels for wcd-dsp-glink
+a0b25ba1ea8c arm64: dts: wahoo: Update wcd9335 property override nodes
+02c06b83564a arm64: DT: MSM8998: Fix audio pinctrl and sound card nodes
+6e1f7b1819ab arm64: DT: MSM8998: Enable using the new msm-hw-limits (LMH) driver
+e0e9e2479041 clk: qcom: mmcc-msm8998: Fix Venus video core clock setting
+60cec7ab5e51 arm64: DT: MSM8998: Use SDM660-class GICv3 platform ops
+4ae5495074ad arm64: DT: MSM8998: Use msm8996-class quirks for QCOM GICv3
+d874e6365013 leds: qti-tri-led: Write known value to TRILED HW at init time
+c46aa026bd76 irqchip: irq-gic-v3: Differentiate quirks for different qcom soc classes
+37154144bcda msm: camera: util: Change error log type for camera
+f99789650afb msm: eeprom: Fix the EEPROM Power leak
+12dd33794d86 mm-camera2:isp2: Avoid multiple frame requests
+741d11328659 memshare: Respond to query qmi always with boot time init value
+187daf3b04b9 soc: qcom: smp2p: keeping inbound entry on freeze NOT PICKED FARO
+3f8477b2af7a rpmsg: qcom_smd: increase bounce buffer size
+21c57671d348 rpmsg: qcom_smd: allow smd create device if remote state is closing
+fa023910e997 memblock: annotate memblock_is_reserved() with __init_memblock
+4f114f8a3616 drivers: thermal: lmh_dcvs: Add support to enable legacy hardware feature
+d94f26f647c0 net: rmnet_data: ignore pkts coming with wrong epconfig
+0a05a18f305d soc: qcom: subsys-pil-tz: fix resource leak problem
+53ed133eae0c drivers: iio: adc: Modified vbat_sns and bat_id channels
+909d322b5462 usb: dwc3: Avoid CLR block DB if run/stop is cleared
+4a694709f18d irqchip: qcom: pdc: Add irq_set_wake support to pdc irqchip
+870fc7b4f869 usb: dwc3: gadget: Ensure minimum delay between run/stop   NOT PICKED FARO
+054bfaa03672 mailbox: msm_qmp: Add msgram readback NOT PICKED FARO
+6f16fcf6263f mailbox: msm_qmp: Fix message send to AOP NOT PICKED FARO
+fd859f7bd4e5 mailbox: msm_qmp: Fix aop message failure NOT PICKED FARO
+9e4b4c69c11a iommu: io-pgtable-arm: Always program TTBR1 to avoid S2 faults
+19b87b013801 arm64: DT: msm8998-audio: Move wcd_rst_gpio out of q6core
+08dfaafbf3be arm64: DT: MSM8998-audio: Move HPH cdc pins probe out of Tasha
+8b06985af8b6 arm64: DT: msm-arm-smmu-8998: Add init quirks for new security model
+e7adfb5c1def arm64: DT: msm8998-audio: Reorder nodes and wait for Q6Core up on WCD
+65303ad16f56 arm64: DT: MSM8998: Enable IPA NAPI for RMNET
+21f4895097dc arm64: DT: MSM8998: Move WCD interrupt controller to main 8998 DT
+f6dce06d26a1 arm64: DT: arm-smmu-8998: Fix ANOC1 clock name typo
+f9307a0d9667 arm64: DT: msm8998-thermal: Remove CDSP QMI cooling device
+a9ea7c768b6c arm64: DT: MSM8998: Fix IPA loading and add memory guards to RMTFS
+68a71472e67c spmi: spmi-pmic-arb: Initialize apid variable in read_apid_map_v5
+8d3b38e42a32 spmi: spmi-pmic-arb: Fix variable name typo for new features
+0be6f6a3d90c spmi: spmi-pmic-arb: Implement a way to skip usage of a reserved channel
+eb9d95a95315 spmi: spmi-pmic-arb: Implement AHB bus dummy read workaround for v5
+dc0c88ad8c11 arm64: DT: MSM8998: Fix typos on reserved memory nodes
+918a9cbdd796 arm64: DT: MSM8998: Add QoS parameters for SDHCI controller
+70f04ff2df34 arm64: DT: MSM8998: Add QoS latency parameter for DWC3 USB controller
+df7119dda663 arm64: DT: MSM8998: Migrate audio nodes in Q6Core parent
+f6f3bff4b638 arm64: DT: msm8998-audio: Fix typos, tavil codec and cleanup
+c6e6dabd05bf arm64: DT: msm8998-camera: Add VFE fuse register to VFE nodes
+a0478a628105 arm64: DT: msm8998: Add and use SMP2P ICNSS interrupts
+130f4e4b7684 arm64: MSM8998: Switch to fastrpc-compute and add PDRs for audio/sensors
+386295aaa60e arm64: DT: MSM8998: Specify FastRPC latency
+e784a82988d8 arm64: DT: MSM8998: Add DIAG channels to SPI WDSP
+ac0ea5a502c6 arm64: DT: MSM8998: Add SPSS support and fix SLPI GLINK node
+391316ca7bd0 clk: qcom: mmcc-msm8998: Disable safe config on maxi and mdp clocks
+ad508267e029 clk: qcom: gcc-msm8998: Set cxo as bi_tcxo fake clock's parent
+3ecfe363ed90 arm64: DT: MSM8998-wcd: Declare gpio cells in cdc-pinctrl nodes
+998c7b0fff61 arm64: DT: MSM8998: Set memory access restriction for adsprpc heap
+1472e2841e65 arm64: DT: MSM8998: Connect DWC3 USB to smbcharger
+e3626a851832 arm64: DT: msm8998-audio: Rewrite audio clk configuration for kernel 4.14
+0856b3d2d075 arm64: DT: MSM8998-smp2p: Move sleepstate smp2p entries to SLPI
+16c751df5672 arm64: DT: MSM8998: Fix mailboxes for GLINK transports
+fc55829b777e iommu/arm-smmu: reduce tlb sync poll retry latency
+1ac2665f9ebd arm64: DT: MSM8998: Fix qmi cooling devices DT compatible
+f776b26d1e7c arm64: DT: MSM8998: Rename efficiency property to capacity-dmips-mhz
+9821ee963936 arm64: DT: PMI8998: Port PMIs to the upstream WLED driver
+4296d23f5159 drivers: irqchip: qcom: Don't assign irq domian name
+deb645198e1f usb: dwc3: Give unique name to gsi endpoints
+9cb6fc511518 devfreq: check for valid hwmon node during get frequency
+604ba4851ab7 soc: qcom: service-notifier: Increase qmi response read timeout
+908d63a7639c clk: qcom: gcc-msm8998: Move XO as first entry in source map
+951635494acf arm64: DT: PMI8998: Fix led-mask for flash led switches
+1ac8db7745ef uapi: media: msm_vidc_utils: Compatibility for old Venus MISR struct
+879665e525a8 arm64: DT: PMI8998: Fix tri-led configuration
+073542488fb8 platform: msm: ipa_v3: Completely disable ADPL/ODL on IPA HW 3.x to 4.0
+ebfddc0da29a arm64: DT: msm8998: Fix removed memory region
+83a5fc5a1678 gpu: msm: adreno_coresight: Disable coresight code if !CONFIG_CORESIGHT
+9ac8fcaf478a arm64: DT: msm8998: Add address and size cells to CPUCC node
+2951b56497bf arm64: DT: msm8998: Port LMH-DCVS configuration to k4.14 driver
+aa08ee66faad arm64: DT: msm8998-wcd: Use qcom,num-pins property to solve DTC warning
+21f2b74ec871 arm64: DT: msm8998: Remove limits and ea references
+98ca50f3f640 arm64: DT: msm8998: Delete unused thermal nodes
+0fc89cdf5c99 rpmsg: rpm-smd: Spin unlock before populating rpm bus devices
+54ff95919e76 clk: qcom: clk-rcg2: Spit clock name in case of CFG update issues
+b8bbdab07650 arm64: DT: MSM8998: Probe the RPM Clock Controller in the RPM bus
+3b17656cd90d HACK: rpmsg: rpm-smd: Allow creating RPM requests during subdev population
+f0bc7e4d3dea rpmsg: rpm-smd: Protect probe with a spinlock
+128b5887a327 arm64: DT: MSM8998: Reorder GLINK nodes for correct probe order
+ad3b5c81665b media: msm: camera_v2: Sanitize some probe failures
+050ce0081b84 media: msm: camera_v2: Explicitly include msm-bus header
+435810c32bea media: msm: camera_v2: cci: Return probe deferral if clocks not ready
+88e1b98fa5ce media: msm: camera_v2: Defer probing if msm-bus is not ready
+87fa7fdce0f6 arm64: DT: msm8998: Rename qcom,load-uC for ipa-rmnet
+6b478efc74bd platform: msm: ipa_v3: Add support for IPA v3.1 and v3.5.1
+bb27e975c5d7 soc: qcom: peripheral-loader: Fall to lower order alignment if smaller
+d814a60557d1 BACKPORT: usb: dwc3: gadget: put link to U0 before Start Transfer
+3c973d32b0ef arm64: DT: MSM8998: Add qcom,serial-loading for Q6V5 Modem on Hexagon
+bb11b23dbca7 gpu: msm: Remove ADRENO_GPMU from all Adreno 5XX
+4e31ca36f917 clk: qcom: gpucc-msm8998: Remove SUPER_TURBO step from gfx
+8d446989ec19 arm64: DT: msm8998-v2: Raise gfx vreg corner max uV to 9
+159b308470a4 arm64: DT: MSM8998: Fix interrupt cells for mpm-gpio
+de283c1aae05 arm64: DT: MSM8998-MTP: Remove MTP LEDs configuration
+6a69541052f8 arm64: DT: MSM8998: Move mailboxes and tcsr earlier for faster boot
+6bdb1ea7bd43 arm64: DT: PMI8998: Add pmic-revid reference to the WLED driver
+e8a3faa13904 soc: qcom: socinfo: Fix check for SMEM probe deferral
+7fb37183a253 arm64: DT: PMI8998: Port PMIC to PWM-LPG, TRI-LED, upstream SPMI WLED
+c45cffef342d arm64: DT: arm-smmu-8998: Don't read ACTLR on Q6 IOMMU
+5e17c16cf485 soc: qcom: peripheral-loader: Add quirk to force serial loading firmware REVISE FARO
+083b308f0c4d soc: qcom: pil-q6v5/pil-msa: Fix function signatures and typos
+20a67e825148 soc: qcom: pil-q6v5-mss: Migrate to the new SMP2P
+27d99591761d soc: qcom: pil-q6v5-mss: Migrate to the new SMEM API for k4.14
+b161d77d5f20 soc: qcom: pil-msa: Use the right DMA attribute for privileged memory
+2dcbe81d74e4 soc: qcom: pil-msa: Use new SCM APIs as of kernel 4.14
+2e94c8504b83 soc: qcom: Import QDSP6 v5 MSS Boot drivers from Open Devices k4.9 tip
+8559b1865a28 power: qcom: qpnp-smb2: Add fake handling for FCC stepper
+6a510159568d slimbus: slim-msm: Map all QMI errors to strings
+54623bab7aa6 power: supply: qpnp-fg-gen3: Fix forwardports for kernel 4.14
+6a7346c1b2fb power: qpnp-fg-gen3: Restore the recharge threshold when out of JEITA
+447ba07d16bf power: qpnp-fg-gen3: fix variable range overflow
+22ec6285dbca power: qpnp-smb2: Add dt property to disable STAT SW_OVERRIDE
+56cd3dd63e06 power: qcom: smb2: set switcher-power-ok IRQ as wakeup IRQ
+8a5b57c07e31 power: smb-lib: Enable TypeC crude sensor PBS WA based on PMIC type
+16046d3b53c0 power: smb-lib: Add support for SW based OV detection
+8ca3f7c05a1b power: qcom: smb2: Add toggle stat pin logic to toggle_stat property
+c632ba2166a8 power: qpnp-smb2: Update the driver to use extcon
+dcfec046c4d0 power: smb2: fix voting for micro USB mode
+644b5afe2a3a power: supply: qpnp-smb2: add support to disable power role switch
+45e9af3ca855 power: qpnp_smb2: add support to detect USB port type
+8bde3d32bfd5 smb-lib: wait before DRP for audio
+7c9c3bc1e10a soc: qcom: socinfo: Retry probing if SMEM is not yet ready
+9c49b52bdf32 power: supply: smb-lib: Add missing typec_present variable to smb_charger
+64d484dcb45c arm64: DT: msm8998-mtp: Remove unneeded nodes
+375160ae0ca6 arm64: DT: MSM8998-audio: Partial porting of audio clocks to k4.14
+a3dc178260f6 arm64: DT: MSM8998: Add new mandatory properties to DWC3 for k4.14
+d70680ae5f83 arm64: DT: MSM8998: Merge DBM in DWC3 node and extend iospace
+cbc0edee33a2 arm64: DT: MSM8998: Use operating-points-v2 for devfreq OPPs
+a1a40232e762 arm64: DT: MSM8998: Fix compatible name for SPS on kernel 4.14
+e4880a656909 arm64: DT: msm8998-pm: Convert latencies as per latest k4.14 spec.
+8f50b124acea arm64: DT: MSM8998: Migrate to mainline SMD and SMP2P drivers
+519b1f5fdf6e arm64: DT: msm8998-pm: Temporarily disable rpm/system stats drivers
+349ea13b13db arm64: DT: msm8998: Add a new dma pool for qseecom ta and its ION heap
+39f20b097d77 arm64: DT: msm8998-pinctrl: Add register names to the pinctrl node
+9a3ba0b95ee6 arm64: DT: MSM8998: Port RPM SMD clocks to kernel 4.14
+d87d9d1fd020 arm64: dts: wahoo: Convert PMIC GPIO definitions to pinctrl format
+5bbfe4c43b2e arm64: DT: MSM8998: Cleanup unneeded panels and batterydata
+241aa8b5875c arm64: DT: Import PM8005 DT for MSM8998 and SDM845
+99421f938cd1 arm64: dts: pm8998: Fix qpnp-power-on bindings
+14d28b90cfea arm64: dts: wahoo: Convert PMIC GPIO pins to pinctrl
+c1468e351771 arm64: dts: msm8998: Force warm reboots
+08c382f08b92 arm64: dts: taimen: Use warm reset for power button force reboots
+fc6864df28d4 arm64: dts: wahoo: Merge ramoops nodes with memory regions
+6f35e7367a9f arm64: dts: wahoo: Update clocks for the new clock framework
+334005733128 arm64: dts: qcom: Build taimen and walleye DTBs
+056551c0aafc wahoo_defconfig: Disable all touchscreen drivers for now
+1a33700a453a wahoo_defconfig: Build for Taimen and Muskie
+56afc873e00d arm64: platforms: Add config options for Taimen and Muskie boards
+9e899bea5ed1 wahoo_defconfig: Replace msm_drm with fbdev mdss
+0e937ac55db5 dt-bindings: usb: Add typec bindings
+868d8c85f5da wahoo_defconfig: Initial adaptation for msm8998 platform
+860d88abd084 arm64: dts: pmi8998: Update torch current
+3b1424043aa7 arm64: dts: wahoo: Convert DT overlays to independent DTBs
+1d5d32a9f5dd arm64: dts: taimen: Disable continuous splash region correctly
+0638acf249a4 arm64: dts: wahoo: Remove pre-production device trees
+824e09f865dd arm64: dts: Import HTC walleye device tree
+89331b3f03a9 arm64: dts: qcom: Import LGE taimen device tree
+263965fc5c8e arm64: dts: qcom: Add msm8998 v2.1 SoC-only base for wahoo
+856bb7793095 arm64: DT: Introduce support for MSM8998
+
+
+e7a227f6b082 thermal: qcom: adc-tm5: Fix usage of uninitialized variable
+f90187b418c9 thermal: qcom: adc-tm: Fix coding mistakes for adc-tm3 and tm4 probe
+0f9659d22865 thermal: qcom: adc-tm3/4: Fix return check for iio read raw
+54e779ceb98f thermal: qcom: adc-tm4: Use the right btm channel for SoMC Yoshino ifdef
+db463e02dde3 thermal: qcom: adc-tm3: Remove SoMC Yoshino ifdef codepath
+7467c0d82f7d thermal: qcom: Implement adc-tm4 hardware support and calculations
+4c0ebd4777d0 thermal: qcom: Implement legacy adc-tm hardware support
+7e1bf4cdf803 iio: adc: qcom-spmi-vadc: Use right ratiometric range for 8998,660,845
+f6b12b246f3a gpu: msm: adreno: Don't fail if GMU init fails on Adreno 5xx
+3ea7c18dbae8 media: sde: rotator: Set CDP control registers to 0 if CDP is disabled
+f8989dca20d7 regulator: Import qpnp-regulator driver from msm-4.9
+4409a10e4ed1 regulator: cpr3: Convert to CPU hotplug state machine
+4cdca57c841e clk: qcom: 8998: Fixes for new alpha-pll
+042814ac452c regulator: qpnp-labibb: Declass driver to subsys_initcall
+8ee0323b780d mailbox: qcom: Add msm8998 hmss compatible
+83697cd42995 arm64: Kconfig: Select ARM64_PAN when ARM64_SW_TTBR0_PAN enabled
+e9a54ca437f3 soc: qcom: spss_utils: Ignore emulation type register if not present
+4710bf2097fc iommu: arm-smmu: Implement no ACTLR read quirk for hypervisor lockup
+6b38f752acc0 iommu: arm-smmu: Only modify the ACTLR register if required
+2783d089cf3d usb: phy: msm-qusb-v2: Remove stray endif
+1212f0c09afd clk: qcom: 8998: Embed Fabia PLL postdiv tables
+d683ebc0fdff clk: qcom: 8998: Adapt for CAF 4.14 alpha-pll driver
+872bc05ce5b8 soc: qcom: Add snapshot of the MSM APM driver
+2a1d2492c65d thermal: qcom: LMH: Port driver to kernel 4.14
+9cd9a7f53667 clk: qcom: clk-pll: Add missing config_ctl_val in struct pll_config
+bf18ee3be497 arm64: Potential rollover condition for timer counter
+4c4a61c3bfc8 clk: qcom: msm8998: Fix postdiv table number of entries
+1a65e15c40de clk: qcom: gcc,gpucc-msm8998: Specify postdivider informations on PLLs
+39947ee831fd clk: qcom: mdss: Add msm8998 as a legacy GDSC target  REVISE FARO
+35beb838b83d usb: phy: phy-msm-usb-downstream: Properly register with new extcon API
+c19089f6b61a usb: phy: Do not build upstream phy-msm-otg when downstream is selected
+c006eb159e80 usb: phy: phy-msm-usb-downstream: Cleanup driver and disable debug log
+69b3901751d7 clk: qcom: clk-smd-rpm: Declass driver to arch initcall
+d0fc6f55e4c9 rpmsg: qcom_smd: Promote driver to core initcall
+640d6faadcfe soc: qcom: smem: Promote driver to core initcall
+09041ac49f3a hwspinlock: qcom: Promote driver to core initcall
+0968d621b106 usb: phy: phy-msm-usb-downstream: Migrate to kernel 4.14 extcon API
+885e252b4ae7 usb: phy: Import downstream USB_MSM_OTG driver from Open Devices k4.9
+09b4202ee82c fbdev: msm: mdss_mdp: Be nice with failures at resource init stage
+2c4d6207d932 fbdev: msm: mdss_mdp: Return the right error code on regulator get fail
+28f5f2ab3c71 rpmsg: qcom_smd: Switch to timeout for tx availability wait event
+5358f3c89f95 rpmsg: qcom_smd: Enable wakeup interrupt and set NO_SUSPEND flag
+a16efcffdf3d devfreq: devfreq_spdm: Port driver to k4.14 SCM calls
+f16023cf51b8 iommu/arm-smmu: Correctly calculate and use the TTBR1 pagetable
+366197d538e2 iommu/arm-smmu: Add support for TTBR1
+2db9a6dcd51d Revert "iommu: arm-smmu: Program TTBR1 to a zero page"
+7291183ca160 soc: qcom: msm_bus: Correctly handle probe deferral case in bus-OF
+7c2f0cd86cee clk: qcom: smd-rpm: Add missing clocks for msm8998
+d007875dd64b clk: qcom: clk-smd-rpm: Fix RPM clocks for kernel 4.14
+4d1eb48bf2aa clk: qcom: smd-rpm: Update msm8998 MMSS AXI clock
+cebb9207479c qcom: smd-rpm: Add definitions for missing RPM resource
+920f01d98160 clk: qcom: clk-rcg2: Forward port ESC clock ops from OD k4.9
+4c590489b95e clk: qcom: clk-rcg2: Fix gfx3d_src functions for kernel 4.14
+4883a8b36029 drivers: thermal: Ignore spurious BCL interrupts whenever BCL is in polling
+7e33af76dcbc gpu: msm: kgsl: Use 8M global MMU mem size for Adreno 3xx, 4xx, 5xx
+5dbb4f299135 gpu: msm: kgsl: Add quirk to use different MMU carveout size
+dfcf9b465463 msm: kgsl: Replace scm call api with its atomic version
+c1eca48c43f8 msm: kgsl: move kgsl_3d_init to async
+b1f855a3cdf4 iommu: arm-smmu: Defer probe if msm-bus is not ready
+782b7b72fecd iommu: arm-smmu: Implement NO_SMR_CHECK option
+f9269add551c devfreq: bimc-bwmon: Customize MB_SHIFT with DT property
+88d4095ff1ff irqchip: irq-gic-v3: Add support for quirks on legacy qcom SoCs
+eccd8facf067 clk: qcom: clk-rcg2: Reverse the pixel fraction array for MSM8998
+72885c62ee77 drm: msm: sde: Add back compatibility for MSM8998 DSI PHY HW V3.0
+bd46244b8b5b IOMMU: Revert "arm64/io: Allow I/O writes to use {W,X}ZR"
+76de4b8e5398 arm64: cache: Set minimum DMA alignment to 128 bytes
+519cf8800afd power: smb-lib: Fix mutex acquisition deadlock on PD hard reset
+ecea4d0bd002 usb: phy-msm-qusb: Adapt for MSM8998 PHY v2
+eded90471ba0 thermal: msm_lmh_dcvs_legacy: Never initialize LMH TZ more than once
+3d3ca07dded1 char: adsprpc: Get the SSC_Q6 VMID from DT property
+9b30ba9a785e soc: qcom: icnss: Force assigning IOMMU group if NULL
+ff3574c60e61 soc: qcom: socinfo: Add support for MSM8998
+0eba563aaa78 thermal: thermal_core: Print thermal zone name in case of read error
+a55bb854e514 platform: msm: ipa: Delay initialization if msm_bus is not ready
+28a67fc17f11 soc: qcom: msm_bus: Add function to check if msm_bus is initialized
+afcfd1da7a69 soc: qcom: icnss: Set atomic attribute to IOMMU when bypassing S1
+51c7f58463d6 devfreq: Add snapshot of devfreq-spdm driver from Open Devices k4.9
+17634e8f557b thermal: qcom: Import msm_lmh_dcvs from early k4.9
+bcccac7ff1c8 platform: msm: ipa_v3: Don't throw an error if no register to unlock
+c5790f0bf4b7 platform: msm: ipa_v3: Add specific CLKON_CFG handling for IPAv3.1
+d34978139ec7 gpu: msm: kgsl_iommu: Don't program SMMU aperture on MSM8998
+4edd568b2369 soc: qcom: spss_utils: Add SPSS Hybrid firmware and MSM8998 support
+84d415fcc800 mfd: qcom-spmi-pmic: Add support for pm8005, pm8998 and pmi8998
+493d05c7211c usb: phy: phy-msm-qusb-v2: Add support for MSM8998
+4963ed7a890f platform: msm: ipa: Delay to fs_initcall for legacy SoC
+8e6774140f83 platform: msm: ipa_v3: Disable MISC clock gating for IPA_HW_v3_1
+a1b0e5290023 pinctrl: Import MSM8998 pinctrl driver from Open Devices k4.9
+68f057b7034a gpu: msm: kgsl_iommu: Add quirk KGSL_MMU_PT_EARLY_ALLOC
+09a087b4b8a3 phy: Add USB speed related PHY modes
+ab86d140e58d thermal: qcom: LMH: Port the driver to OF-Thermal API
+232ac24b64fc thermal: qcom: Import LMH Lite and Interface drivers from k4.4
+1cbfb2d4cf74 arm64: cpu_errata: Add Kryo2xx Silver to ARM erratum 845219
+2f45f9e9af48 iommu/io-pgtable-fast: fix sign extension position
+635fd46a5a81 irqchip: qcom: msm: Wire up set_wake for MPM-GPIO
+12476fa7acc6 irqchip: qcom: mpm: Wire up irq_{get,set}_irqchip_state passthrough
+9d8d6690d901 irqchip: qcom: mpm: Wire up irq_set_wake call, remove SKIP_SET_WAKE
+1b8dfceb3121 irqchip: mpm: Don't mask mpm-gpio interrupts on suspend
+8a192cccf91c irqchip: mpm: Wire up irq_{en,dis}able and trigger parent
+18f32898f2b0 irqchip: qcom: mpm: Add MPM drivers for MSM8998
+2146b27067d7 regulator: Add snapshot of Kryo regulator driver from OD k4.9
+dc40a414e001 regulator: Add snapshot of all CPR4 regulator drivers from OD k4.9
+61d3e8c7981a regulator: Add snapshot of all CPRh regulator drivers from OD k4.9
+91ee4adcd5e6 regulator: Add snapshot of all CPR3 regulator drivers from OD k4.9
+d050e4be8dd5 clk: qcom: Import OSM CPU clock controller driver for 8998/630/660
+ea2e21246d99 clk: qcom: Import MSM8998 GCC, MMCC, GPUCC from Open Devices k4.9
+733f9062f1cf clk: qcom: clk-pll: Get clock name only after PLL wait failure
+567a986fecb2 clk: qcom: clk-pll: Add support for PLL ACPU voting
+1791c0f70a4b clk: qcom: clk-smd-rpm: Add support for MSM8998 SoC clocks
+008cc2defc26 clk: qcom: Add additional delay while enabling votable clocks
+3e9d8dc3418f clk: qcom: Add set_flags ops for the clk_gate2_ops
+9135aa95fece clk: qcom: clk-rcg2: Declare the rcg struct in clk_gfx3d_src_determine_rate
+17d804599303 clk: qcom: Add support for gfx clock to ping pong PLLs
+c891408dcee7 include: Import msm_spmi.h and use it instead of spmi.h if MSM_SPMI=y
+b9eedf4d2c1f editorconfig: Add EditorConfig configuration
+542e859e9be7 wahoo_defconfig: Enable pstore
+79a5a5882d59 wahoo_defconfig: Disable modules
+de5d64ab73c7 wahoo_defconfig: Disable OKL4 hypervisor guest support
+3f615a37ac1d wahoo_defconfig: Append Git info to version string
+ef3fef242971 dtc: Silence warnings
+07f00300bcfb scripts/dtc: Remove redundant YYLOC global declaration
+c3aa70e963a1 scripts: Remove gcc-wrapper.py
+11b3d93fd019 wahoo_defconfig: Compress kernel with LZ4
+f6c9dd9b66a7 arm64: gitignore: add Image.lz4 and Image.lz4-dtb
+a88c6540d30e floral: Allow LZ4 kernel image compression
+db091365f2ac wahoo_defconfig: Generate full config
+4c8589c890c8 arm64: configs: vendor: Derive wahoo_defconfig from sm8150-perf_defconfig
+06f4951d6e91 flasher: Reverse the Magisk kernel patch if necessary
+21bb56a3c63c initramfs: Pre-patch with Magisk's want_initramfs hack
+626a811404c6 flasher: Add support for running directly on Android
+b43535e9be09 flasher: Skip ramdisk unpacking and repacking
+fef9673ee438 gitignore: Ignore flasher-related artifacts
+c78aa69346da Makefile: Set KBUILD_OUTPUT to out by default
+32d13e546ce8 flasher: Configure for Pixel 2 family (wahoo)
+43c7813113ac flasher: Import stripped-down AnyKernel 3
+dda993a443df Import interactive kernel development helpers
+2fcb59b71922 Merge 607d039033a39545c36c00e98c82e17d99b99096 on remote branch
+607d039033a3 Merge "defconfig: msm: Enable QTI composite gadget for sdxprair
